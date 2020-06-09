@@ -1,7 +1,6 @@
 import React from 'react';
 import './Game.css';
 import { Board } from "./Board";
-import { GameData } from "./models/game";
 
 interface IGameProps {
     game: any;

@@ -1,13 +1,18 @@
 import React from 'react';
+import { Switch, Route } from 'react-router-dom'
 import { Game } from "./Game";
 
-const game = {
-    g: 5
+function GameList(props) {
+    return (<div>This is a game list</div>);
 }
+
 export function App() {
     return (
-        <div className="App">
-            <Game game={game}/>
-        </div>
+        <React.StrictMode>
+            <Switch>
+                <Route exact path='/games' component={GameList}/>
+                <Route path='/games/:id' component={Game}/>
+            </Switch>
+        </React.StrictMode>
     );
 }
