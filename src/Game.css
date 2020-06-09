@@ -1,0 +1,18 @@
+.Game {
+    display: flex;
+    justify-content: center;
+}
+
+.leftCol {
+    flex: 0 0 230px;
+}
+
+.middleCol {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
+.rightCol {
+    flex: 0 0 230px;
+}
