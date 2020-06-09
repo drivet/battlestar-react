@@ -16,6 +16,10 @@ function createActiveBasestar(location: LocationId) {
     }
 }
 
+export interface GameEntry {
+    gameId: string;
+    users: number;
+}
 
 export interface GalacticaDamage {
     locationId?: LocationId;
@@ -106,10 +110,10 @@ export class Game {
             gameId: gameId,
             players: users.map(u => ({
                 userId: u,
-                characterId: undefined,
+                characterId: null,
                 admiral: false,
                 president: false,
-                location: undefined,
+                location: null,
                 loyaltyCards: [],
                 skillCards: []
             })),

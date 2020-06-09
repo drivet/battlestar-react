@@ -1,0 +1,21 @@
+.gameList {
+    display: table;
+}
+
+.gameHeader {
+    display: table-row;
+}
+
+.gameHeader > div {
+    display: table-cell;
+    padding: 5px;
+}
+
+.gameRow {
+    display: table-row;
+}
+
+.gameRow > div {
+    display: table-cell;
+    padding: 5px;
+}
