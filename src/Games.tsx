@@ -4,20 +4,33 @@ import firebase from './firebase';
 import { GameEntry } from "./models/game";
 import './Games.css'
 
-interface IGameProps {
-    game: any;
-}
-
 interface GameListState {
     games: GameEntry[];
 }
 
-export class GameList extends React.Component<IGameProps, GameListState> {
+export class GameList extends React.Component<any, GameListState> {
     constructor(props) {
         super(props);
         this.state = {
             games: []
         }
+    }
+
+    componentDidMount() {
+        const gameListRef = firebase.database().ref('gameList');
+        gameListRef.on('value', snapshot => {
+            const games = snapshot.val();
+            const newState = [];
+            for (let game in games) {
+                newState.push({
+                    gameId: game,
+                    users: games[game].users
+                });
+            }
+            this.setState({
+                games: newState
+            });
+        });
     }
     render() {
         return (
@@ -35,24 +48,26 @@ export class GameList extends React.Component<IGameProps, GameListState> {
                             Join?
                         </div>
                     </div>
-                    {this.state.games.map(game => {
-                        return (
-                            <div key={game.gameId} className={'gameRow'}>
-                                <div>
-                                    {game.users}
-                                </div>
-                                <div>
-                                    <button onClick={e => this.handleDelete(e, game.gameId)}>Delete</button>
-                                </div>
-                                <div>
-                                    <Link to={'/games/' + game.gameId}>Join</Link>
-                                </div>
-                            </div>
-                        )
-                    })}
+                    {this.state.games.map(game => this.gameRow(game))}
                 </div>
             </div>
         );
+    }
+
+    private gameRow(game: GameEntry) {
+        return (
+            <div key={game.gameId} className={'gameRow'}>
+                <div>
+                    {game.users}
+                </div>
+                <div>
+                    <button onClick={e => this.handleDelete(e, game.gameId)}>Delete</button>
+                </div>
+                <div>
+                    <Link to={'/games/' + game.gameId}>Join</Link>
+                </div>
+            </div>
+        )
     }
 
     handleDelete(e, gameId: string) {
@@ -62,23 +77,6 @@ export class GameList extends React.Component<IGameProps, GameListState> {
 
         firebase.database().ref().update(updates).then(() => {
             console.log('deleted!');
-        });
-    }
-
-    componentDidMount() {
-        const gameListRef = firebase.database().ref('gameList');
-        gameListRef.on('value', snapshot => {
-            const games = snapshot.val();
-            const newState = [];
-            for (let game in games) {
-                newState.push({
-                    gameId: game,
-                    users: games[game].users
-                });
-            }
-            this.setState({
-                games: newState
-            });
         });
     }
 }

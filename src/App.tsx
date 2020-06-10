@@ -1,6 +1,6 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom'
-import { Game } from "./Game";
+import { GameComponent } from "./Game";
 import { CreateGame } from "./CreateGame";
 import { GameList } from "./Games";
 
@@ -10,7 +10,7 @@ export function App() {
             <Switch>
                 <Route exact path='/games' component={GameList}/>
                 <Route exact path='/create' component={CreateGame}/>
-                <Route path='/games/:id' component={Game}/>
+                <Route path='/games/:gameId' component={GameComponent}/>
             </Switch>
         </React.StrictMode>
     );

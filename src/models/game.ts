@@ -16,6 +16,14 @@ function createActiveBasestar(location: LocationId) {
     }
 }
 
+export enum GameState {
+    Setup,
+    ReceiveSkills,
+    Movement,
+    Action,
+    Crisis
+}
+
 export interface GameEntry {
     gameId: string;
     users: number;
@@ -61,6 +69,7 @@ export interface PlayerData {
 
 export interface GameData {
     gameId: string;
+    state: GameState;
     players: PlayerData[];
     currentPlayer: number;
 
@@ -108,6 +117,7 @@ export class Game {
     static newGame(gameId: string, users: string[]): GameData {
         return {
             gameId: gameId,
+            state: GameState.Setup,
             players: users.map(u => ({
                 userId: u,
                 characterId: null,
@@ -151,10 +161,14 @@ export class Game {
         }
     }
 
-    constructor(public game: GameData) {}
+    constructor(public gameData: GameData) {}
+
+    currentPlayer(): PlayerData {
+        return this.gameData.players[this.gameData.currentPlayer]
+    }
 
     selectCharacter(selectedCharacter: SelectedCharacter) {
-        const player = this.game.players[this.game.currentPlayer];
+        const player = this.gameData.players[this.gameData.currentPlayer];
         player.characterId = selectedCharacter.character;
         if (selectedCharacter.location) {
             if(isSpace(selectedCharacter.location)) {
@@ -162,7 +176,7 @@ export class Game {
             }
             player.location = selectedCharacter.location;
         }
-        this.game.currentPlayer++;
+        this.gameData.currentPlayer++;
     }
 
     distributeTitles() {
@@ -171,20 +185,20 @@ export class Game {
     }
 
     setupLoyalty() {
-        const extraHumans = this.game.players.filter(p => p.characterId === CharacterId.GaiusBaltar ||
+        const extraHumans = this.gameData.players.filter(p => p.characterId === CharacterId.GaiusBaltar ||
             p.characterId === CharacterId.SharonValeri)
             .length;
-        const loyalties = loyaltyDeck(this.game.players.length, extraHumans);
-        this.game.players.forEach(p => addCard(p.loyaltyCards, dealOne(loyalties.distributed)));
-        this.game.loyaltyDeck = loyalties.remaining;
+        const loyalties = loyaltyDeck(this.gameData.players.length, extraHumans);
+        this.gameData.players.forEach(p => addCard(p.loyaltyCards, dealOne(loyalties.distributed)));
+        this.gameData.loyaltyDeck = loyalties.remaining;
     }
 
     setupDecks() {
-        this.game.quorumDeck = createQuorumDeck();
-        this.game.crisisDeck = createCrisisDeck();
-        this.game.superCrisisDeck = createSuperCrisisDeck();
-        this.game.destinationDeck = createDestinationDeck();
-        this.game.skillDecks = createSkillDecks();
+        this.gameData.quorumDeck = createQuorumDeck();
+        this.gameData.crisisDeck = createCrisisDeck();
+        this.gameData.superCrisisDeck = createSuperCrisisDeck();
+        this.gameData.destinationDeck = createDestinationDeck();
+        this.gameData.skillDecks = createSkillDecks();
     }
 
     receiveSkills(player: PlayerData, skillCards: SkillCardChoices) {
@@ -199,11 +213,11 @@ export class Game {
         addCards(destiny, deal(this.skillDeck(SkillType.Politics), 2));
         addCards(destiny, deal(this.skillDeck(SkillType.Leadership), 2));
         shuffle(destiny);
-        this.game.destinyDeck = destiny;
+        this.gameData.destinyDeck = destiny;
     }
 
     setupInitialShips() {
-        this.game.activeBasestars = [createActiveBasestar(LocationId.Front)];
+        this.gameData.activeBasestars = [createActiveBasestar(LocationId.Front)];
         this.placeViper(LocationId.FrontBelow);
         this.placeViper(LocationId.BackBelow);
         this.placeRaiders(LocationId.Front, 3);
@@ -211,49 +225,49 @@ export class Game {
     }
 
     private skillDeck(skill: SkillType): SkillCard[] {
-        return this.game.skillDecks[SkillType[skill]];
+        return this.gameData.skillDecks[SkillType[skill]];
     }
 
     private placeViper(location: LocationId) {
-        if (this.game.vipers === 0) {
+        if (this.gameData.vipers === 0) {
             throw new Error('There are no more vipers');
         }
 
-        this.game.vipers--;
+        this.gameData.vipers--;
         const locationKey = LocationId[location];
-        if (this.game.activeVipers[locationKey] === undefined) {
-            this.game.activeVipers[locationKey] = 0;
+        if (this.gameData.activeVipers[locationKey] === undefined) {
+            this.gameData.activeVipers[locationKey] = 0;
         }
-        this.game.activeVipers[locationKey]++;
+        this.gameData.activeVipers[locationKey]++;
     }
 
     private placeRaiders(location: LocationId, count: number) {
         for (let i = 0; i < count; i++) {
-            if (this.game.raiders === 0) {
+            if (this.gameData.raiders === 0) {
                 return;
             }
 
-            this.game.raiders--;
+            this.gameData.raiders--;
             const locationKey = LocationId[location];
-            if (this.game.activeRaiders[locationKey] === undefined) {
-                this.game.activeRaiders[locationKey] = 0;
+            if (this.gameData.activeRaiders[locationKey] === undefined) {
+                this.gameData.activeRaiders[locationKey] = 0;
             }
-            this.game.activeRaiders[locationKey]++;
+            this.gameData.activeRaiders[locationKey]++;
         }
     }
 
     private placeCivilians(location: LocationId, count: number) {
         for (let i = 0; i < count; i++) {
-            if (this.game.civilianShips.length === 0) {
+            if (this.gameData.civilianShips.length === 0) {
                 return;
             }
 
-            const civilian = dealOne(this.game.civilianShips);
+            const civilian = dealOne(this.gameData.civilianShips);
             const locationKey = LocationId[location];
-            if (this.game.activeCivilians[locationKey] === undefined) {
-                this.game.activeCivilians[locationKey] = [];
+            if (this.gameData.activeCivilians[locationKey] === undefined) {
+                this.gameData.activeCivilians[locationKey] = [];
             }
-            this.game.activeRaiders[locationKey].push(civilian);
+            this.gameData.activeRaiders[locationKey].push(civilian);
         }
     }
 
@@ -294,6 +308,6 @@ export class Game {
     }
 
     private findPlayer(character: CharacterId) {
-        return this.game.players.find(p => p.characterId === CharacterId.LauraRoslin);
+        return this.gameData.players.find(p => p.characterId === CharacterId.LauraRoslin);
     }
 }
