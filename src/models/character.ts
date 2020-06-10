@@ -3,7 +3,7 @@ import { SkillType } from "./skills";
 
 export enum CharacterId {
     LeeAdama, GaiusBaltar, GalenTyrol, SaulTigh,
-    LauraRoslin, TomZarek, KaraThrace, SharonValeri,
+    LauraRoslin, TomZarek, KaraThrace, SharonValerii,
     WilliamAdama, KarlAgathon
 }
 
@@ -70,8 +70,8 @@ export const Characters: {[key in CharacterKeys]: Character} = {
             }
         ]
     },
-    'SharonValeri': {
-        id: CharacterId.SharonValeri,
+    'SharonValerii': {
+        id: CharacterId.SharonValerii,
         name: 'Sharon, "Boomer" Valeri',
         type: CharacterType.Pilot,
         startLocation: LocationId.Armory,
@@ -234,8 +234,9 @@ export function getCharacter(characterId: CharacterId) {
 }
 
 export class CharacterPool {
-    selectable: Character[] = [
-    ];
+    selectable: Character[] = [Characters['TomZarek'], Characters['KarlAgathon'], Characters['SharonValerii'],
+        Characters['LeeAdama'], Characters['WilliamAdama'], Characters['LauraRoslin'], Characters['GaiusBaltar'],
+        Characters['KaraThrace'], Characters['GalenTyrol'], Characters['SaulTigh']];
     unselectable: Character[] = [];
 
     select(character: Character) {

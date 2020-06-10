@@ -1,7 +1,7 @@
 import React from 'react';
 import './Game.css';
 import { Board } from "./Board";
-import { Game, GameData, PlayerData } from "./models/game";
+import { Game, PlayerData } from "./models/game";
 import firebase from "./firebase";
 
 interface GameState {

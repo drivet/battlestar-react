@@ -186,7 +186,7 @@ export class Game {
 
     setupLoyalty() {
         const extraHumans = this.gameData.players.filter(p => p.characterId === CharacterId.GaiusBaltar ||
-            p.characterId === CharacterId.SharonValeri)
+            p.characterId === CharacterId.SharonValerii)
             .length;
         const loyalties = loyaltyDeck(this.gameData.players.length, extraHumans);
         this.gameData.players.forEach(p => addCard(p.loyaltyCards, dealOne(loyalties.distributed)));
