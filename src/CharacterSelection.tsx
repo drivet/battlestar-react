@@ -1,5 +1,4 @@
 import React from "react";
-import { CharacterId } from "./models/character";
 import ReactModal from 'react-modal';
 import baltar from './images/chars_baltar.jpg';
 import billadama from './images/chars_bill_adama.jpg';
@@ -11,6 +10,7 @@ import leeadama from './images/chars_lee_adama.jpg';
 import saultigh from './images/chars_saul_tigh.jpg';
 import sharonvalaerii from './images/chars_sharon_valerii.jpg';
 import tomzarek from './images/chars_tom_zarek.jpg';
+import { CharacterId } from "./models/game-data";
 
 const charImages = {
     [CharacterId.KarlAgathon]: karlagathon,

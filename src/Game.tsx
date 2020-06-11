@@ -1,11 +1,11 @@
 import React from 'react';
 import './Game.css';
 import { Board } from "./Board";
-import { Game, PlayerData } from "./models/game";
+import { GameData, PlayerData, TurnPhase } from "./models/game-data";
 import firebase from "./firebase";
 
 interface GameState {
-    game: Game;
+    game: GameData;
 }
 
 export class GameComponent extends React.Component<any, GameState> {
@@ -20,13 +20,16 @@ export class GameComponent extends React.Component<any, GameState> {
         const gameRef = firebase.database().ref('games/' + this.props.match.params.gameId);
         gameRef.on('value', snapshot => {
             this.setState({
-                game: new Game(snapshot.val())
+                game: new GameData(snapshot.val())
             });
         });
     }
 
     render() {
         if (this.state.game) {
+            if (this.state.game.gameData.state === TurnPhase.NotStarted) {
+                return (<button onClick={e => this.handleStart(e)}>Start</button>);
+            }
             return (
                 <div className={'Game'}>
                     <div className={'leftCol'}>
@@ -48,6 +51,10 @@ export class GameComponent extends React.Component<any, GameState> {
         } else {
             return null;
         }
+    }
+
+    private handleStart(e) {
+
     }
 
     private player(p: PlayerData, currentPlayer: PlayerData) {

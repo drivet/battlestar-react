@@ -1,18 +1,5 @@
 import { makeDeck, shuffle } from "./deck";
-
-export enum QuorumCardId {
-    AssignMissionSpecialist,
-    AuthorizationOfBrutalForce,
-    FoodRationing,
-    ReleaseCylonMugshots,
-    AssignVicePresident,
-    AssignArbitrator,
-    EncourageMutiny,
-    PresidentialPardon,
-    AcceptProphecy,
-    ArrestOrder,
-    InspirationalSpeech
-}
+import { QuorumCardId } from "../../src/models/game-data";
 
 export function createQuorumDeck() {
     return shuffle([

@@ -1,16 +1,16 @@
 import React from 'react';
-import { Switch, Route } from 'react-router-dom'
-import { GameComponent } from "./Game";
-import { CreateGame } from "./CreateGame";
-import { GameList } from "./Games";
+import { Route, Switch } from 'react-router-dom'
+import { CreateTable } from "./CreateTable";
+import { Tables } from "./Tables";
+import { TableComponent } from './Table';
 
 export function App() {
     return (
         <React.StrictMode>
             <Switch>
-                <Route exact path='/games' component={GameList}/>
-                <Route exact path='/create' component={CreateGame}/>
-                <Route path='/games/:gameId' component={GameComponent}/>
+                <Route exact path='/tables' component={Tables}/>
+                <Route exact path='/create' component={CreateTable}/>
+                <Route path='/tables/:tableId' component={TableComponent}/>
             </Switch>
         </React.StrictMode>
     );

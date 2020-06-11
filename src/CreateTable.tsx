@@ -1,25 +1,25 @@
 import React from 'react';
 import firebase from './firebase';
-import { Game, GameData, GameEntry } from './models/game';
 import { Redirect } from 'react-router';
+import { Table } from "./Table";
 
-interface CreateGameState {
+interface CreateTableState {
     players: number;
-    gameId: string;
+    tableId: string;
 }
 
-export class CreateGame extends React.Component<any,CreateGameState> {
+export class CreateTable extends React.Component<any,CreateTableState> {
     constructor(props) {
         super(props);
         this.state = {
             players: 3,
-            gameId: null
+            tableId: null
         }
     }
 
     render() {
-        if (this.state.gameId) {
-            const url = '/games/' + this.state.gameId;
+        if (this.state.tableId) {
+            const url = '/tables/' + this.state.tableId;
             return <Redirect to={url} />
         }
         return (
@@ -42,29 +42,31 @@ export class CreateGame extends React.Component<any,CreateGameState> {
 
     handleSubmit(e) {
         e.preventDefault();
-        const gameRef = firebase.database().ref('games').push();
-        const gameId = gameRef.key;
-        const game = newGame(gameId, this.state.players);
+        const tableRef = firebase.database().ref('tables').push();
+        const tableId = tableRef.key;
+        const table = newTable(tableId, this.state.players);
 
         const updates = {};
-        updates['/games/' + gameId] = game;
-        updates['/gameList/' + gameId] = { gameId: gameId, users: game.players.length} as GameEntry;
+        updates['/tables/' + tableId] = table;
 
         firebase.database().ref().update(updates).then(() => {
             this.setState({
-                gameId: gameId
+                tableId: tableId
             });
         });
     }
 }
 
-function newGame(gameId: string, players: number): GameData {
+function newTable(tableId: string, players: number): Table {
     const names: string[] = []
     for (let i = 0; i < players; i++) {
         names.push(makeid(10));
     }
-
-    return Game.newGame(gameId, names);
+    return {
+        tableId: tableId,
+        started: false,
+        users: names
+    }
 }
 
 function makeid(length) {

@@ -1,17 +1,5 @@
 import { makeDeck, shuffle } from "./deck";
-
-export enum DestinationCardId {
-    DesolateMoon,
-    RagnarAnchorage,
-    CylonAmbush,
-    CylonRefinery,
-    AsteroidField,
-    DeepSpace,
-    RemotePlanet,
-    IcyMoon,
-    BarrenPlanet,
-    TyliumPlanet,
-}
+import { DestinationCardId } from "../../src/models/game-data";
 
 export function createDestinationDeck(): DestinationCardId[] {
     return shuffle([

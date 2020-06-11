@@ -1,8 +1,5 @@
 import { addCard, deal, shuffle } from "./deck";
-
-export enum LoyaltyCardId {
-    Human, Sympathizer, ReduceMorale, SendCharToSickbay, DamageGalactica, SendCharToBrig
-}
+import { LoyaltyCardId } from "../../src/models/game-data";
 
 export interface LoyaltyDistribution {
     distributed: LoyaltyCardId[];
@@ -28,6 +25,8 @@ export function loyaltyDeck(playerCount: number, extraHumans: number): LoyaltyDi
         deck = new Array(8).fill(LoyaltyCardId.Human).concat(deal(cylonCards, 2));
     } else if (playerCount === 6) {
         deck = new Array(9).fill(LoyaltyCardId.Human).concat(deal(cylonCards, 2));
+    } else {
+        throw new Error('Bad player count ' + playerCount);
     }
 
     for (let i = 0; i < extraHumans; i++) {

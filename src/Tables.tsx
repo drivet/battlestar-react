@@ -1,43 +1,45 @@
 import React from "react";
 import { Link } from 'react-router-dom'
 import firebase from './firebase';
-import { GameEntry } from "./models/game";
-import './Games.css'
+import './Tables.css'
+import { Table, TableComponent } from "./Table";
 
-interface GameListState {
-    games: GameEntry[];
+
+interface TableListState {
+    tables: Table[];
 }
 
-export class GameList extends React.Component<any, GameListState> {
+export class Tables extends React.Component<any, TableListState> {
     constructor(props) {
         super(props);
         this.state = {
-            games: []
+            tables: []
         }
     }
 
     componentDidMount() {
-        const gameListRef = firebase.database().ref('gameList');
-        gameListRef.on('value', snapshot => {
-            const games = snapshot.val();
+        const tableListRef = firebase.database().ref('tableList');
+        tableListRef.on('value', snapshot => {
+            const tables = snapshot.val();
             const newState = [];
-            for (let game in games) {
+            for (let table in tables) {
                 newState.push({
-                    gameId: game,
-                    users: games[game].users
+                    tableId: table,
+                    users: tables[table].users
                 });
             }
             this.setState({
-                games: newState
+                tables: newState
             });
         });
     }
+
     render() {
         return (
             <div>
-                <Link to='/create'>Create new game</Link>
-                <div className={'gameList'}>
-                    <div className={'gameHeader'}>
+                <Link to='/create'>Create new table</Link>
+                <div className={'tableList'}>
+                    <div className={'tableHeader'}>
                         <div>
                             Number of players
                         </div>
@@ -48,32 +50,31 @@ export class GameList extends React.Component<any, GameListState> {
                             Join?
                         </div>
                     </div>
-                    {this.state.games.map(game => this.gameRow(game))}
+                    {this.state.tables.map(table => this.tableRow(table))}
                 </div>
             </div>
         );
     }
 
-    private gameRow(game: GameEntry) {
+    private tableRow(table: Table) {
         return (
-            <div key={game.gameId} className={'gameRow'}>
+            <div key={table.tableId} className={'tableRow'}>
                 <div>
-                    {game.users}
+                    {table.users}
                 </div>
                 <div>
-                    <button onClick={e => this.handleDelete(e, game.gameId)}>Delete</button>
+                    <button onClick={e => this.handleDelete(e, table.tableId)}>Delete</button>
                 </div>
                 <div>
-                    <Link to={'/games/' + game.gameId}>Join</Link>
+                    <Link to={'/tables/' + table.tableId}>Join</Link>
                 </div>
             </div>
         )
     }
 
-    handleDelete(e, gameId: string) {
+    handleDelete(e, tableId: string) {
         const updates = {};
-        updates['/games/' + gameId] = null;
-        updates['/gameList/' + gameId] = null;
+        updates['/tables/' + tableId] = null;
 
         firebase.database().ref().update(updates).then(() => {
             console.log('deleted!');

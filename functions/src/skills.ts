@@ -1,33 +1,5 @@
 import { shuffle } from "./deck";
-
-export enum SkillType {
-    Tactics,
-    Piloting,
-    Leadership,
-    Engineering,
-    Politics
-}
-
-export type SkillTypeKeys = keyof typeof SkillType;
-
-export enum SkillCardType {
-    ScientificResearch,
-    Repair,
-    EvasiveManeuvers,
-    MaximumFirepower,
-    LaunchScout,
-    StrategicPlanning,
-    ExecutiveOrder,
-    DeclareEmergency,
-    ConsolidatePower,
-    InvestigativeCommittee,
-}
-
-export interface SkillCard {
-    type: SkillType;
-    cardType: SkillCardType;
-    strength: number;
-}
+import { SkillCard, SkillCardType, SkillType } from "../../src/models/game-data";
 
 function skillCard(skillType: SkillType, card: SkillCardType, strength: number): SkillCard {
     return {
@@ -190,15 +162,15 @@ function pilotingDeck(): SkillCard[] {
 }
 
 export type SkillDecks = {
-    [key in SkillTypeKeys]: SkillCard[]
+    [key in SkillType]: SkillCard[]
 }
 
 export function createSkillDecks(): SkillDecks {
     return {
-        'Tactics': shuffle(tacticsDeck()),
-        'Politics': shuffle(politicsDeck()),
-        'Leadership': shuffle(leadershipDeck()),
-        'Piloting': shuffle(pilotingDeck()),
-        'Engineering': shuffle(engineeringDeck())
+        [SkillType.Tactics]: shuffle(tacticsDeck()),
+        [SkillType.Politics]: shuffle(politicsDeck()),
+        [SkillType.Leadership]: shuffle(leadershipDeck()),
+        [SkillType.Piloting]: shuffle(pilotingDeck()),
+        [SkillType.Engineering]: shuffle(engineeringDeck())
     }
 }

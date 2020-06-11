@@ -1,11 +1,5 @@
 import { shuffle } from "./deck";
-
-export interface CivilianShip {
-    food: number;
-    fuel: number;
-    morale: number;
-    population: number;
-}
+import { CivilianShip } from "../../src/models/game-data";
 
 function createCivilian(food: number, fuel: number, morale: number, population: number): CivilianShip {
     return {
