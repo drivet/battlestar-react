@@ -397,12 +397,15 @@ export type LocationCounts = {
     [key in LocationId]?: number;
 }
 
-export interface GalacticaDamage {
-    locationId?: LocationId;
-    food?: number;
-    fuel?: number;
-    morale?: number;
-    population?: number;
+export enum GalacticaDamage {
+    Food,
+    Population,
+    Armory,
+    Hangar,
+    WeaponsControl,
+    Command,
+    FtlControl,
+    AdmiralsQuarters
 }
 
 export enum BasestarDamage {
