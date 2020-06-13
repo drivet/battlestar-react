@@ -25,7 +25,7 @@ import { loyaltyDeck } from "./loyalty";
 import { createCrisisDeck, createSuperCrisisDeck } from "./crisis";
 import { createDestinationDeck } from "./destination";
 import { convertToViewable } from "./viewable";
-import { InputId, InputRequest } from "../../src/models/inputs";
+import { InputId, InputRequest, InputResponse } from "../../src/models/inputs";
 import { makeInputRequest } from "./inputs";
 
 export interface FullPlayer {
@@ -91,6 +91,7 @@ export interface GameDocument {
     players: { [key: string]: FullPlayer }
     gameState: FullGameData;
     view?: ViewableGameData;
+    responses: { [key: string]: InputResponse }
 }
 
 function makeFullPlayer (userId: string): FullPlayer {
@@ -147,7 +148,8 @@ export function newGame(gameId: string, userIds: string[]): GameDocument {
         gameId: gameId,
         gameState: gameState,
         players: players,
-        view: view
+        view: view,
+        responses: null
     }
 }
 
