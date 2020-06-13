@@ -4,9 +4,12 @@ export enum CharacterId {
     WilliamAdama, KarlAgathon
 }
 
+export type CharacterIdKeys = keyof typeof CharacterId;
+
 export enum CharacterType {
     Pilot, Military, Political, Support
 }
+export type CharacterTypeKeys = keyof typeof CharacterType;
 
 export enum SkillType {
     Tactics,
@@ -15,9 +18,10 @@ export enum SkillType {
     Engineering,
     Politics
 }
+export type SkillTypeKeys = keyof typeof SkillType;
 
 export type SkillDeckCounts = {
-    [key in SkillType]?: number;
+    [key in SkillTypeKeys]?: number;
 }
 
 export enum SkillCardType {
@@ -32,6 +36,7 @@ export enum SkillCardType {
     ConsolidatePower,
     InvestigativeCommittee,
 }
+type SkillCardTypeKeys = keyof typeof SkillCardType;
 
 export interface SkillCard {
     type: SkillType;
@@ -71,6 +76,7 @@ export enum LocationId {
     FrontBelow,
     BackBelow
 }
+export type LocationIdKeys = keyof typeof LocationId;
 
 export function isSpace(location: LocationId): boolean {
     return location in [LocationId.Back, LocationId.Front,
@@ -86,8 +92,8 @@ export interface Character {
     cardsDue: SkillCardDue[];
 }
 
-export const Characters: { [key in CharacterId]: Character } = {
-    [CharacterId.KaraThrace]: {
+export const Characters: { [key in CharacterIdKeys]?: Character } = {
+    [CharacterId[CharacterId.KaraThrace]]: {
         id: CharacterId.KaraThrace,
         name: 'Kara "Starbuck" Thrace',
         type: CharacterType.Pilot,
@@ -107,7 +113,7 @@ export const Characters: { [key in CharacterId]: Character } = {
             }
         ]
     },
-    [CharacterId.WilliamAdama]: {
+    [CharacterId[CharacterId.WilliamAdama]]: {
         id: CharacterId.WilliamAdama,
         name: "William Adama",
         type: CharacterType.Military,
@@ -123,7 +129,7 @@ export const Characters: { [key in CharacterId]: Character } = {
             }
         ]
     },
-    [CharacterId.SharonValerii]: {
+    [CharacterId[CharacterId.SharonValerii]]: {
         id: CharacterId.SharonValerii,
         name: 'Sharon, "Boomer" Valeri',
         type: CharacterType.Pilot,
@@ -143,7 +149,7 @@ export const Characters: { [key in CharacterId]: Character } = {
             }
         ]
     },
-    [CharacterId.LeeAdama]: {
+    [CharacterId[CharacterId.LeeAdama]]: {
         id: CharacterId.LeeAdama,
         name: 'Lee "Apollo" Adama',
         type: CharacterType.Pilot,
@@ -162,7 +168,7 @@ export const Characters: { [key in CharacterId]: Character } = {
             }
         ]
     },
-    [CharacterId.KarlAgathon]: {
+    [CharacterId[CharacterId.KarlAgathon]]: {
         id: CharacterId.KarlAgathon,
         name: 'Karl "Helo" Agathon',
         type: CharacterType.Military,
@@ -181,7 +187,7 @@ export const Characters: { [key in CharacterId]: Character } = {
             }
         ]
     },
-    [CharacterId.GaiusBaltar]: {
+    [CharacterId[CharacterId.GaiusBaltar]]: {
         id: CharacterId.GaiusBaltar,
         name: "Gaius Baltar",
         type: CharacterType.Political,
@@ -201,7 +207,7 @@ export const Characters: { [key in CharacterId]: Character } = {
             }
         ]
     },
-    [CharacterId.GalenTyrol]: {
+    [CharacterId[CharacterId.GalenTyrol]]: {
         id: CharacterId.GalenTyrol,
         name: '"Chief" Galen Tyrol',
         type: CharacterType.Support,
@@ -221,7 +227,7 @@ export const Characters: { [key in CharacterId]: Character } = {
             }
         ]
     },
-    [CharacterId.SaulTigh]: {
+    [CharacterId[CharacterId.SaulTigh]]: {
         id: CharacterId.SaulTigh,
         name: "Saul Tigh",
         type: CharacterType.Military,
@@ -239,7 +245,7 @@ export const Characters: { [key in CharacterId]: Character } = {
 
     },
 
-    [CharacterId.LauraRoslin]: {
+    [CharacterId[CharacterId.LauraRoslin]]: {
         id: CharacterId.LauraRoslin,
         name: "Laura Roslin",
         type: CharacterType.Political,
@@ -255,7 +261,7 @@ export const Characters: { [key in CharacterId]: Character } = {
             }
         ]
     },
-    [CharacterId.TomZarek]: {
+    [CharacterId[CharacterId.TomZarek]]: {
         id: CharacterId.TomZarek,
         name: "Tom Zarek",
         type: CharacterType.Political,
@@ -295,7 +301,6 @@ export enum QuorumCardId {
     ArrestOrder,
     InspirationalSpeech
 }
-
 
 export enum DestinationCardId {
     DesolateMoon,
@@ -394,7 +399,7 @@ export enum CrisisType {
 }
 
 export type LocationCounts = {
-    [key in LocationId]?: number;
+    [key in LocationIdKeys]?: number;
 }
 
 export enum GalacticaDamage {
@@ -425,10 +430,6 @@ export interface CivilianShip {
     fuel: number;
     morale: number;
     population: number;
-}
-
-export type LocatedCivilianShips = {
-    [key in LocationId]?: CivilianShip[];
 }
 
 // only visible to the player identified by the userId

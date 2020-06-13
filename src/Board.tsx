@@ -6,10 +6,10 @@ import jump03 from './images/jump03.png';
 import jump04 from './images/jump04.png';
 import jump05 from './images/jump05.png';
 import './Board.css';
-import { GameData } from "./models/game-data";
+import { ViewableGameData } from "./models/game-data";
 
 interface IBoardProps {
-    game: GameData;
+    game: ViewableGameData;
 }
 
 function jumpPositionImage(position: number): any {

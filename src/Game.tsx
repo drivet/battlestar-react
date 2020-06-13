@@ -1,11 +1,11 @@
 import React from 'react';
 import './Game.css';
 import { Board } from "./Board";
-import { GameData, PlayerData, TurnPhase } from "./models/game-data";
+import { PlayerData, TurnPhase, ViewableGameData } from "./models/game-data";
 import firebase from "./firebase";
 
 interface GameState {
-    game: GameData;
+    game: ViewableGameData;
 }
 
 export class GameComponent extends React.Component<any, GameState> {
@@ -17,44 +17,41 @@ export class GameComponent extends React.Component<any, GameState> {
     }
 
     componentDidMount() {
-        const gameRef = firebase.database().ref('games/' + this.props.match.params.gameId);
+        const gameId = this.props.match.params.gameId;
+        const gameRef = firebase.database().ref('games/' + gameId + '/viewable');
         gameRef.on('value', snapshot => {
             this.setState({
-                game: new GameData(snapshot.val())
+                game: snapshot.val()
             });
         });
     }
 
     render() {
         if (this.state.game) {
-            if (this.state.game.gameData.state === TurnPhase.NotStarted) {
-                return (<button onClick={e => this.handleStart(e)}>Start</button>);
-            }
+            console.log('hello');
+            const currentPlayer = this.state.game.players[this.state.game.currentPlayer];
             return (
                 <div className={'Game'}>
                     <div className={'leftCol'}>
                         <div>Players</div>
-                        {this.state.game.gameData.players.map(p => this.player(p, this.state.game.currentPlayer()))}
+                        {this.state.game.players.map(p => this.player(p, currentPlayer))}
                     </div>
                     <div className={'middleCol'}>
-                        <Board game={this.state.game.gameData}/>
+                        <Board game={this.state.game}/>
                     </div>
                     <div className={'rightCol'}>
-                        <div>Vipers: {this.state.game.gameData.vipers}</div>
-                        <div>Raptors: {this.state.game.gameData.raptors}</div>
-                        <div>Civilian ships: {this.state.game.gameData.civilianShips.length}</div>
-                        <div>Raiders: {this.state.game.gameData.raiders}</div>
-                        <div>Heavy Raiders: {this.state.game.gameData.heavyRaiders}</div>
+                        <div>Vipers: {this.state.game.vipers}</div>
+                        <div>Raptors: {this.state.game.raptors}</div>
+                        <div>Civilian ships: {this.state.game.civilianShips}</div>
+                        <div>Raiders: {this.state.game.raiders}</div>
+                        <div>Heavy Raiders: {this.state.game.heavyRaiders}</div>
                     </div>
                 </div>
             );
         } else {
+            console.log('ddd');
             return null;
         }
-    }
-
-    private handleStart(e) {
-
     }
 
     private player(p: PlayerData, currentPlayer: PlayerData) {

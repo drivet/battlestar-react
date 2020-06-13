@@ -1,4 +1,4 @@
-import { CharacterId, GameData, PlayerData, TurnPhase } from "./game-data";
+import { CharacterId, PlayerData, TurnPhase, ViewableGameData } from "./game-data";
 
 export enum InputId {
     SelectCharacter,
@@ -16,7 +16,7 @@ export interface InputState {
 }
 
 export class GameManager {
-    constructor(public game: GameData) {}
+    constructor(public game: ViewableGameData) {}
 
     currentPlayer(): PlayerData {
         return this.game.players[this.game.currentPlayer]
@@ -47,15 +47,15 @@ export class GameManager {
         }
 
         // Apollo has a location
-
-        const noSkillCards = this.game.players.find(p => p.skillCards.length === 0);
+/*
+        const noSkillCards = this.game.players.find(p => p.skillCards === 0);
         if (noSkillCards && this.game.state === TurnPhase.Setup) {
             return {
                 userId: noSkillCards.userId,
                 inputId: InputId.SelectInitialSkillCards
             }
         }
-
+*/
         // everyone has skill cards, or it's not the setup phase, in which case it's okay for some people to not
         // have skill cards
 
@@ -78,6 +78,7 @@ export class GameManager {
         // movement phase has been resolved
 
         if (this.game.state === TurnPhase.Action) {
+            /*
             if (!this.game.currentAction) {
                 return {
                     userId: this.currentPlayer().userId,
@@ -86,6 +87,8 @@ export class GameManager {
             } else {
                 // this can vary wildly between actions
             }
+            */
+
         }
 
         // action phase has been resolved

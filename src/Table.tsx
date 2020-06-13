@@ -1,11 +1,10 @@
 import React from "react";
 import firebase from "./firebase";
-import { GameComponent } from './Game';
+import { Redirect } from 'react-router-dom';
 
 export interface Table {
     tableId: string;
     users: string[];
-    started: boolean;
     gameId?: string;
 }
 
@@ -33,10 +32,12 @@ export class TableComponent extends React.Component<any, TableState> {
 
     render() {
         if (this.state.table) {
+
             if (!this.state.table.gameId) {
                 return (<button onClick={e => this.handleStart(e)}>Start</button>);
+            } else {
+                return (<Redirect to={'/games/' + this.state.table.gameId} />);
             }
-            return (<GameComponent />)
         } else {
             return null;
         }
@@ -44,9 +45,19 @@ export class TableComponent extends React.Component<any, TableState> {
 
     private handleStart(e) {
         e.preventDefault();
-        const tableId = this.props.match.params.tableId;
-        firebase.database().ref('/tables/' + tableId + '/started').set(true).then(() => {
-            console.log('started!');
+        const startGame = firebase.functions().httpsCallable('startGame');
+        startGame({users: this.users(), tableId: this.tableId()}).then(result => {
+            console.log('game started');
+        }).catch(error => {
+            console.log('error: ' + error.code + ', ' + error.message + ', ' + error.details);
         });
+    }
+
+    private users() {
+        return this.state.table.users;
+    }
+
+    private tableId() {
+        return this.state.table.tableId;
     }
 }

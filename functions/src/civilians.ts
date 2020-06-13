@@ -1,5 +1,9 @@
 import { shuffle } from "./deck";
-import { CivilianShip } from "../../src/models/game-data";
+import { CivilianShip, LocationIdKeys } from "../../src/models/game-data";
+
+export type LocatedCivilianShips = {
+    [key in LocationIdKeys]?: CivilianShip[];
+}
 
 function createCivilian(food: number, fuel: number, morale: number, population: number): CivilianShip {
     return {
@@ -9,6 +13,7 @@ function createCivilian(food: number, fuel: number, morale: number, population: 
         population: population
     }
 }
+
 export function createCivilianPile(): CivilianShip[] {
     return shuffle([
         createCivilian(0, 0, 0, 0),

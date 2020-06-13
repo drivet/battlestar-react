@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from 'react-router-dom'
 import firebase from './firebase';
 import './Tables.css'
-import { Table, TableComponent } from "./Table";
+import { Table } from "./Table";
 
 
 interface TableListState {
@@ -18,7 +18,7 @@ export class Tables extends React.Component<any, TableListState> {
     }
 
     componentDidMount() {
-        const tableListRef = firebase.database().ref('tableList');
+        const tableListRef = firebase.database().ref('tables');
         tableListRef.on('value', snapshot => {
             const tables = snapshot.val();
             const newState = [];
@@ -60,7 +60,7 @@ export class Tables extends React.Component<any, TableListState> {
         return (
             <div key={table.tableId} className={'tableRow'}>
                 <div>
-                    {table.users}
+                    {table.users.length}
                 </div>
                 <div>
                     <button onClick={e => this.handleDelete(e, table.tableId)}>Delete</button>

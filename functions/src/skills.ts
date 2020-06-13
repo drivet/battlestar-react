@@ -1,5 +1,5 @@
 import { shuffle } from "./deck";
-import { SkillCard, SkillCardType, SkillType } from "../../src/models/game-data";
+import { SkillCard, SkillCardType, SkillType, SkillTypeKeys } from "../../src/models/game-data";
 
 function skillCard(skillType: SkillType, card: SkillCardType, strength: number): SkillCard {
     return {
@@ -162,15 +162,15 @@ function pilotingDeck(): SkillCard[] {
 }
 
 export type SkillDecks = {
-    [key in SkillType]: SkillCard[]
+    [key in SkillTypeKeys]?: SkillCard[]
 }
 
 export function createSkillDecks(): SkillDecks {
     return {
-        [SkillType.Tactics]: shuffle(tacticsDeck()),
-        [SkillType.Politics]: shuffle(politicsDeck()),
-        [SkillType.Leadership]: shuffle(leadershipDeck()),
-        [SkillType.Piloting]: shuffle(pilotingDeck()),
-        [SkillType.Engineering]: shuffle(engineeringDeck())
+        [SkillType[SkillType.Tactics]]: shuffle(tacticsDeck()),
+        [SkillType[SkillType.Politics]]: shuffle(politicsDeck()),
+        [SkillType[SkillType.Leadership]]: shuffle(leadershipDeck()),
+        [SkillType[SkillType.Piloting]]: shuffle(pilotingDeck()),
+        [SkillType[SkillType.Engineering]]: shuffle(engineeringDeck())
     }
 }

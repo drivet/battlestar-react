@@ -8,18 +8,17 @@ import {
     CrisisCardId,
     DestinationCardId,
     GalacticaDamage,
-    LocatedCivilianShips,
     LocationCounts,
-    LocationId,
+    LocationId, LocationIdKeys,
     LoyaltyCardId,
     QuorumCardId,
     SkillCard,
-    SkillType,
+    SkillType, SkillTypeKeys,
     TurnPhase,
     ViewableGameData
 } from "../../src/models/game-data";
 import { createSkillDecks, SkillDecks } from "./skills";
-import { createCivilianPile } from "./civilians";
+import { createCivilianPile, LocatedCivilianShips } from "./civilians";
 import { loyaltyDeck } from "./loyalty";
 import { createCrisisDeck, createSuperCrisisDeck } from "./crisis";
 import { createDestinationDeck } from "./destination";
@@ -61,16 +60,16 @@ export interface FullGameData {
     nukes: number;
 
     damagedVipers: number;
-    damagedLocations: LocationId[]
+    damagedLocations?: LocationId[]
 
     // all the various ships that can be on the board
-    activeVipers: LocationCounts;
-    activeRaiders: LocationCounts;
-    activeHeavyRaiders: LocationCounts;
-    activeCivilians: LocatedCivilianShips;
-    activeBasestars: ActiveBasestar[];
+    activeVipers?: LocationCounts;
+    activeRaiders?: LocationCounts;
+    activeHeavyRaiders?: LocationCounts;
+    activeCivilians?: LocatedCivilianShips;
+    activeBasestars?: ActiveBasestar[];
 
-    boardedCenturions: number[];
+    boardedCenturions?: number[];
 
     quorumHand?: QuorumCardId[];
     quorumDeck?: QuorumCardId[];
@@ -91,8 +90,11 @@ export interface GameDocument {
 function makePlayerData (userId: string): FullPlayer {
     return {
         userId: userId,
-        loyaltyCards: [],
-        skillCards: []
+        characterId: null,
+        admiral: false,
+        president: false,
+        loyaltyCards: null,
+        skillCards: null
     }
 }
 
@@ -147,14 +149,7 @@ export function newGame(userIds: string[]): FullGameData {
         nukes: 2,
 
         damagedVipers: 0,
-        damagedLocations: [],
-        activeVipers: {},
-        activeRaiders: {},
-        activeHeavyRaiders: {},
-        activeCivilians: {},
-        activeBasestars: [],
 
-        boardedCenturions: [],
     }
 }
 
@@ -201,22 +196,25 @@ function setupLoyalty(game: FullGameData) {
 
 function setupInitialShips(game: FullGameData) {
     game.activeBasestars = [createActiveBasestar(LocationId.Front)];
-    placeViper(game, LocationId.FrontBelow);
-    placeViper(game, LocationId.BackBelow);
+    placeVipers(game, LocationId.FrontBelow, 1);
+    placeVipers(game, LocationId.BackBelow, 1);
     placeRaiders(game, LocationId.Front, 3);
     placeCivilians(game, LocationId.Back, 2);
 }
 
-function placeViper(game: FullGameData, location: LocationId) {
-    if (game.vipers === 0) {
-        return;
-    }
+function placeVipers(game: FullGameData, location: LocationId, count: number) {
+    for (let i = 0; i < count; i++) {
+        if (game.vipers === 0) {
+            return;
+        }
 
-    game.vipers--;
-    if (game.activeVipers[location] === undefined) {
-        game.activeVipers[location] = 0;
+        game.vipers--;
+        const key = LocationId[location] as LocationIdKeys;
+        if (game.activeVipers![key] === undefined) {
+            game.activeVipers![key] = 0;
+        }
+        game.activeVipers![key]!++;
     }
-    game.activeVipers[location]++;
 }
 
 function placeRaiders(game: FullGameData, location: LocationId, count: number) {
@@ -226,10 +224,27 @@ function placeRaiders(game: FullGameData, location: LocationId, count: number) {
         }
 
         game.raiders--;
-        if (game.activeRaiders[location] === undefined) {
-            game.activeRaiders[location] = 0;
+        const key = LocationId[location] as LocationIdKeys;
+        if (game.activeRaiders![key] === undefined) {
+            game.activeRaiders![key] = 0;
         }
-        game.activeRaiders[location]++;
+        game.activeRaiders![key]!++;
+    }
+}
+
+
+function placeHeavyRaiders(game: FullGameData, location: LocationId, count: number) {
+    for (let i = 0; i < count; i++) {
+        if (game.heavyRaiders === 0) {
+            return;
+        }
+
+        game.heavyRaiders--;
+        const key = LocationId[location] as LocationIdKeys;
+        if (game.activeHeavyRaiders![key] === undefined) {
+            game.activeHeavyRaiders![key] = 0;
+        }
+        game.activeHeavyRaiders![key]!++;
     }
 }
 
@@ -240,15 +255,17 @@ function placeCivilians(game: FullGameData, location: LocationId, count: number)
         }
 
         const civilian = dealOne(game.civilianShips);
-        if (game.activeCivilians[location] === undefined) {
-            game.activeCivilians[location] = [];
+        const key = LocationId[location] as LocationIdKeys;
+        if (game.activeCivilians![key] === undefined) {
+            game.activeCivilians![key] = [];
         }
-        game.activeCivilians[location].push(civilian);
+        game.activeCivilians![key]!.push(civilian);
     }
 }
 
 function skillDeck(game: FullGameData, skill: SkillType): SkillCard[] {
-    return game.skillDecks![skill];
+    const key = SkillType[skill] as SkillTypeKeys;
+    return game.skillDecks![key]!;
 }
 
 function flagPresident(game: FullGameData) {
