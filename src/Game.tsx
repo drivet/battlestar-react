@@ -18,7 +18,7 @@ export class GameComponent extends React.Component<any, GameState> {
 
     componentDidMount() {
         const gameId = this.props.match.params.gameId;
-        const gameRef = firebase.database().ref('games/' + gameId + '/viewable');
+        const gameRef = firebase.database().ref('games/' + gameId + '/view');
         gameRef.on('value', snapshot => {
             this.setState({
                 game: snapshot.val()
@@ -28,7 +28,6 @@ export class GameComponent extends React.Component<any, GameState> {
 
     render() {
         if (this.state.game) {
-            console.log('hello');
             const currentPlayer = this.state.game.players[this.state.game.currentPlayer];
             return (
                 <div className={'Game'}>
@@ -49,7 +48,6 @@ export class GameComponent extends React.Component<any, GameState> {
                 </div>
             );
         } else {
-            console.log('ddd');
             return null;
         }
     }

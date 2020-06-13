@@ -1,3 +1,5 @@
+import { InputId, InputRequest } from "./inputs";
+
 export enum CharacterId {
     LeeAdama, GaiusBaltar, GalenTyrol, SaulTigh,
     LauraRoslin, TomZarek, KaraThrace, SharonValerii,
@@ -461,6 +463,7 @@ export enum TurnPhase {
 }
 
 export interface ViewableGameData {
+    inputRequest: InputRequest,
     state: TurnPhase;
     players: PlayerData[];
     currentPlayer: number;

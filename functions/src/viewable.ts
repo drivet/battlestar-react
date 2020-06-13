@@ -49,10 +49,12 @@ function redactSkillDecks(skillDecks: SkillDecks): SkillDeckCounts {
     }
 }
 
-export function convertToViewable(full: FullGameData): ViewableGameData {
+export function convertToViewable(full: FullGameData, players: { [key: string]: FullPlayer}): ViewableGameData {
+    const redactedPlayers: PlayerData[] = Object.values(players).map(redactPlayer);
     return {
+        inputRequest: full.inputRequest,
         state: full.state,
-        players: full.players.map(redactPlayer),
+        players: redactedPlayers,
         currentPlayer: full.currentPlayer,
         food: full.food,
         fuel: full.fuel,

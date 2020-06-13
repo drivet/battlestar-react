@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { FullGameData, GameDocument, newGame } from "./game-manager";
-import { convertToViewable } from "./viewable";
+import { newGame } from "./game-manager";
 
 admin.initializeApp();
 
@@ -9,19 +8,22 @@ export interface StartGameParams {
     users: string[];
     tableId: string;
 }
-export const startGame = functions.https.onCall((params, context) => {
+
+export const startGame = functions.https.onCall((params: StartGameParams, context) => {
     const gameRef = admin.database().ref('games').push();
     const gameId = gameRef.key;
 
-    const gameDoc: GameDocument = { gameId: gameId!, full: newGame(params.users) }
+    const gameDoc = newGame(gameId, params.users);
 
     const updates = {};
     updates['/games/' + gameId] = gameDoc;
-    updates['/tables/'+params.tableId+'/gameId'] = gameId;
+    updates['/tables/' + params.tableId + '/gameId'] = gameId;
 
-    return admin.database().ref().update(updates).then(() => console.log('Game created'));
+    return admin.database().ref().update(updates)
+        .then(() => console.log('Game document created'));
 });
 
+/*
 export const sendVisibleUpdates = functions.database.ref('/games/{gameId}/full')
     .onWrite((change, context) => {
         const gameId = context.params.gameId;
@@ -31,3 +33,4 @@ export const sendVisibleUpdates = functions.database.ref('/games/{gameId}/full')
             console.log('Updates sent');
         });
     });
+*/

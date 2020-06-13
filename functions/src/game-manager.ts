@@ -9,11 +9,13 @@ import {
     DestinationCardId,
     GalacticaDamage,
     LocationCounts,
-    LocationId, LocationIdKeys,
+    LocationId,
+    LocationIdKeys,
     LoyaltyCardId,
     QuorumCardId,
     SkillCard,
-    SkillType, SkillTypeKeys,
+    SkillType,
+    SkillTypeKeys,
     TurnPhase,
     ViewableGameData
 } from "../../src/models/game-data";
@@ -22,6 +24,9 @@ import { createCivilianPile, LocatedCivilianShips } from "./civilians";
 import { loyaltyDeck } from "./loyalty";
 import { createCrisisDeck, createSuperCrisisDeck } from "./crisis";
 import { createDestinationDeck } from "./destination";
+import { convertToViewable } from "./viewable";
+import { InputId, InputRequest } from "../../src/models/inputs";
+import { makeInputRequest } from "./inputs";
 
 export interface FullPlayer {
     userId: string;
@@ -34,9 +39,9 @@ export interface FullPlayer {
 }
 
 export interface FullGameData {
+    inputRequest: InputRequest,
     state: TurnPhase;
-
-    players: FullPlayer[];
+    players: string[];
     currentPlayer: number;
 
     jumpPosition: number;
@@ -83,11 +88,12 @@ export interface FullGameData {
 
 export interface GameDocument {
     gameId: string;
-    full: FullGameData;
-    viewable?: ViewableGameData;
+    players: { [key: string]: FullPlayer }
+    gameState: FullGameData;
+    view?: ViewableGameData;
 }
 
-function makePlayerData (userId: string): FullPlayer {
+function makeFullPlayer (userId: string): FullPlayer {
     return {
         userId: userId,
         characterId: null,
@@ -127,10 +133,29 @@ function createBasestarDamageTokens(): BasestarDamage[] {
     ]
 }
 
-export function newGame(userIds: string[]): FullGameData {
+function makeFullPlayers(userIds: string[]): { [key: string]: FullPlayer } {
+    const result = {};
+    userIds.forEach(u => result[u] = makeFullPlayer(u));
+    return result;
+}
+
+export function newGame(gameId: string, userIds: string[]): GameDocument {
+    const gameState = newGameState(userIds);
+    const players = makeFullPlayers(userIds);
+    const view = convertToViewable(gameState, players);
     return {
+        gameId: gameId,
+        gameState: gameState,
+        players: players,
+        view: view
+    }
+}
+
+function newGameState(userIds: string[]): FullGameData {
+    return {
+        inputRequest: makeInputRequest(userIds[0], InputId.SelectCharacter),
         state: TurnPhase.Setup,
-        players: userIds.map(u => makePlayerData(u)),
+        players: userIds,
         currentPlayer: 0,
         food: 8,
         fuel: 8,
@@ -147,19 +172,17 @@ export function newGame(userIds: string[]): FullGameData {
         basestarDamage: createBasestarDamageTokens(),
         civilianShips: createCivilianPile(),
         nukes: 2,
-
         damagedVipers: 0,
-
     }
 }
 
-function findPlayerByCharacter(game: FullGameData, character: CharacterId) : FullPlayer {
-    return game.players.filter(p => p.characterId === character)[0];
+function findPlayerByCharacter(players: FullPlayer[], character: CharacterId) : FullPlayer {
+    return players.filter(p => p.characterId === character)[0];
 }
 
-function distributeTitles(game: FullGameData) {
-    flagPresident(game);
-    flagAdmiral(game);
+function distributeTitles(players: FullPlayer[]) {
+    flagPresident(players);
+    flagAdmiral(players);
 }
 
 function setupDecks(game: FullGameData) {
@@ -181,17 +204,18 @@ function setupDestinyDeck(game: FullGameData) {
     game.destinyDeck = destiny;
 }
 
-function setupLoyalty(game: FullGameData) {
-    const extraHumans = game.players.filter(
+function setupLoyalty(gameDoc: GameDocument) {
+    const players = Object.values(gameDoc.players);
+    const extraHumans = players.filter(
         p => p.characterId === CharacterId.GaiusBaltar ||
         p.characterId === CharacterId.SharonValerii).length;
-    const loyalties = loyaltyDeck(game.players.length, extraHumans);
-    game.players.forEach(p => addCard(p.loyaltyCards!, dealOne(loyalties.distributed)));
-    const baltar = findPlayerByCharacter(game, CharacterId.GaiusBaltar);
+    const loyalties = loyaltyDeck(gameDoc.gameState.players.length, extraHumans);
+    players.forEach(p => addCard(p.loyaltyCards!, dealOne(loyalties.distributed)));
+    const baltar = findPlayerByCharacter(players, CharacterId.GaiusBaltar);
     if (baltar) {
         addCard(baltar.loyaltyCards!, dealOne(loyalties.distributed));
     }
-    game.loyaltyDeck = loyalties.remaining;
+    gameDoc.gameState.loyaltyDeck = loyalties.remaining;
 }
 
 function setupInitialShips(game: FullGameData) {
@@ -268,36 +292,37 @@ function skillDeck(game: FullGameData, skill: SkillType): SkillCard[] {
     return game.skillDecks![key]!;
 }
 
-function flagPresident(game: FullGameData) {
-    const laura = findPlayerByCharacter(game, CharacterId.LauraRoslin);
+function flagPresident(players: FullPlayer[]) {
+
+    const laura = findPlayerByCharacter(players, CharacterId.LauraRoslin);
     if (laura) {
         laura.president = true;
         return;
     }
-    const gaius = findPlayerByCharacter(game, CharacterId.GaiusBaltar);
+    const gaius = findPlayerByCharacter(players, CharacterId.GaiusBaltar);
     if (gaius) {
         gaius.president = true;
         return;
     }
-    const tom = findPlayerByCharacter(game, CharacterId.TomZarek);
+    const tom = findPlayerByCharacter(players, CharacterId.TomZarek);
     if (tom) {
         tom.president = true;
         return;
     }
 }
 
-function flagAdmiral(game: FullGameData) {
-    const will = findPlayerByCharacter(game, CharacterId.WilliamAdama);
+function flagAdmiral(players: FullPlayer[]) {
+    const will = findPlayerByCharacter(players, CharacterId.WilliamAdama);
     if (will) {
         will.admiral = true;
         return;
     }
-    const saul = findPlayerByCharacter(game, CharacterId.SaulTigh);
+    const saul = findPlayerByCharacter(players, CharacterId.SaulTigh);
     if (saul) {
         saul.admiral = true;
         return;
     }
-    const helo = findPlayerByCharacter(game, CharacterId.KarlAgathon);
+    const helo = findPlayerByCharacter(players, CharacterId.KarlAgathon);
     if (helo) {
         helo.admiral = true;
         return;
