@@ -453,20 +453,26 @@ export interface PlayerData {
     location?: LocationId;
 }
 
-export enum TurnPhase {
-    NotStarted,
-    Setup,
+export enum GameState {
+    SetupCharacterSelection,
+    SetupSelectInitialLocation,
+    SetupInitialSkillSelection,
     ReceiveSkills,
     Movement,
     Action,
-    Crisis
+    Crisis,
+    HumansWin,
+    CylonsWin
 }
 
 export interface ViewableGameData {
     inputRequest: InputRequest,
-    state: TurnPhase;
+    state: GameState;
     players: PlayerData[];
     currentPlayer: number;
+
+    // this is only defined at the beginning of the game
+    selectableCharacters: CharacterId[];
 
     // resource counters
     food: number;

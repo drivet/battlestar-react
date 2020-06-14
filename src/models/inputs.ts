@@ -1,25 +1,41 @@
+import { CharacterId, SkillType } from "./game-data";
+import { CharacterPool } from "../../functions/src/character";
+
 export enum InputId {
     SelectCharacter,
     SelectInitialLocation,
-    ReceiveInitialSkills
+    ReceiveInitialSkills,
+    ReceiveSkills
 }
 
 export interface InputRequest {
-    requestId: string;
     userId: string;
     inputId: InputId;
 }
 
 export interface InputResponse {
-    requestId: string;
     userId: string;
-    data: any;
+    inputId: InputId;
 }
 
-export function makeResponse(request: InputRequest, data: any): InputResponse {
-    return {
-        requestId: request.requestId,
-        userId: request.userId,
-        data: data
-    }
+export interface CharacterSelectionRequest extends InputRequest {
+    characterPool: CharacterPool;
 }
+
+export interface CharacterSelectionResponse extends InputResponse {
+    selectedCharacter: CharacterId;
+}
+
+export interface CharacterSelectionInput extends CharacterSelectionRequest, CharacterSelectionResponse {}
+
+export interface InitialLocationResponse extends InputResponse {
+    left: boolean;
+}
+
+export interface InitialLocationInput extends InputRequest, InitialLocationResponse {}
+
+export interface ReceiveInitialSkillsResponse extends InputResponse {
+    skills: SkillType[];
+}
+
+export interface ReceiveInitialSkillsInput extends InputRequest, ReceiveInitialSkillsResponse {}

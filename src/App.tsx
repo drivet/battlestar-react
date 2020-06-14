@@ -5,6 +5,8 @@ import { Tables } from "./Tables";
 import { TableComponent } from './Table';
 import { GameComponent } from "./Game";
 
+export const myUserId = 'thegreatdesmondo';
+
 export function App() {
     return (
         <React.StrictMode>

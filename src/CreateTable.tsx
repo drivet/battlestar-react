@@ -2,6 +2,7 @@ import React from 'react';
 import firebase from './firebase';
 import { Redirect } from 'react-router';
 import { Table } from "./Table";
+import { myUserId } from "./App";
 
 interface CreateTableState {
     players: number;
@@ -58,12 +59,13 @@ export class CreateTable extends React.Component<any,CreateTableState> {
 }
 
 function newTable(tableId: string, players: number): Table {
-    const names: string[] = []
-    for (let i = 0; i < players; i++) {
-        names.push('player_'+i);
+    const userIds: string[] = [myUserId];
+
+    for (let i = 1; i < players; i++) {
+        userIds.push('bot_'+i);
     }
     return {
         tableId: tableId,
-        users: names
+        users: userIds
     }
 }

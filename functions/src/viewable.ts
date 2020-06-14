@@ -1,4 +1,4 @@
-import { FullGameData, FullPlayer } from "./game-manager";
+import { FullGameData, FullPlayer } from "./game";
 import {
     LocationCounts,
     LocationIdKeys,
@@ -56,6 +56,7 @@ export function convertToViewable(full: FullGameData, players: { [key: string]: 
         state: full.state,
         players: redactedPlayers,
         currentPlayer: full.currentPlayer,
+        selectableCharacters: full.characterPool ? full.characterPool.selectable : null,
         food: full.food,
         fuel: full.fuel,
         morale: full.morale,

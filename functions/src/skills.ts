@@ -1,5 +1,9 @@
-import { shuffle } from "./deck";
-import { SkillCard, SkillCardType, SkillType, SkillTypeKeys } from "../../src/models/game-data";
+import { addCards, deal, shuffle } from "./deck";
+import { CharacterId, SkillCard, SkillCardType, SkillType, SkillTypeKeys } from "../../src/models/game-data";
+import { FullGameData, FullPlayer } from "./game";
+import { getCharacter } from "./character";
+import { makeInputRequest } from "./inputs";
+import { InputId } from "../../src/models/inputs";
 
 function skillCard(skillType: SkillType, card: SkillCardType, strength: number): SkillCard {
     return {
@@ -173,4 +177,10 @@ export function createSkillDecks(): SkillDecks {
         [SkillType[SkillType.Piloting]]: shuffle(pilotingDeck()),
         [SkillType[SkillType.Engineering]]: shuffle(engineeringDeck())
     }
+}
+
+export function getAllSkills(character: CharacterId): SkillType[] {
+    const skills: SkillType[] = [];
+    getCharacter(character).cardsDue.forEach(d => skills.push(...d.skills));
+    return skills;
 }

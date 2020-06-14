@@ -32,9 +32,13 @@ export class TableComponent extends React.Component<any, TableState> {
 
     render() {
         if (this.state.table) {
-
             if (!this.state.table.gameId) {
-                return (<button onClick={e => this.handleStart(e)}>Start</button>);
+                return (
+                    <div>
+                        {this.state.table.users.map(u => (<div>{u}</div>))}
+                        <button onClick={e => this.handleStart(e)}>Start</button>
+                    </div>
+                );
             } else {
                 return (<Redirect to={'/games/' + this.state.table.gameId} />);
             }

@@ -5,17 +5,21 @@ import { CharacterId, PlayerData, ViewableGameData } from "./models/game-data";
 import firebase from "./firebase";
 import { CharacterSelection } from "./CharacterSelection";
 import { InputId } from "./models/inputs";
-import { CharacterPool } from "./models/character";
+import { CharacterPool } from "../functions/src/character";
+import { myUserId } from "./App";
+import { FullPlayer } from "../functions/src/game";
 
 interface GameState {
     game: ViewableGameData;
+    player: FullPlayer;
 }
 
 export class GameComponent extends React.Component<any, GameState> {
     constructor(props) {
         super(props);
         this.state = {
-            game: null
+            game: null,
+            player: null
         }
     }
 
@@ -24,6 +28,13 @@ export class GameComponent extends React.Component<any, GameState> {
         gameRef.on('value', snapshot => {
             this.setState({
                 game: snapshot.val()
+            });
+        });
+
+        const playerRef = firebase.database().ref('games/' + this.gameId() + '/players/' + myUserId);
+        playerRef.on('value', snapshot => {
+            this.setState({
+                player: snapshot.val()
             });
         });
     }
@@ -63,10 +74,6 @@ export class GameComponent extends React.Component<any, GameState> {
                 </CharacterSelection>
             </div>
         );
-    }
-
-    private handleCharacterSelection(selectable: CharacterId[], index: number) {
-        console.log('selected char ' + selectable[index]);
     }
 
     private shouldShowCharacterSelection() {

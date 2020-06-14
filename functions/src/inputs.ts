@@ -7,10 +7,11 @@ function uuidv4() {
     });
 }
 
-export function makeInputRequest(user: string, input: InputId): InputRequest {
+export function makeInputRequest(user: string, input: InputId, data: any = null): InputRequest {
     return {
         requestId: uuidv4(),
         userId: user,
-        inputId: input
+        inputId: input,
+        data: data
     }
 }

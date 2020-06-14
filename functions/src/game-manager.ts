@@ -1,332 +1,132 @@
-import { addCard, addCards, deal, dealOne, shuffle } from "./deck";
-import { createQuorumDeck } from "./quorum";
+import { CharacterId, GameState, LocationId, SkillType } from "../../src/models/game-data";
+import { distributeTitles, GameDocument, setupDecks, setupLoyalty } from "./game";
 import {
-    ActiveBasestar,
-    BasestarDamage,
-    CharacterId,
-    CivilianShip,
-    CrisisCardId,
-    DestinationCardId,
-    GalacticaDamage,
-    LocationCounts,
-    LocationId,
-    LocationIdKeys,
-    LoyaltyCardId,
-    QuorumCardId,
-    SkillCard,
-    SkillType,
-    SkillTypeKeys,
-    TurnPhase,
-    ViewableGameData
-} from "../../src/models/game-data";
-import { createSkillDecks, SkillDecks } from "./skills";
-import { createCivilianPile, LocatedCivilianShips } from "./civilians";
-import { loyaltyDeck } from "./loyalty";
-import { createCrisisDeck, createSuperCrisisDeck } from "./crisis";
-import { createDestinationDeck } from "./destination";
-import { convertToViewable } from "./viewable";
-import { InputId, InputRequest, InputResponse } from "../../src/models/inputs";
-import { makeInputRequest } from "./inputs";
+    CharacterSelectionRequest,
+    CharacterSelectionResponse,
+    InitialLocationResponse,
+    InputId,
+    InputResponse,
+    ReceiveInitialSkillsResponse
+} from "../../src/models/inputs";
+import { getCharacter, selectCharacter } from "./character";
+import { addCard, addCards, deal, dealOne } from "./deck";
 
-export interface FullPlayer {
-    userId: string;
-    characterId?: CharacterId;
-    admiral?: boolean;
-    president?: boolean;
-    location?: LocationId;
-    loyaltyCards?: LoyaltyCardId[];
-    skillCards?: SkillCard[];
-}
+/**
+ * This is always called because someone has given an input which in theory should allow us to continue the game
+ */
+export function runGame(gameDoc: GameDocument, response: InputResponse) {
+    if (gameDoc.gameState.inputRequest.userId !== response.userId) {
+        console.log('InputRequest userId: ' + gameDoc.gameState.inputRequest.userId +
+            ', response userId: ' + response.userId + ', does not match. Error!');
+        return;
+    }
 
-export interface FullGameData {
-    inputRequest: InputRequest,
-    state: TurnPhase;
-    players: string[];
-    currentPlayer: number;
+    if (gameDoc.gameState.inputRequest.inputId !== response.inputId) {
+        console.log('InputRequest inputId: ' + gameDoc.gameState.inputRequest.inputId +
+            ', response inputId: ' + response.inputId + ', does not match. Error!');
+        return;
+    }
 
-    jumpPosition: number;
+    const data = { ...gameDoc.gameState.inputRequest, ...response };
+    
 
-    // resource counters
-    food: number;
-    fuel: number;
-    morale: number;
-    population: number;
-
-    // ships and tokens in reserve
-    vipers: number;
-    raptors: number;
-    raiders: number;
-    heavyRaiders: number;
-    centurions: number;
-    basestars: number;
-    civilianShips: CivilianShip[];
-    galacticaDamage: GalacticaDamage[];
-    basestarDamage: BasestarDamage[];
-    nukes: number;
-
-    damagedVipers: number;
-    damagedLocations?: LocationId[]
-
-    // all the various ships that can be on the board
-    activeVipers?: LocationCounts;
-    activeRaiders?: LocationCounts;
-    activeHeavyRaiders?: LocationCounts;
-    activeCivilians?: LocatedCivilianShips;
-    activeBasestars?: ActiveBasestar[];
-
-    boardedCenturions?: number[];
-
-    quorumHand?: QuorumCardId[];
-    quorumDeck?: QuorumCardId[];
-    destinationDeck?: DestinationCardId[];
-    skillDecks?: SkillDecks;
-    destinyDeck?: SkillCard[];
-    crisisDeck?: CrisisCardId[];
-    superCrisisDeck?: CrisisCardId[];
-    loyaltyDeck?: LoyaltyCardId[];
-}
-
-export interface GameDocument {
-    gameId: string;
-    players: { [key: string]: FullPlayer }
-    gameState: FullGameData;
-    view?: ViewableGameData;
-    responses: { [key: string]: InputResponse }
-}
-
-function makeFullPlayer (userId: string): FullPlayer {
-    return {
-        userId: userId,
-        characterId: null,
-        admiral: false,
-        president: false,
-        loyaltyCards: null,
-        skillCards: null
+    if (gameDoc.gameState.state === GameState.SetupCharacterSelection) {
+        handleCharacterSelection(gameDoc, response as CharacterSelectionResponse);
+    } else if (gameDoc.gameState.state === GameState.SetupSelectInitialLocation) {
+        handleSelectInitialLocation(gameDoc, response as InitialLocationResponse);
+    } else if (gameDoc.gameState.state === GameState.SetupInitialSkillSelection) {
+        handleReceiveInitialSkills(gameDoc, response as ReceiveInitialSkillsResponse);
     }
 }
 
-function createActiveBasestar(location: LocationId): ActiveBasestar {
-    return {
-        location: location,
-        damage: []
-    }
-}
+function handleCharacterSelection(gameDoc: GameDocument, response: CharacterSelectionResponse) {
+    const inputReq = gameDoc.gameState.inputRequest as CharacterSelectionRequest;
+    const index = gameDoc.gameState.userIds.indexOf(inputReq.userId);
+    const player = gameDoc.players[gameDoc.gameState.userIds[index]];
+    player.characterId = response.selectedCharacter;
 
-function createGalacticaDamageTokens(): GalacticaDamage[] {
-    return [
-        GalacticaDamage.Hangar,
-        GalacticaDamage.AdmiralsQuarters,
-        GalacticaDamage.Armory,
-        GalacticaDamage.Command,
-        GalacticaDamage.WeaponsControl,
-        GalacticaDamage.FtlControl,
-        GalacticaDamage.Food,
-        GalacticaDamage.Population
-    ];
-}
-
-function createBasestarDamageTokens(): BasestarDamage[] {
-    return [
-        BasestarDamage.CriticalHit,
-        BasestarDamage.DisabledHanger,
-        BasestarDamage.DisabledWeapons,
-        BasestarDamage.StructuralDamage
-    ]
-}
-
-function makeFullPlayers(userIds: string[]): { [key: string]: FullPlayer } {
-    const result = {};
-    userIds.forEach(u => result[u] = makeFullPlayer(u));
-    return result;
-}
-
-export function newGame(gameId: string, userIds: string[]): GameDocument {
-    const gameState = newGameState(userIds);
-    const players = makeFullPlayers(userIds);
-    const view = convertToViewable(gameState, players);
-    return {
-        gameId: gameId,
-        gameState: gameState,
-        players: players,
-        view: view,
-        responses: null
-    }
-}
-
-function newGameState(userIds: string[]): FullGameData {
-    return {
-        inputRequest: makeInputRequest(userIds[0], InputId.SelectCharacter),
-        state: TurnPhase.Setup,
-        players: userIds,
-        currentPlayer: 0,
-        food: 8,
-        fuel: 8,
-        morale: 10,
-        population: 12,
-        vipers: 8,
-        raptors: 4,
-        raiders: 16,
-        heavyRaiders: 4,
-        centurions: 4,
-        basestars: 2,
-        jumpPosition: 0,
-        galacticaDamage: createGalacticaDamageTokens(),
-        basestarDamage: createBasestarDamageTokens(),
-        civilianShips: createCivilianPile(),
-        nukes: 2,
-        damagedVipers: 0,
-    }
-}
-
-function findPlayerByCharacter(players: FullPlayer[], character: CharacterId) : FullPlayer {
-    return players.filter(p => p.characterId === character)[0];
-}
-
-function distributeTitles(players: FullPlayer[]) {
-    flagPresident(players);
-    flagAdmiral(players);
-}
-
-function setupDecks(game: FullGameData) {
-    game.quorumDeck = createQuorumDeck();
-    game.crisisDeck = createCrisisDeck();
-    game.superCrisisDeck = createSuperCrisisDeck();
-    game.destinationDeck = createDestinationDeck();
-    game.skillDecks = createSkillDecks();
-}
-
-function setupDestinyDeck(game: FullGameData) {
-    const destiny: SkillCard[] = [];
-    addCards(destiny, deal(skillDeck(game, SkillType.Tactics), 2));
-    addCards(destiny, deal(skillDeck(game, SkillType.Engineering), 2));
-    addCards(destiny, deal(skillDeck(game, SkillType.Piloting), 2));
-    addCards(destiny, deal(skillDeck(game, SkillType.Politics), 2));
-    addCards(destiny, deal(skillDeck(game, SkillType.Leadership), 2));
-    shuffle(destiny);
-    game.destinyDeck = destiny;
-}
-
-function setupLoyalty(gameDoc: GameDocument) {
     const players = Object.values(gameDoc.players);
-    const extraHumans = players.filter(
-        p => p.characterId === CharacterId.GaiusBaltar ||
-        p.characterId === CharacterId.SharonValerii).length;
-    const loyalties = loyaltyDeck(gameDoc.gameState.players.length, extraHumans);
-    players.forEach(p => addCard(p.loyaltyCards!, dealOne(loyalties.distributed)));
-    const baltar = findPlayerByCharacter(players, CharacterId.GaiusBaltar);
-    if (baltar) {
-        addCard(baltar.loyaltyCards!, dealOne(loyalties.distributed));
-    }
-    gameDoc.gameState.loyaltyDeck = loyalties.remaining;
-}
+    if (index === gameDoc.gameState.userIds.length - 1) {
+        // done with character selection, move to next phase
 
-function setupInitialShips(game: FullGameData) {
-    game.activeBasestars = [createActiveBasestar(LocationId.Front)];
-    placeVipers(game, LocationId.FrontBelow, 1);
-    placeVipers(game, LocationId.BackBelow, 1);
-    placeRaiders(game, LocationId.Front, 3);
-    placeCivilians(game, LocationId.Back, 2);
-}
+        // we skip the first player for the initial skill card choices
+        gameDoc.gameState.currentPlayer = 1;
 
-function placeVipers(game: FullGameData, location: LocationId, count: number) {
-    for (let i = 0; i < count; i++) {
-        if (game.vipers === 0) {
-            return;
+        // give everyone a location that you can
+        players.filter(p => p.characterId !== CharacterId.LeeAdama && p.characterId !== CharacterId.KarlAgathon)
+            .forEach(p => p.location = getCharacter(p.characterId).startLocation);
+
+        // but apollo may need help
+        const apollo = players.find(p => p.characterId === CharacterId.LeeAdama);
+        gameDoc.gameState.state = apollo ? GameState.SetupSelectInitialLocation: GameState.SetupInitialSkillSelection;
+        if (apollo) {
+            gameDoc.gameState.inputRequest = {
+                userId: apollo.userId,
+                inputId: InputId.SelectInitialLocation,
+            }
+        } else {
+            setupDecksAndTitles(gameDoc);
+            gameDoc.gameState.inputRequest = {
+                userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
+                inputId: InputId.ReceiveInitialSkills,
+            }
         }
-
-        game.vipers--;
-        const key = LocationId[location] as LocationIdKeys;
-        if (game.activeVipers![key] === undefined) {
-            game.activeVipers![key] = 0;
-        }
-        game.activeVipers![key]!++;
-    }
-}
-
-function placeRaiders(game: FullGameData, location: LocationId, count: number) {
-    for (let i = 0; i < count; i++) {
-        if (game.raiders === 0) {
-            return;
-        }
-
-        game.raiders--;
-        const key = LocationId[location] as LocationIdKeys;
-        if (game.activeRaiders![key] === undefined) {
-            game.activeRaiders![key] = 0;
-        }
-        game.activeRaiders![key]!++;
+    } else {
+        gameDoc.gameState.currentPlayer++;
+        gameDoc.gameState.inputRequest = {
+            userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
+            inputId: InputId.SelectCharacter,
+            characterPool: selectCharacter(inputReq.characterPool, response.selectedCharacter)
+        } as CharacterSelectionRequest
     }
 }
 
-
-function placeHeavyRaiders(game: FullGameData, location: LocationId, count: number) {
-    for (let i = 0; i < count; i++) {
-        if (game.heavyRaiders === 0) {
-            return;
-        }
-
-        game.heavyRaiders--;
-        const key = LocationId[location] as LocationIdKeys;
-        if (game.activeHeavyRaiders![key] === undefined) {
-            game.activeHeavyRaiders![key] = 0;
-        }
-        game.activeHeavyRaiders![key]!++;
+function handleSelectInitialLocation(gameDoc: GameDocument, response: InitialLocationResponse) {
+    const players = Object.values(gameDoc.players);
+    const apollo = players.find(p => p.characterId === CharacterId.LeeAdama);
+    apollo.location = response.left ? LocationId.FrontBelow : LocationId.BackBelow;
+    gameDoc.gameState.state = GameState.SetupInitialSkillSelection;
+    setupDecksAndTitles(gameDoc);
+    gameDoc.gameState.inputRequest = {
+        userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
+        inputId: InputId.ReceiveInitialSkills,
     }
 }
 
-function placeCivilians(game: FullGameData, location: LocationId, count: number) {
-    for (let i = 0; i < count; i++) {
-        if (game.civilianShips.length === 0) {
-            return;
+function handleReceiveInitialSkills(gameDoc: GameDocument, response: ReceiveInitialSkillsResponse) {
+    const inputReq = gameDoc.gameState.inputRequest;
+    const index = gameDoc.gameState.userIds.indexOf(inputReq.userId);
+    const player = gameDoc.players[gameDoc.gameState.userIds[index]];
+
+    validateSkills(player.characterId, response.skills);
+
+    response.skills.forEach(s => addCard(player.skillCards, dealOne(gameDoc.gameState.skillDecks[SkillType[s]])));
+
+    if (index === gameDoc.gameState.userIds.length - 1) {
+        // done with receive initial skills
+        gameDoc.gameState.currentPlayer = 0;
+        gameDoc.gameState.inputRequest = {
+            userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
+            inputId: InputId.ReceiveSkills,
         }
-
-        const civilian = dealOne(game.civilianShips);
-        const key = LocationId[location] as LocationIdKeys;
-        if (game.activeCivilians![key] === undefined) {
-            game.activeCivilians![key] = [];
+    } else {
+        gameDoc.gameState.currentPlayer++;
+        gameDoc.gameState.inputRequest = {
+            userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
+            inputId: InputId.ReceiveInitialSkills,
         }
-        game.activeCivilians![key]!.push(civilian);
     }
 }
 
-function skillDeck(game: FullGameData, skill: SkillType): SkillCard[] {
-    const key = SkillType[skill] as SkillTypeKeys;
-    return game.skillDecks![key]!;
+function setupDecksAndTitles(gameDoc: GameDocument) {
+    distributeTitles(Object.values(gameDoc.players));
+    setupLoyalty(gameDoc);
+    setupDecks(gameDoc.gameState);
+    addCards(gameDoc.gameState.quorumHand, deal(gameDoc.gameState.quorumDeck, 2));
 }
 
-function flagPresident(players: FullPlayer[]) {
-
-    const laura = findPlayerByCharacter(players, CharacterId.LauraRoslin);
-    if (laura) {
-        laura.president = true;
-        return;
-    }
-    const gaius = findPlayerByCharacter(players, CharacterId.GaiusBaltar);
-    if (gaius) {
-        gaius.president = true;
-        return;
-    }
-    const tom = findPlayerByCharacter(players, CharacterId.TomZarek);
-    if (tom) {
-        tom.president = true;
-        return;
-    }
-}
-
-function flagAdmiral(players: FullPlayer[]) {
-    const will = findPlayerByCharacter(players, CharacterId.WilliamAdama);
-    if (will) {
-        will.admiral = true;
-        return;
-    }
-    const saul = findPlayerByCharacter(players, CharacterId.SaulTigh);
-    if (saul) {
-        saul.admiral = true;
-        return;
-    }
-    const helo = findPlayerByCharacter(players, CharacterId.KarlAgathon);
-    if (helo) {
-        helo.admiral = true;
-        return;
-    }
+function validateSkills(character: CharacterId, skills: SkillType[]): boolean {
+    const c = getCharacter(character);
+    return skills.every(s => c.cardsDue.map(d => d.skills)
+                                       .some((ds: SkillType[]) => ds.indexOf(s) !== -1))
 }

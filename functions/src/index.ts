@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { newGame } from "./game-manager";
+import { FullGameData, newGame } from "./game";
 
 admin.initializeApp();
 
@@ -23,14 +23,11 @@ export const startGame = functions.https.onCall((params: StartGameParams, contex
         .then(() => console.log('Game document created'));
 });
 
-/*
-export const sendVisibleUpdates = functions.database.ref('/games/{gameId}/full')
-    .onWrite((change, context) => {
+export const runGame = functions.database.ref('/games/{gameId}/responses')
+    .onCreate((snapshot, context) => {
         const gameId = context.params.gameId;
-        const fullGame: FullGameData = change.after.val();
+        const response = snapshot.val();
+        const gameState = admin.database().ref('/games/' + gameId + '/gameState').once('value');
+        const players = admin.database().ref('/games/' + gameId + '/players').once('value');
         const viewable = convertToViewable(fullGame);
-        return admin.database().ref('/games/' + gameId + '/viewable').set(viewable).then(() => {
-            console.log('Updates sent');
-        });
     });
-*/
