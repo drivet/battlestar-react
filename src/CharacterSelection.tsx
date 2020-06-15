@@ -12,7 +12,7 @@ import sharonvalaerii from './images/chars_sharon_valerii.jpg';
 import tomzarek from './images/chars_tom_zarek.jpg';
 import { CharacterId } from "./models/game-data";
 import firebase from "./firebase";
-import { InputRequest, makeResponse } from "./models/inputs";
+import { CharacterSelectionRequest, CharacterSelectionResponse } from "./models/inputs";
 
 const charImages = {
     [CharacterId.KarlAgathon]: karlagathon,
@@ -34,14 +34,15 @@ function charImgElement(character: CharacterId) {
 interface CharacterSelectionProps {
     show: boolean,
     gameId: string,
-    request: InputRequest,
-    selectableCharacters: CharacterId[],
+    request: CharacterSelectionRequest,
 }
 
 interface CharacterSelectionState {
+    selectableCharacters: CharacterId[],
     displayedCharacter: number;
     open: boolean;
 }
+
 const customStyles = {
     content : {
         top                   : '50%',
@@ -53,10 +54,19 @@ const customStyles = {
     }
 };
 
+function makeResponse(request: CharacterSelectionRequest, selectedCharacter: CharacterId): CharacterSelectionResponse {
+    return {
+        userId: request.userId,
+        inputId: request.inputId,
+        selectedCharacter: selectedCharacter
+    }
+}
+
 export class CharacterSelection extends React.Component<CharacterSelectionProps, CharacterSelectionState> {
     constructor(props) {
         super(props);
         this.state = {
+            selectableCharacters: props.request.characterPool.selectable,
             displayedCharacter: 0,
             open: props.show
         };
@@ -77,7 +87,7 @@ export class CharacterSelection extends React.Component<CharacterSelectionProps,
 
     private handleSelect(e) {
         firebase.database().ref('/games/' + this.props.gameId + '/responses')
-            .push(makeResponse(this.props.request, this.props.selectableCharacters[this.state.displayedCharacter]));
+            .push(makeResponse(this.props.request, this.state.selectableCharacters[this.state.displayedCharacter]));
         this.setState({
             open: false
         });
@@ -85,7 +95,7 @@ export class CharacterSelection extends React.Component<CharacterSelectionProps,
 
     private handleNext(e) {
         this.setState({
-            displayedCharacter: this.state.displayedCharacter === this.props.selectableCharacters.length -1 ?
+            displayedCharacter: this.state.displayedCharacter === this.state.selectableCharacters.length -1 ?
                 0 : this.state.displayedCharacter + 1
         });
     }
@@ -93,12 +103,12 @@ export class CharacterSelection extends React.Component<CharacterSelectionProps,
     private handlePrev(e) {
         this.setState({
             displayedCharacter: this.state.displayedCharacter === 0 ?
-                this.props.selectableCharacters.length - 1 : this.state.displayedCharacter - 1
+                this.state.selectableCharacters.length - 1 : this.state.displayedCharacter - 1
         });
     }
 
     private currentCharacterId(): CharacterId {
-        return this.props.selectableCharacters[this.state.displayedCharacter];
+        return this.state.selectableCharacters[this.state.displayedCharacter];
     }
 }
 

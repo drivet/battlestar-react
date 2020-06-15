@@ -24,8 +24,8 @@ export function selectCharacter(pool: CharacterPool, selected: CharacterId): Cha
         throw new Error('invalid character selection');
     }
 
-    const selectable = pool.selectable.splice(index, 1);
-    return split(selectable.concat(pool.unselectable));
+    pool.selectable.splice(index, 1);
+    return split(pool.selectable.concat(pool.unselectable ? pool.unselectable : []));
 }
 
 function split(characters: CharacterId[]): CharacterPool {

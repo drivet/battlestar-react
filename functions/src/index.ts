@@ -1,6 +1,9 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { FullGameData, newGame } from "./game";
+import { FullGameData, GameDocument, newGame } from "./game";
+import { runGame } from "./game-manager";
+import { convertToViewable } from "./viewable";
+import { InputResponse } from "../../src/models/inputs";
 
 admin.initializeApp();
 
@@ -23,11 +26,23 @@ export const startGame = functions.https.onCall((params: StartGameParams, contex
         .then(() => console.log('Game document created'));
 });
 
-export const runGame = functions.database.ref('/games/{gameId}/responses')
-    .onCreate((snapshot, context) => {
+export const processResponse = functions.database.ref('/games/{gameId}/responses')
+    .onCreate((responseSnapshot, context) => {
         const gameId = context.params.gameId;
-        const response = snapshot.val();
-        const gameState = admin.database().ref('/games/' + gameId + '/gameState').once('value');
-        const players = admin.database().ref('/games/' + gameId + '/players').once('value');
-        const viewable = convertToViewable(fullGame);
+        const response = Object.values(responseSnapshot.val())[0] as InputResponse;
+        const gameDocRef = admin.database().ref('/games/' + gameId);
+        return gameDocRef.once('value').then(snapshot => {
+            const gameDoc: GameDocument = snapshot.val();
+
+            // consume the response.  Only need one at a time
+            gameDoc.responses = null;
+
+            // run through simulation
+            runGame(gameDoc, response);
+
+            // re-create view
+            gameDoc.view = convertToViewable(gameDoc.gameState, gameDoc.players);
+
+            return admin.database().ref('/games/' + gameId).set(gameDoc);
+        });
     });

@@ -1,11 +1,10 @@
 import React from 'react';
 import './Game.css';
 import { Board } from "./Board";
-import { CharacterId, PlayerData, ViewableGameData } from "./models/game-data";
+import { PlayerData, ViewableGameData } from "./models/game-data";
 import firebase from "./firebase";
 import { CharacterSelection } from "./CharacterSelection";
-import { InputId } from "./models/inputs";
-import { CharacterPool } from "../functions/src/character";
+import { CharacterSelectionRequest, InputId } from "./models/inputs";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 
@@ -48,8 +47,6 @@ export class GameComponent extends React.Component<any, GameState> {
             return null;
         }
 
-        const pool = new CharacterPool();
-        const selectable = pool.selectable.map(c => c.id);
         const currentPlayer = this.state.game.players[this.state.game.currentPlayer];
         return (
             <div className={'Game'}>
@@ -68,8 +65,7 @@ export class GameComponent extends React.Component<any, GameState> {
                     <div>Heavy Raiders: {this.state.game.heavyRaiders}</div>
                 </div>
                 <CharacterSelection show={this.shouldShowCharacterSelection()}
-                                    selectableCharacters={selectable}
-                                    request={this.request()}
+                                    request={ this.request() as CharacterSelectionRequest }
                                     gameId={this.gameId()}>
                 </CharacterSelection>
             </div>

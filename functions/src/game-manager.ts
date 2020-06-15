@@ -1,12 +1,20 @@
 import { CharacterId, GameState, LocationId, SkillType } from "../../src/models/game-data";
-import { distributeTitles, GameDocument, setupDecks, setupLoyalty } from "./game";
 import {
+    distributeTitles,
+    FullPlayer,
+    GameDocument,
+    setupDecks,
+    setupDestinyDeck,
+    setupInitialShips,
+    setupLoyalty
+} from "./game";
+import {
+    CharacterSelectionInput,
     CharacterSelectionRequest,
-    CharacterSelectionResponse,
-    InitialLocationResponse,
+    InitialLocationInput,
     InputId,
     InputResponse,
-    ReceiveInitialSkillsResponse
+    ReceiveInitialSkillsInput
 } from "../../src/models/inputs";
 import { getCharacter, selectCharacter } from "./character";
 import { addCard, addCards, deal, dealOne } from "./deck";
@@ -27,90 +35,121 @@ export function runGame(gameDoc: GameDocument, response: InputResponse) {
         return;
     }
 
-    const data = { ...gameDoc.gameState.inputRequest, ...response };
-    
+    let data = { ...gameDoc.gameState.inputRequest, ...response };
 
-    if (gameDoc.gameState.state === GameState.SetupCharacterSelection) {
-        handleCharacterSelection(gameDoc, response as CharacterSelectionResponse);
-    } else if (gameDoc.gameState.state === GameState.SetupSelectInitialLocation) {
-        handleSelectInitialLocation(gameDoc, response as InitialLocationResponse);
-    } else if (gameDoc.gameState.state === GameState.SetupInitialSkillSelection) {
-        handleReceiveInitialSkills(gameDoc, response as ReceiveInitialSkillsResponse);
+    // We've capture the input into a data variable, so we can delete the input request
+    // Now we crank through the game until we need need another input, which may be a couple of cranks!
+    gameDoc.gameState.inputRequest = null;
+    while (!gameDoc.gameState.inputRequest) {
+        if (gameDoc.gameState.state === GameState.CharacterSelection) {
+            handleCharacterSelection(gameDoc, data as CharacterSelectionInput);
+        } else if (gameDoc.gameState.state === GameState.CharacterSetup) {
+            handleCharacterSetup(gameDoc, data as InitialLocationInput);
+        } else if (gameDoc.gameState.state === GameState.SetupCards) {
+            setupDecksAndTitles(gameDoc);
+        } else if (gameDoc.gameState.state === GameState.InitialSkillSelection) {
+            handleReceiveInitialSkills(gameDoc, data as ReceiveInitialSkillsInput);
+        } else if (gameDoc.gameState.state === GameState.SetupDestiny) {
+            handleSetupDestiny(gameDoc);
+        } else if (gameDoc.gameState.state === GameState.SetupInitialShips) {
+            handleSetupInitialShips(gameDoc);
+        } else if (gameDoc.gameState.state === GameState.ReceiveSkills) {
+            handleReceiveSkills(gameDoc);
+        }
+
+        // we assume the data was used up in one iteration
+        data = null;
     }
 }
 
-function handleCharacterSelection(gameDoc: GameDocument, response: CharacterSelectionResponse) {
-    const inputReq = gameDoc.gameState.inputRequest as CharacterSelectionRequest;
-    const index = gameDoc.gameState.userIds.indexOf(inputReq.userId);
-    const player = gameDoc.players[gameDoc.gameState.userIds[index]];
-    player.characterId = response.selectedCharacter;
+function handleCharacterSelection(gameDoc: GameDocument, possibleInput: CharacterSelectionInput) {
+    const currentPlayer = getCurrentPlayer(gameDoc);
+    const input = !possibleInput && currentPlayer.bot ? {
+        inputId: InputId.SelectCharacter,
+        userId: currentPlayer.userId,
+        characterPool: gameDoc.gameState.characterPool,
+        selectedCharacter: gameDoc.gameState.characterPool.selectable[0]
+    }: possibleInput;
 
-    const players = Object.values(gameDoc.players);
-    if (index === gameDoc.gameState.userIds.length - 1) {
-        // done with character selection, move to next phase
-
-        // we skip the first player for the initial skill card choices
-        gameDoc.gameState.currentPlayer = 1;
-
-        // give everyone a location that you can
-        players.filter(p => p.characterId !== CharacterId.LeeAdama && p.characterId !== CharacterId.KarlAgathon)
-            .forEach(p => p.location = getCharacter(p.characterId).startLocation);
-
-        // but apollo may need help
-        const apollo = players.find(p => p.characterId === CharacterId.LeeAdama);
-        gameDoc.gameState.state = apollo ? GameState.SetupSelectInitialLocation: GameState.SetupInitialSkillSelection;
-        if (apollo) {
-            gameDoc.gameState.inputRequest = {
-                userId: apollo.userId,
-                inputId: InputId.SelectInitialLocation,
-            }
-        } else {
-            setupDecksAndTitles(gameDoc);
-            gameDoc.gameState.inputRequest = {
-                userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
-                inputId: InputId.ReceiveInitialSkills,
-            }
-        }
+    if (input) {
+        currentPlayer.characterId = input.selectedCharacter;
+        gameDoc.gameState.characterPool = selectCharacter(input.characterPool, input.selectedCharacter);
+        nextPlayerInSetup(gameDoc, GameState.CharacterSetup)
     } else {
-        gameDoc.gameState.currentPlayer++;
         gameDoc.gameState.inputRequest = {
             userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
             inputId: InputId.SelectCharacter,
-            characterPool: selectCharacter(inputReq.characterPool, response.selectedCharacter)
+            characterPool: gameDoc.gameState.characterPool
         } as CharacterSelectionRequest
     }
 }
 
-function handleSelectInitialLocation(gameDoc: GameDocument, response: InitialLocationResponse) {
-    const players = Object.values(gameDoc.players);
-    const apollo = players.find(p => p.characterId === CharacterId.LeeAdama);
-    apollo.location = response.left ? LocationId.FrontBelow : LocationId.BackBelow;
-    gameDoc.gameState.state = GameState.SetupInitialSkillSelection;
-    setupDecksAndTitles(gameDoc);
-    gameDoc.gameState.inputRequest = {
-        userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
-        inputId: InputId.ReceiveInitialSkills,
+function handleCharacterSetup(gameDoc: GameDocument, input?: any) {
+    const currentPlayer = getCurrentPlayer(gameDoc);
+    if (currentPlayer.characterId === CharacterId.LeeAdama) {
+        handleApolloSetup(gameDoc, currentPlayer, input);
+    } else {
+        handleStandardCharacterSetup(gameDoc, currentPlayer);
     }
 }
 
-function handleReceiveInitialSkills(gameDoc: GameDocument, response: ReceiveInitialSkillsResponse) {
-    const inputReq = gameDoc.gameState.inputRequest;
-    const index = gameDoc.gameState.userIds.indexOf(inputReq.userId);
-    const player = gameDoc.players[gameDoc.gameState.userIds[index]];
+function handleApolloSetup(gameDoc: GameDocument, player: FullPlayer, possibleInput: InitialLocationInput) {
+    const input = !possibleInput && player.bot ? {
+        inputId: InputId.SelectInitialLocation,
+        userId: player.userId,
+        left: true
+    } : possibleInput;
 
-    validateSkills(player.characterId, response.skills);
-
-    response.skills.forEach(s => addCard(player.skillCards, dealOne(gameDoc.gameState.skillDecks[SkillType[s]])));
-
-    if (index === gameDoc.gameState.userIds.length - 1) {
-        // done with receive initial skills
-        gameDoc.gameState.currentPlayer = 0;
-        gameDoc.gameState.inputRequest = {
-            userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
-            inputId: InputId.ReceiveSkills,
-        }
+    if (input) {
+        player.location = input.left ? LocationId.FrontBelow : LocationId.BackBelow;
+        nextPlayerInSetup(gameDoc, GameState.SetupCards)
     } else {
-        gameDoc.gameState.currentPlayer++;
+        gameDoc.gameState.inputRequest = {
+            userId: player.userId,
+            inputId: InputId.SelectInitialLocation,
+        }
+    }
+}
+
+function handleStandardCharacterSetup(gameDoc: GameDocument, player: FullPlayer) {
+    const character = getCharacter(player.characterId);
+    if (character.startLocation !== null && character.startLocation !== undefined) {
+        player.location = getCharacter(player.characterId).startLocation;
+    }
+    nextPlayerInSetup(gameDoc, GameState.SetupCards)
+}
+
+function setupDecksAndTitles(gameDoc: GameDocument) {
+    Object.values(gameDoc.players).forEach(p => p.loyaltyCards = p.loyaltyCards ? p.loyaltyCards : []);
+    gameDoc.gameState.quorumHand = gameDoc.gameState.quorumHand ? gameDoc.gameState.quorumHand : [];
+    gameDoc.gameState.quorumDeck = gameDoc.gameState.quorumDeck ? gameDoc.gameState.quorumDeck : [];
+
+    distributeTitles(Object.values(gameDoc.players));
+    setupLoyalty(gameDoc);
+    setupDecks(gameDoc.gameState);
+    addCards(gameDoc.gameState.quorumHand, deal(gameDoc.gameState.quorumDeck, 2));
+    gameDoc.gameState.state = GameState.InitialSkillSelection;
+    // first player (player 0) doesn't get skill cards to start with
+    gameDoc.gameState.currentPlayer = 1;
+}
+
+function handleReceiveInitialSkills(gameDoc: GameDocument, possibleInput: ReceiveInitialSkillsInput) {
+    Object.values(gameDoc.players).forEach(p => p.skillCards = p.skillCards ? p.skillCards : []);
+
+    const currentPlayer = getCurrentPlayer(gameDoc);
+
+    const input = !possibleInput && currentPlayer.bot ? {
+        userId: currentPlayer.userId,
+        inputId: InputId.ReceiveInitialSkills,
+        skills: botInitialSkills(currentPlayer.characterId)
+    } : possibleInput;
+
+    if (input) {
+        validateSkills(currentPlayer.characterId, input.skills);
+        input.skills.forEach(s => addCard(currentPlayer.skillCards,
+            dealOne(gameDoc.gameState.skillDecks[SkillType[s]])));
+        nextPlayerInSetup(gameDoc, GameState.SetupDestiny);
+    } else {
         gameDoc.gameState.inputRequest = {
             userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
             inputId: InputId.ReceiveInitialSkills,
@@ -118,15 +157,49 @@ function handleReceiveInitialSkills(gameDoc: GameDocument, response: ReceiveInit
     }
 }
 
-function setupDecksAndTitles(gameDoc: GameDocument) {
-    distributeTitles(Object.values(gameDoc.players));
-    setupLoyalty(gameDoc);
-    setupDecks(gameDoc.gameState);
-    addCards(gameDoc.gameState.quorumHand, deal(gameDoc.gameState.quorumDeck, 2));
+function handleSetupDestiny(gameDoc: GameDocument) {
+    setupDestinyDeck(gameDoc.gameState);
+    gameDoc.gameState.state = GameState.SetupInitialShips;
+}
+
+function handleSetupInitialShips(gameDoc: GameDocument) {
+    setupInitialShips(gameDoc.gameState)
+    gameDoc.gameState.state = GameState.ReceiveSkills;
+}
+
+function handleReceiveSkills(gameDoc: GameDocument) {
+    gameDoc.gameState.inputRequest = {
+        userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
+        inputId: InputId.ReceiveSkills,
+    }
 }
 
 function validateSkills(character: CharacterId, skills: SkillType[]): boolean {
     const c = getCharacter(character);
     return skills.every(s => c.cardsDue.map(d => d.skills)
-                                       .some((ds: SkillType[]) => ds.indexOf(s) !== -1))
+                                       .some((ds: SkillType[]) => ds.indexOf(s) !== -1));
+}
+
+// pick 3 skill types from characters skill set
+function botInitialSkills(character: CharacterId): SkillType[] {
+    const c = getCharacter(character);
+    const skill = c.cardsDue[0].skills[0];
+    return [skill, skill, skill];
+}
+
+function getCurrentPlayer(gameDoc: GameDocument): FullPlayer {
+    return gameDoc.players[gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer]];
+}
+
+function isLastPlayer(gameDoc: GameDocument): boolean {
+    return gameDoc.gameState.currentPlayer === (gameDoc.gameState.userIds.length - 1);
+}
+
+function nextPlayerInSetup(gameDoc: GameDocument, stateIfDone: GameState) {
+    if (isLastPlayer(gameDoc)) {
+        gameDoc.gameState.currentPlayer = 0;
+        gameDoc.gameState.state = stateIfDone;
+    } else {
+        gameDoc.gameState.currentPlayer++;
+    }
 }

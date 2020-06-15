@@ -1,4 +1,4 @@
-import { InputId, InputRequest } from "./inputs";
+import { InputRequest } from "./inputs";
 
 export enum CharacterId {
     LeeAdama, GaiusBaltar, GalenTyrol, SaulTigh,
@@ -386,6 +386,7 @@ export enum CrisisCardId {
     ForcedWaterMining,
     TerroristBomber,
     CylonAccusation,
+    InformingThePublic,
 
     // super crisis skill check
     InboundNukes,
@@ -454,15 +455,14 @@ export interface PlayerData {
 }
 
 export enum GameState {
-    SetupCharacterSelection,
-    SetupSelectInitialLocation,
-    SetupInitialSkillSelection,
+    CharacterSelection,
+    CharacterSetup,
+    SetupCards,
+    InitialSkillSelection,
+    SetupDestiny,
+    SetupInitialShips,
     ReceiveSkills,
-    Movement,
-    Action,
-    Crisis,
-    HumansWin,
-    CylonsWin
+    Movement
 }
 
 export interface ViewableGameData {

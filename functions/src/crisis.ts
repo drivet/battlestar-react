@@ -27,8 +27,17 @@ export function createCrisisDeck(): CrisisCardId[] {
 
         // events
         CrisisCardId.RescueMission,
+        CrisisCardId.RescueMission,
+        CrisisCardId.Riots,
         CrisisCardId.Riots,
         CrisisCardId.FoodShortage,
+        CrisisCardId.FoodShortage,
+        CrisisCardId.FoodShortage,
+        CrisisCardId.FoodShortage,
+        CrisisCardId.WaterShortage,
+        CrisisCardId.WaterShortage,
+        CrisisCardId.WaterShortage,
+        CrisisCardId.WaterShortage,
         CrisisCardId.WaterShortage,
         CrisisCardId.RescueTheFleet,
         CrisisCardId.RescueCapricaSurvivors,
@@ -78,5 +87,6 @@ export function createCrisisDeck(): CrisisCardId[] {
         CrisisCardId.ForcedWaterMining,
         CrisisCardId.TerroristBomber,
         CrisisCardId.CylonAccusation,
+        CrisisCardId.InformingThePublic
     ]);
 }

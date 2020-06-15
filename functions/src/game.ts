@@ -3,11 +3,12 @@ import { createQuorumDeck } from "./quorum";
 import {
     ActiveBasestar,
     BasestarDamage,
-    CharacterId, Characters,
+    CharacterId,
     CivilianShip,
     CrisisCardId,
     DestinationCardId,
     GalacticaDamage,
+    GameState,
     LocationCounts,
     LocationId,
     LocationIdKeys,
@@ -16,7 +17,6 @@ import {
     SkillCard,
     SkillType,
     SkillTypeKeys,
-    GameState,
     ViewableGameData
 } from "../../src/models/game-data";
 import { createSkillDecks, SkillDecks } from "./skills";
@@ -25,12 +25,12 @@ import { loyaltyDeck } from "./loyalty";
 import { createCrisisDeck, createSuperCrisisDeck } from "./crisis";
 import { createDestinationDeck } from "./destination";
 import { convertToViewable } from "./viewable";
-import { InputId, InputRequest, InputResponse } from "../../src/models/inputs";
-import { makeInputRequest } from "./inputs";
+import { CharacterSelectionRequest, InputId, InputRequest, InputResponse } from "../../src/models/inputs";
 import { CharacterPool, initCharacterPool } from "./character";
 
 export interface FullPlayer {
     userId: string;
+    bot: boolean;
     characterId?: CharacterId;
     admiral?: boolean;
     president?: boolean;
@@ -98,9 +98,10 @@ export interface GameDocument {
     responses: { [key: string]: InputResponse }
 }
 
-function makeFullPlayer (userId: string): FullPlayer {
+function makeFullPlayer (userId: string, bot: boolean): FullPlayer {
     return {
         userId: userId,
+        bot: bot,
         characterId: null,
         admiral: false,
         president: false,
@@ -140,7 +141,7 @@ function createBasestarDamageTokens(): BasestarDamage[] {
 
 function makeFullPlayers(userIds: string[]): { [key: string]: FullPlayer } {
     const result = {};
-    userIds.forEach(u => result[u] = makeFullPlayer(u));
+    userIds.forEach((u, i) => result[u] = makeFullPlayer(u, i !==0 ));
     return result;
 }
 
@@ -158,10 +159,15 @@ export function newGame(gameId: string, userIds: string[]): GameDocument {
 }
 
 function newGameState(userIds: string[]): FullGameData {
+    const characterPool = initCharacterPool();
     return {
-        inputRequest: makeInputRequest(userIds[0], InputId.SelectCharacter),
-        characterPool: initCharacterPool(),
-        state: GameState.SetupCharacterSelection,
+        inputRequest: {
+            userId: userIds[0],
+            inputId: InputId.SelectCharacter,
+            characterPool: characterPool
+        } as CharacterSelectionRequest,
+        characterPool: characterPool,
+        state: GameState.CharacterSelection,
         userIds: userIds,
         currentPlayer: 0,
         food: 8,
@@ -200,7 +206,7 @@ export function setupDecks(game: FullGameData) {
     game.skillDecks = createSkillDecks();
 }
 
-function setupDestinyDeck(game: FullGameData) {
+export function setupDestinyDeck(game: FullGameData) {
     const destiny: SkillCard[] = [];
     addCards(destiny, deal(skillDeck(game, SkillType.Tactics), 2));
     addCards(destiny, deal(skillDeck(game, SkillType.Engineering), 2));
@@ -225,7 +231,7 @@ export function setupLoyalty(gameDoc: GameDocument) {
     gameDoc.gameState.loyaltyDeck = loyalties.remaining;
 }
 
-function setupInitialShips(game: FullGameData) {
+export function setupInitialShips(game: FullGameData) {
     game.activeBasestars = [createActiveBasestar(LocationId.Front)];
     placeVipers(game, LocationId.FrontBelow, 1);
     placeVipers(game, LocationId.BackBelow, 1);
@@ -234,6 +240,7 @@ function setupInitialShips(game: FullGameData) {
 }
 
 function placeVipers(game: FullGameData, location: LocationId, count: number) {
+    game.activeVipers = game.activeVipers ? game.activeVipers : {};
     for (let i = 0; i < count; i++) {
         if (game.vipers === 0) {
             return;
@@ -249,6 +256,7 @@ function placeVipers(game: FullGameData, location: LocationId, count: number) {
 }
 
 function placeRaiders(game: FullGameData, location: LocationId, count: number) {
+    game.activeRaiders = game.activeRaiders ? game.activeRaiders : {};
     for (let i = 0; i < count; i++) {
         if (game.raiders === 0) {
             return;
@@ -265,6 +273,7 @@ function placeRaiders(game: FullGameData, location: LocationId, count: number) {
 
 
 function placeHeavyRaiders(game: FullGameData, location: LocationId, count: number) {
+    game.activeHeavyRaiders = game.activeHeavyRaiders ? game.activeHeavyRaiders : {};
     for (let i = 0; i < count; i++) {
         if (game.heavyRaiders === 0) {
             return;
@@ -280,6 +289,7 @@ function placeHeavyRaiders(game: FullGameData, location: LocationId, count: numb
 }
 
 function placeCivilians(game: FullGameData, location: LocationId, count: number) {
+    game.activeCivilians = game.activeCivilians ? game.activeCivilians : {};
     for (let i = 0; i < count; i++) {
         if (game.civilianShips.length === 0) {
             return;
