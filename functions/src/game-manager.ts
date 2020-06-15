@@ -120,14 +120,18 @@ function handleStandardCharacterSetup(gameDoc: GameDocument, player: FullPlayer)
 }
 
 function setupDecksAndTitles(gameDoc: GameDocument) {
-    Object.values(gameDoc.players).forEach(p => p.loyaltyCards = p.loyaltyCards ? p.loyaltyCards : []);
-    gameDoc.gameState.quorumHand = gameDoc.gameState.quorumHand ? gameDoc.gameState.quorumHand : [];
+    const players = Object.values(gameDoc.players)
+    players.forEach(p => p.loyaltyCards = p.loyaltyCards ? p.loyaltyCards : []);
     gameDoc.gameState.quorumDeck = gameDoc.gameState.quorumDeck ? gameDoc.gameState.quorumDeck : [];
 
-    distributeTitles(Object.values(gameDoc.players));
+    distributeTitles(players);
     setupLoyalty(gameDoc);
     setupDecks(gameDoc.gameState);
-    addCards(gameDoc.gameState.quorumHand, deal(gameDoc.gameState.quorumDeck, 2));
+
+    const president = players.find(p => p.president);
+    president.quorumHand = president.quorumHand ? president.quorumHand : [];
+    addCards(president.quorumHand, deal(gameDoc.gameState.quorumDeck, 2));
+
     gameDoc.gameState.state = GameState.InitialSkillSelection;
     // first player (player 0) doesn't get skill cards to start with
     gameDoc.gameState.currentPlayer = 1;

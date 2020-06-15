@@ -37,6 +37,7 @@ export interface FullPlayer {
     location?: LocationId;
     loyaltyCards?: LoyaltyCardId[];
     skillCards?: SkillCard[];
+    quorumHand?: QuorumCardId[];
 }
 
 export interface FullGameData {
@@ -80,7 +81,6 @@ export interface FullGameData {
 
     boardedCenturions?: number[];
 
-    quorumHand?: QuorumCardId[];
     quorumDeck?: QuorumCardId[];
     destinationDeck?: DestinationCardId[];
     skillDecks?: SkillDecks;
