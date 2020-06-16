@@ -1,12 +1,8 @@
-import { Character, CharacterId, Characters, CharacterType } from "../../src/models/game-data";
+import { CharacterId, CharacterType, getCharacter } from "../../src/models/game-data";
 
 export interface CharacterPool {
     selectable: CharacterId[];
     unselectable: CharacterId[];
-}
-
-export function getCharacter(characterId: CharacterId): Character {
-    return Characters[CharacterId[characterId]];
 }
 
 export function initCharacterPool(): CharacterPool {

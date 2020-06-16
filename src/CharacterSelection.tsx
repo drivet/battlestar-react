@@ -32,7 +32,6 @@ function charImgElement(character: CharacterId) {
 }
 
 interface CharacterSelectionProps {
-    show: boolean,
     gameId: string,
     request: CharacterSelectionRequest,
 }
@@ -68,7 +67,7 @@ export class CharacterSelection extends React.Component<CharacterSelectionProps,
         this.state = {
             selectableCharacters: props.request.characterPool.selectable,
             displayedCharacter: 0,
-            open: props.show
+            open: true
         };
     }
 

@@ -1,4 +1,4 @@
-import { CharacterId, GameState, LocationId, SkillType } from "../../src/models/game-data";
+import { CharacterId, GameState, getCharacter, LocationId, SkillType } from "../../src/models/game-data";
 import {
     distributeTitles,
     FullPlayer,
@@ -16,7 +16,7 @@ import {
     InputResponse,
     ReceiveInitialSkillsInput
 } from "../../src/models/inputs";
-import { getCharacter, selectCharacter } from "./character";
+import { selectCharacter } from "./character";
 import { addCard, addCards, deal, dealOne } from "./deck";
 
 /**
@@ -133,15 +133,14 @@ function setupDecksAndTitles(gameDoc: GameDocument) {
     addCards(president.quorumHand, deal(gameDoc.gameState.quorumDeck, 2));
 
     gameDoc.gameState.state = GameState.InitialSkillSelection;
-    // first player (player 0) doesn't get skill cards to start with
+
+    // first player doesn't get initial skills
     gameDoc.gameState.currentPlayer = 1;
 }
 
 function handleReceiveInitialSkills(gameDoc: GameDocument, possibleInput: ReceiveInitialSkillsInput) {
     Object.values(gameDoc.players).forEach(p => p.skillCards = p.skillCards ? p.skillCards : []);
-
     const currentPlayer = getCurrentPlayer(gameDoc);
-
     const input = !possibleInput && currentPlayer.bot ? {
         userId: currentPlayer.userId,
         inputId: InputId.ReceiveInitialSkills,

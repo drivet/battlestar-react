@@ -516,3 +516,7 @@ export interface ViewableGameData {
     superCrisisDeck: number;
     loyaltyDeck: number;
 }
+
+export function getCharacter(characterId: CharacterId): Character {
+    return Characters[CharacterId[characterId]];
+}

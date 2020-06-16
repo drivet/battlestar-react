@@ -1,12 +1,13 @@
 import React from 'react';
 import './Game.css';
 import { Board } from "./Board";
-import { PlayerData, ViewableGameData } from "./models/game-data";
+import { getCharacter, PlayerData, SkillType, ViewableGameData } from "./models/game-data";
 import firebase from "./firebase";
 import { CharacterSelection } from "./CharacterSelection";
 import { CharacterSelectionRequest, InputId } from "./models/inputs";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
+import { SkillSelection } from "./SkillSelection";
 
 interface GameState {
     game: ViewableGameData;
@@ -64,15 +65,28 @@ export class GameComponent extends React.Component<any, GameState> {
                     <div>Raiders: {this.state.game.raiders}</div>
                     <div>Heavy Raiders: {this.state.game.heavyRaiders}</div>
                 </div>
-                <CharacterSelection show={this.shouldShowCharacterSelection()}
-                                    request={ this.request() as CharacterSelectionRequest }
-                                    gameId={this.gameId()}>
-                </CharacterSelection>
+                {this.shouldShowCharacterSelection() ? this.characterSelection() : null}
+                {this.shouldShowSkillSelection() ? this.skillSelection() : null}
             </div>
         );
     }
 
-    private shouldShowCharacterSelection() {
+    private characterSelection() {
+        return (
+            <CharacterSelection request={this.request() as CharacterSelectionRequest}
+                                gameId={this.gameId()}/>
+        );
+    }
+
+    private skillSelection() {
+        return (
+            <SkillSelection availableSkills={this.getAvailableSkills()}
+                            gameId={this.gameId()}
+                            count={3}/>
+        );
+    }
+
+    private shouldShowCharacterSelection(): boolean {
         const g = this.state.game;
         return g && g.inputRequest.userId === g.players[0].userId &&
             g.inputRequest.inputId === InputId.SelectCharacter;
@@ -91,5 +105,25 @@ export class GameComponent extends React.Component<any, GameState> {
                 </div>
             </div>
         );
+    }
+
+    private shouldShowSkillSelection(): boolean {
+        if (!this.state.player) {
+            return false;
+        }
+        const g = this.state.game;
+        const r = g && g.inputRequest.userId === g.players[0].userId &&
+            g.inputRequest.inputId === InputId.ReceiveInitialSkills;
+        return r;
+    }
+
+    private getAvailableSkills(): SkillType[] {
+        if (!this.shouldShowSkillSelection()) {
+            return [];
+        }
+        const character = getCharacter(this.state.player.characterId);
+        const skills = [];
+        character.cardsDue.forEach(d => skills.push(...d.skills));
+        return skills;
     }
 }

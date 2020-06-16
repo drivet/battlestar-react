@@ -1,6 +1,12 @@
 import { shuffle } from "./deck";
-import { CharacterId, SkillCard, SkillCardType, SkillType, SkillTypeKeys } from "../../src/models/game-data";
-import { getCharacter } from "./character";
+import {
+    CharacterId,
+    getCharacter,
+    SkillCard,
+    SkillCardType,
+    SkillType,
+    SkillTypeKeys
+} from "../../src/models/game-data";
 
 function skillCard(skillType: SkillType, card: SkillCardType, strength: number): SkillCard {
     return {
