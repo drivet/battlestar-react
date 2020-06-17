@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { FullGameData, GameDocument, newGame } from "./game";
+import { GameDocument, newGame } from "./game";
 import { runGame } from "./game-manager";
 import { convertToViewable } from "./viewable";
 import { InputResponse } from "../../src/models/inputs";
@@ -11,6 +11,12 @@ export interface StartGameParams {
     users: string[];
     tableId: string;
 }
+
+export const processTableDelete = functions.database.ref('/tables/{tableId}')
+    .onDelete((snapshot, context) => {
+        const table = snapshot.val();
+        return admin.database().ref('/games/' + table.gameId).set(null);
+    });
 
 export const startGame = functions.https.onCall((params: StartGameParams, context) => {
     const gameRef = admin.database().ref('games').push();

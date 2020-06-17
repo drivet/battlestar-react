@@ -35,7 +35,7 @@ export class TableComponent extends React.Component<any, TableState> {
             if (!this.state.table.gameId) {
                 return (
                     <div>
-                        {this.state.table.users.map(u => (<div>{u}</div>))}
+                        {this.state.table.users.map(u => (<div key={u}>{u}</div>))}
                         <button onClick={e => this.handleStart(e)}>Start</button>
                     </div>
                 );
