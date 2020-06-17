@@ -30,7 +30,7 @@ function jumpPositionImage(position: number): any {
 
 export class Board extends React.Component<IBoardProps> {
     render() {
-        const jumpImage = jumpPositionImage(4);
+        const jumpImage = jumpPositionImage(this.props.game.jumpPosition);
         return (
             <svg className={"board"} viewBox={"0 0 1440 1080"}>
                 <image href={board} x={"0"} y={"0"} width={"100%"} height={"100%"}/>
