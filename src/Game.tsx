@@ -66,6 +66,7 @@ export class GameComponent extends React.Component<any, GameState> {
                     <div>Heavy Raiders: {this.state.game.heavyRaiders}</div>
                 </div>
                 {this.shouldShowCharacterSelection() ? this.characterSelection() : null}
+                {this.shouldShowInitialSkillSelection() ? this.initialSkillSelection() : null}
                 {this.shouldShowSkillSelection() ? this.skillSelection() : null}
             </div>
         );
@@ -78,11 +79,22 @@ export class GameComponent extends React.Component<any, GameState> {
         );
     }
 
-    private skillSelection() {
+    private initialSkillSelection() {
         return (
-            <SkillSelection availableSkills={this.getAvailableSkills()}
+            <SkillSelection availableSkills={this.getAvailableInitialSkills()}
                             gameId={this.gameId()}
-                            count={3}/>
+                            count={3} initial={true}/>
+        );
+    }
+
+    private skillSelection() {
+        const multiSkills = this.getMultiSkills();
+        const count = multiSkills[0];
+        const skills = multiSkills[1];
+        return (
+            <SkillSelection availableSkills={skills}
+                            gameId={this.gameId()}
+                            count={count} initial={false}/>
         );
     }
 
@@ -107,7 +119,7 @@ export class GameComponent extends React.Component<any, GameState> {
         );
     }
 
-    private shouldShowSkillSelection(): boolean {
+    private shouldShowInitialSkillSelection(): boolean {
         if (!this.state.player) {
             return false;
         }
@@ -117,13 +129,39 @@ export class GameComponent extends React.Component<any, GameState> {
         return r;
     }
 
-    private getAvailableSkills(): SkillType[] {
-        if (!this.shouldShowSkillSelection()) {
+    private shouldShowSkillSelection(): boolean {
+        if (!this.state.player) {
+            return false;
+        }
+        const g = this.state.game;
+        const r = g && g.inputRequest.userId === g.players[0].userId &&
+            g.inputRequest.inputId === InputId.ReceiveSkills;
+        return r;
+    }
+
+    private getAvailableInitialSkills(): SkillType[] {
+        if (!this.shouldShowInitialSkillSelection()) {
             return [];
         }
         const character = getCharacter(this.state.player.characterId);
         const skills = [];
         character.cardsDue.forEach(d => skills.push(...d.skills));
         return skills;
+    }
+
+    private getMultiSkills(): [number, SkillType[]] {
+        if (!this.shouldShowSkillSelection()) {
+            return [0, []];
+        }
+        const character = getCharacter(this.state.player.characterId);
+        const skills = [];
+        let count = 0;
+        character.cardsDue
+            .filter(d => d.skills.length > 1)
+            .forEach(d => {
+                count += d.count;
+                skills.push(...d.skills);
+            });
+        return [count, skills];
     }
 }

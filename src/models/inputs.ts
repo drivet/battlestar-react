@@ -5,7 +5,8 @@ export enum InputId {
     SelectCharacter,
     SelectInitialLocation,
     ReceiveInitialSkills,
-    ReceiveSkills
+    ReceiveSkills,
+    Movement
 }
 
 export interface InputRequest {
@@ -39,3 +40,9 @@ export interface ReceiveInitialSkillsResponse extends InputResponse {
 }
 
 export interface ReceiveInitialSkillsInput extends InputRequest, ReceiveInitialSkillsResponse {}
+
+export interface ReceiveSkillsResponse extends InputResponse {
+    skills: SkillType[];
+}
+
+export interface ReceiveSkillsInput extends InputRequest, ReceiveInitialSkillsResponse {}

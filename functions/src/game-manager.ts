@@ -14,7 +14,8 @@ import {
     InitialLocationInput,
     InputId,
     InputResponse,
-    ReceiveInitialSkillsInput
+    ReceiveInitialSkillsInput,
+    ReceiveSkillsInput
 } from "../../src/models/inputs";
 import { selectCharacter } from "./character";
 import { addCard, addCards, deal, dealOne } from "./deck";
@@ -54,7 +55,9 @@ export function runGame(gameDoc: GameDocument, response: InputResponse) {
         } else if (gameDoc.gameState.state === GameState.SetupInitialShips) {
             handleSetupInitialShips(gameDoc);
         } else if (gameDoc.gameState.state === GameState.ReceiveSkills) {
-            handleReceiveSkills(gameDoc);
+            handleReceiveSkills(gameDoc, data as ReceiveSkillsInput);
+        } else if (gameDoc.gameState.state === GameState.Movement) {
+            handleMovement(gameDoc);
         }
 
         // we assume the data was used up in one iteration
@@ -74,7 +77,7 @@ function handleCharacterSelection(gameDoc: GameDocument, possibleInput: Characte
     if (input) {
         currentPlayer.characterId = input.selectedCharacter;
         gameDoc.gameState.characterPool = selectCharacter(input.characterPool, input.selectedCharacter);
-        nextPlayerInSetup(gameDoc, GameState.CharacterSetup)
+        nextPlayerAndChangeState(gameDoc, GameState.CharacterSetup)
     } else {
         gameDoc.gameState.inputRequest = {
             userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
@@ -102,7 +105,7 @@ function handleApolloSetup(gameDoc: GameDocument, player: FullPlayer, possibleIn
 
     if (input) {
         player.location = input.left ? LocationId.FrontBelow : LocationId.BackBelow;
-        nextPlayerInSetup(gameDoc, GameState.SetupCards)
+        nextPlayerAndChangeState(gameDoc, GameState.SetupCards)
     } else {
         gameDoc.gameState.inputRequest = {
             userId: player.userId,
@@ -116,7 +119,7 @@ function handleStandardCharacterSetup(gameDoc: GameDocument, player: FullPlayer)
     if (character.startLocation !== null && character.startLocation !== undefined) {
         player.location = getCharacter(player.characterId).startLocation;
     }
-    nextPlayerInSetup(gameDoc, GameState.SetupCards)
+    nextPlayerAndChangeState(gameDoc, GameState.SetupCards)
 }
 
 function setupDecksAndTitles(gameDoc: GameDocument) {
@@ -151,7 +154,7 @@ function handleReceiveInitialSkills(gameDoc: GameDocument, possibleInput: Receiv
         validateSkills(currentPlayer.characterId, input.skills);
         input.skills.forEach(s => addCard(currentPlayer.skillCards,
             dealOne(gameDoc.gameState.skillDecks[SkillType[s]])));
-        nextPlayerInSetup(gameDoc, GameState.SetupDestiny);
+        nextPlayerAndChangeState(gameDoc, GameState.SetupDestiny);
     } else {
         gameDoc.gameState.inputRequest = {
             userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
@@ -170,11 +173,63 @@ function handleSetupInitialShips(gameDoc: GameDocument) {
     gameDoc.gameState.state = GameState.ReceiveSkills;
 }
 
-function handleReceiveSkills(gameDoc: GameDocument) {
+function handleReceiveSkills(gameDoc: GameDocument, input?: ReceiveSkillsInput) {
+    const currentPlayer = getCurrentPlayer(gameDoc);
+    if (hasMultiSkills(currentPlayer.characterId)) {
+        handleReceiveMultiSkills(gameDoc, input);
+    } else {
+        handleReceiveStandardSkills(gameDoc);
+    }
+}
+
+function handleReceiveMultiSkills(gameDoc: GameDocument, possibleInput: ReceiveSkillsInput) {
+    Object.values(gameDoc.players).forEach(p => p.skillCards = p.skillCards ? p.skillCards : []);
+    const currentPlayer = getCurrentPlayer(gameDoc);
+    const input: ReceiveSkillsInput = !possibleInput && currentPlayer.bot ? {
+        userId: currentPlayer.userId,
+        inputId: InputId.ReceiveSkills,
+        skills: botSkills(currentPlayer.characterId)
+    } : possibleInput;
+
+    if (input) {
+        // validateSkills(currentPlayer.characterId, input.skills);
+
+        // hand out the multi skills
+        input.skills.forEach(s => addCard(currentPlayer.skillCards,
+            dealOne(gameDoc.gameState.skillDecks[SkillType[s]])));
+
+        // hand out the standard skills
+        handleReceiveStandardSkills(gameDoc);
+
+    } else {
+        gameDoc.gameState.inputRequest = {
+            userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
+            inputId: InputId.ReceiveSkills,
+        }
+    }
+}
+
+function handleReceiveStandardSkills(gameDoc: GameDocument) {
+    Object.values(gameDoc.players).forEach(p => p.skillCards = p.skillCards ? p.skillCards : []);
+    const currentPlayer = getCurrentPlayer(gameDoc);
+    const c = getCharacter(currentPlayer.characterId);
+    c.cardsDue.filter(cd => cd.skills.length === 1).forEach(cd => {
+        const skill = cd.skills[0];
+        const count = cd.count;
+        addCards(currentPlayer.skillCards, deal(gameDoc.gameState.skillDecks[SkillType[skill]], count));
+    });
+    gameDoc.gameState.state = GameState.Movement;
+}
+
+function handleMovement(gameDoc: GameDocument) {
     gameDoc.gameState.inputRequest = {
         userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
-        inputId: InputId.ReceiveSkills,
+        inputId: InputId.Movement,
     }
+}
+
+function hasMultiSkills(character: CharacterId): boolean {
+    return getCharacter(character).cardsDue.some(cd => cd.skills.length > 1);
 }
 
 function validateSkills(character: CharacterId, skills: SkillType[]): boolean {
@@ -183,7 +238,19 @@ function validateSkills(character: CharacterId, skills: SkillType[]): boolean {
                                        .some((ds: SkillType[]) => ds.indexOf(s) !== -1));
 }
 
-// pick 3 skill types from characters skill set
+function botSkills(character: CharacterId): SkillType[] {
+    const c = getCharacter(character);
+    const skills: SkillType[] = [];
+    c.cardsDue.forEach(cd => {
+        if (cd.skills.length > 1) {
+            for (let i = 0; i < cd.count; i++) {
+                skills.push(cd.skills[0]);
+            }
+        }
+    });
+    return skills;
+}
+
 function botInitialSkills(character: CharacterId): SkillType[] {
     const c = getCharacter(character);
     const skill = c.cardsDue[0].skills[0];
@@ -198,7 +265,7 @@ function isLastPlayer(gameDoc: GameDocument): boolean {
     return gameDoc.gameState.currentPlayer === (gameDoc.gameState.userIds.length - 1);
 }
 
-function nextPlayerInSetup(gameDoc: GameDocument, stateIfDone: GameState) {
+function nextPlayerAndChangeState(gameDoc: GameDocument, stateIfDone: GameState) {
     if (isLastPlayer(gameDoc)) {
         gameDoc.gameState.currentPlayer = 0;
         gameDoc.gameState.state = stateIfDone;

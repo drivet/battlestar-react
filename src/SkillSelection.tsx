@@ -15,6 +15,9 @@ interface SkillSelectionProps {
     availableSkills: SkillType[];
     count: number;
     gameId: string;
+
+    // TODO find better way
+    initial: boolean;
 }
 
 interface SkillSelectionState {
@@ -45,10 +48,10 @@ function skillImgElement(skillType: SkillType) {
     return (<img className={'skillImg'} src={skillImages[skillType]} alt={'skill type'}/>);
 }
 
-function makeResponse(selectedSkills: SkillType[]): ReceiveInitialSkillsResponse {
+function makeResponse(initial: boolean, selectedSkills: SkillType[]): ReceiveInitialSkillsResponse {
     return {
         userId: myUserId,
-        inputId: InputId.ReceiveInitialSkills,
+        inputId: initial ? InputId.ReceiveInitialSkills: InputId.ReceiveSkills,
         skills: selectedSkills,
     }
 }
@@ -77,7 +80,7 @@ export class SkillSelection extends React.Component<SkillSelectionProps, SkillSe
                 </div>
                 <div>
                     <button onClick={e => this.handleDone(e)}
-                            disabled={this.state.selectedSkills.length < 3}>
+                            disabled={this.state.selectedSkills.length < this.props.count}>
                         Done
                     </button>
                 </div>
@@ -93,7 +96,7 @@ export class SkillSelection extends React.Component<SkillSelectionProps, SkillSe
 
     private handleDone(e) {
         firebase.database().ref('/games/' + this.props.gameId + '/responses')
-            .push(makeResponse(this.state.selectedSkills));
+            .push(makeResponse(this.props.initial, this.state.selectedSkills));
         this.setState({
             open: false
         });
@@ -133,6 +136,7 @@ export class SkillSelection extends React.Component<SkillSelectionProps, SkillSe
 
     private skillClick(skill: SkillType) {
         if (this.state.selectedSkills.length === this.props.count) {
+            console.log('reached ' + this.props.count);
             return;
         }
         this.setState({
