@@ -20,6 +20,22 @@ import {
 import { selectCharacter } from "./character";
 import { addCard, addCards, deal, dealOne } from "./deck";
 
+
+/**
+ * It appears that Firebase doesn't preserve empty arrays when doing a read.  But the objects are
+ * easier to use f we have them so fill those out those sharp edges here.
+ */
+export function sandGameDoc(gameDoc: GameDocument) {
+    gameDoc.gameState.quorumDeck = gameDoc.gameState.quorumDeck ? gameDoc.gameState.quorumDeck : [];
+
+    const players = Object.values(gameDoc.players)
+    players.forEach(p => {
+        p.loyaltyCards = p.loyaltyCards ? p.loyaltyCards : [];
+        p.quorumHand = p.quorumHand ? p.quorumHand : [];
+        p.skillCards = p.skillCards ? p.skillCards : [];
+    });
+}
+
 /**
  * This is always called because someone has given an input which in theory should allow us to continue the game
  */
@@ -124,15 +140,12 @@ function handleStandardCharacterSetup(gameDoc: GameDocument, player: FullPlayer)
 
 function setupDecksAndTitles(gameDoc: GameDocument) {
     const players = Object.values(gameDoc.players)
-    players.forEach(p => p.loyaltyCards = p.loyaltyCards ? p.loyaltyCards : []);
-    gameDoc.gameState.quorumDeck = gameDoc.gameState.quorumDeck ? gameDoc.gameState.quorumDeck : [];
 
     distributeTitles(players);
     setupLoyalty(gameDoc);
     setupDecks(gameDoc.gameState);
 
     const president = players.find(p => p.president);
-    president.quorumHand = president.quorumHand ? president.quorumHand : [];
     addCards(president.quorumHand, deal(gameDoc.gameState.quorumDeck, 2));
 
     gameDoc.gameState.state = GameState.InitialSkillSelection;
@@ -142,7 +155,6 @@ function setupDecksAndTitles(gameDoc: GameDocument) {
 }
 
 function handleReceiveInitialSkills(gameDoc: GameDocument, possibleInput: ReceiveInitialSkillsInput) {
-    Object.values(gameDoc.players).forEach(p => p.skillCards = p.skillCards ? p.skillCards : []);
     const currentPlayer = getCurrentPlayer(gameDoc);
     const input = !possibleInput && currentPlayer.bot ? {
         userId: currentPlayer.userId,
@@ -183,7 +195,6 @@ function handleReceiveSkills(gameDoc: GameDocument, input?: ReceiveSkillsInput) 
 }
 
 function handleReceiveMultiSkills(gameDoc: GameDocument, possibleInput: ReceiveSkillsInput) {
-    Object.values(gameDoc.players).forEach(p => p.skillCards = p.skillCards ? p.skillCards : []);
     const currentPlayer = getCurrentPlayer(gameDoc);
     const input: ReceiveSkillsInput = !possibleInput && currentPlayer.bot ? {
         userId: currentPlayer.userId,
@@ -210,7 +221,6 @@ function handleReceiveMultiSkills(gameDoc: GameDocument, possibleInput: ReceiveS
 }
 
 function handleReceiveStandardSkills(gameDoc: GameDocument) {
-    Object.values(gameDoc.players).forEach(p => p.skillCards = p.skillCards ? p.skillCards : []);
     const currentPlayer = getCurrentPlayer(gameDoc);
     const c = getCharacter(currentPlayer.characterId);
     c.cardsDue.filter(cd => cd.skills.length === 1).forEach(cd => {

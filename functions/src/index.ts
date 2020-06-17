@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { GameDocument, newGame } from "./game";
-import { runGame } from "./game-manager";
+import { runGame, sandGameDoc } from "./game-manager";
 import { convertToViewable } from "./viewable";
 import { InputResponse } from "../../src/models/inputs";
 
@@ -39,6 +39,7 @@ export const processResponse = functions.database.ref('/games/{gameId}/responses
         const gameDocRef = admin.database().ref('/games/' + gameId);
         return gameDocRef.once('value').then(snapshot => {
             const gameDoc: GameDocument = snapshot.val();
+            sandGameDoc(gameDoc);
 
             // consume the response.  Only need one at a time
             gameDoc.responses = null;
