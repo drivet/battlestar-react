@@ -7,17 +7,11 @@ import tactics from './images/tactics.png';
 import piloting from './images/piloting.png';
 import engineering from './images/engineering.png';
 import leadership from './images/leadership.png';
-import firebase from "./firebase";
-import { InputId, ReceiveInitialSkillsResponse } from "./models/inputs";
-import { myUserId } from "./App";
 
 interface SkillSelectionProps {
     availableSkills: SkillType[];
     count: number;
-    gameId: string;
-
-    // TODO find better way
-    initial: boolean;
+    doneCb: (skills: SkillType[]) => void;
 }
 
 interface SkillSelectionState {
@@ -46,14 +40,6 @@ const skillImages = {
 
 function skillImgElement(skillType: SkillType) {
     return (<img className={'skillImg'} src={skillImages[skillType]} alt={'skill type'}/>);
-}
-
-function makeResponse(initial: boolean, selectedSkills: SkillType[]): ReceiveInitialSkillsResponse {
-    return {
-        userId: myUserId,
-        inputId: initial ? InputId.ReceiveInitialSkills: InputId.ReceiveSkills,
-        skills: selectedSkills,
-    }
 }
 
 export class SkillSelection extends React.Component<SkillSelectionProps, SkillSelectionState> {
@@ -95,8 +81,7 @@ export class SkillSelection extends React.Component<SkillSelectionProps, SkillSe
     }
 
     private handleDone(e) {
-        firebase.database().ref('/games/' + this.props.gameId + '/responses')
-            .push(makeResponse(this.props.initial, this.state.selectedSkills));
+        this.props.doneCb(this.state.selectedSkills);
         this.setState({
             open: false
         });
@@ -136,7 +121,6 @@ export class SkillSelection extends React.Component<SkillSelectionProps, SkillSe
 
     private skillClick(skill: SkillType) {
         if (this.state.selectedSkills.length === this.props.count) {
-            console.log('reached ' + this.props.count);
             return;
         }
         this.setState({

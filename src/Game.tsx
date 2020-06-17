@@ -4,7 +4,12 @@ import { Board } from "./Board";
 import { getCharacter, PlayerData, SkillType, ViewableGameData } from "./models/game-data";
 import firebase from "./firebase";
 import { CharacterSelection } from "./CharacterSelection";
-import { CharacterSelectionRequest, InputId } from "./models/inputs";
+import {
+    CharacterSelectionRequest,
+    InputId,
+    ReceiveInitialSkillsResponse,
+    ReceiveSkillsResponse
+} from "./models/inputs";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { SkillSelection } from "./SkillSelection";
@@ -12,6 +17,14 @@ import { SkillSelection } from "./SkillSelection";
 interface GameState {
     game: ViewableGameData;
     player: FullPlayer;
+}
+
+function makeResponse(input: InputId, selectedSkills: SkillType[]): ReceiveInitialSkillsResponse | ReceiveSkillsResponse {
+    return {
+        userId: myUserId,
+        inputId: input,
+        skills: selectedSkills,
+    }
 }
 
 export class GameComponent extends React.Component<any, GameState> {
@@ -82,8 +95,8 @@ export class GameComponent extends React.Component<any, GameState> {
     private initialSkillSelection() {
         return (
             <SkillSelection availableSkills={this.getAvailableInitialSkills()}
-                            gameId={this.gameId()}
-                            count={3} initial={true}/>
+                            count={3}
+                            doneCb={skills => this.handleInitialSkillSelection(skills)}/>
         );
     }
 
@@ -93,9 +106,19 @@ export class GameComponent extends React.Component<any, GameState> {
         const skills = multiSkills[1];
         return (
             <SkillSelection availableSkills={skills}
-                            gameId={this.gameId()}
-                            count={count} initial={false}/>
+                            count={count}
+                            doneCb={skills => this.handleSkillSelection(skills)}/>
         );
+    }
+
+    private handleInitialSkillSelection(selectedSkills: SkillType[]) {
+        firebase.database().ref('/games/' + this.gameId() + '/responses')
+            .push(makeResponse(InputId.ReceiveInitialSkills, selectedSkills));
+    }
+
+    private handleSkillSelection(selectedSkills: SkillType[]) {
+        firebase.database().ref('/games/' + this.gameId() + '/responses')
+            .push(makeResponse(InputId.ReceiveSkills, selectedSkills));
     }
 
     private shouldShowCharacterSelection(): boolean {
