@@ -77,11 +77,7 @@ export function CharacterSelection(props: InputDialogsProps) {
         );
     }
 
-    return (
-        <div>
-            {shouldShowCharacterSelection() ? characterSelection() : null}
-        </div>
-    );
+    return (<div>{shouldShowCharacterSelection() ? characterSelection() : null}</div>);
 }
 
 class CharacterSelectionModal extends React.Component<CharacterSelectionProps, CharacterSelectionState> {

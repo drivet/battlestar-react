@@ -1,12 +1,16 @@
 import React from "react";
 import './SkillSelection.css';
-import { SkillType } from "./models/game-data";
+import { getCharacter, SkillType } from "./models/game-data";
 import Modal from 'react-modal';
 import politics from './images/politics.png';
 import tactics from './images/tactics.png';
 import piloting from './images/piloting.png';
 import engineering from './images/engineering.png';
 import leadership from './images/leadership.png';
+import { InputDialogsProps } from "./InputDialogs";
+import { InputId, ReceiveInitialSkillsResponse, ReceiveSkillsResponse } from "./models/inputs";
+import firebase from "./firebase";
+import { myUserId } from "./App";
 
 interface SkillSelectionProps {
     availableSkills: SkillType[];
@@ -42,7 +46,108 @@ function skillImgElement(skillType: SkillType) {
     return (<img className={'skillImg'} src={skillImages[skillType]} alt={'skill type'}/>);
 }
 
-export class SkillSelection extends React.Component<SkillSelectionProps, SkillSelectionState> {
+function makeResponse(input: InputId, selectedSkills: SkillType[]): ReceiveInitialSkillsResponse | ReceiveSkillsResponse {
+    return {
+        userId: myUserId,
+        inputId: input,
+        skills: selectedSkills,
+    }
+}
+
+export function InitialSkillSelection(props: InputDialogsProps) {
+
+    function shouldShowInitialSkillSelection(): boolean {
+        if (!props.player) {
+            return false;
+        }
+        const g = props.game;
+        const r = g && g.inputRequest.userId === g.players[0].userId &&
+            g.inputRequest.inputId === InputId.ReceiveInitialSkills;
+        return r;
+    }
+
+    function getAvailableInitialSkills(): SkillType[] {
+        if (!shouldShowInitialSkillSelection()) {
+            return [];
+        }
+        const character = getCharacter(props.player.characterId);
+        const skills = [];
+        character.cardsDue.forEach(d => skills.push(...d.skills));
+        return skills;
+    }
+
+
+    function handleInitialSkillSelection(selectedSkills: SkillType[]) {
+        firebase.database().ref('/games/' + props.gameId + '/responses')
+            .push(makeResponse(InputId.ReceiveInitialSkills, selectedSkills));
+    }
+
+    function initialSkillSelection() {
+        return (
+            <SkillSelectionModal availableSkills={getAvailableInitialSkills()}
+                                 count={3}
+                                 doneCb={skills => handleInitialSkillSelection(skills)}/>
+        );
+    }
+
+    return (
+        <div>
+            {shouldShowInitialSkillSelection() ? initialSkillSelection() : null}
+        </div>
+    );
+}
+
+export function SkillSelection(props: InputDialogsProps) {
+    function skillSelection() {
+        const multiSkills = getMultiSkills();
+        const count = multiSkills[0];
+        const skills = multiSkills[1];
+        return (
+            <SkillSelectionModal availableSkills={skills}
+                                 count={count}
+                                 doneCb={skills => handleSkillSelection(skills)}/>
+        );
+    }
+
+    function handleSkillSelection(selectedSkills: SkillType[]) {
+        firebase.database().ref('/games/' + props.gameId + '/responses')
+            .push(makeResponse(InputId.ReceiveSkills, selectedSkills));
+    }
+
+    function shouldShowSkillSelection(): boolean {
+        if (!props.player) {
+            return false;
+        }
+        const g = props.game;
+        const r = g && g.inputRequest.userId === g.players[0].userId &&
+            g.inputRequest.inputId === InputId.ReceiveSkills;
+        return r;
+    }
+
+    function getMultiSkills(): [number, SkillType[]] {
+        if (!shouldShowSkillSelection()) {
+            return [0, []];
+        }
+        const character = getCharacter(props.player.characterId);
+        const skills = [];
+        let count = 0;
+        character.cardsDue
+            .filter(d => d.skills.length > 1)
+            .forEach(d => {
+                count += d.count;
+                skills.push(...d.skills);
+            });
+        return [count, skills];
+    }
+
+    return (
+        <div>
+            {shouldShowSkillSelection() ? skillSelection() : null}
+        </div>
+    );
+}
+
+export class SkillSelectionModal extends React.Component<SkillSelectionProps, SkillSelectionState> {
     constructor(props) {
         super(props);
         this.state = {
