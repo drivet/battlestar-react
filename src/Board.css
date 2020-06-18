@@ -2,3 +2,22 @@
     width: 1200px;
     height: 900px;
 }
+
+
+.location {
+    fill: blue;
+    opacity: 0;
+}
+
+.location:hover {
+    opacity: 0.5;
+}
+
+.spaceLocation {
+    fill: grey;
+    opacity: 0;
+}
+
+.spaceLocation:hover {
+    opacity: 0.5;
+}

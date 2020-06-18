@@ -54,7 +54,7 @@ export class GameComponent extends React.Component<any, GameState> {
                     {this.state.game.players.map(p => this.player(p, currentPlayer))}
                 </div>
                 <div className={'middleCol'}>
-                    <Board game={this.state.game}/>
+                    <Board game={this.state.game} locationSelect={false}/>
                 </div>
                 <div className={'rightCol'}>
                     <div>Vipers: {this.state.game.vipers}</div>
