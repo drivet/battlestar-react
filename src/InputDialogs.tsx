@@ -2,17 +2,12 @@ import React from "react";
 import { getCharacter, SkillType, ViewableGameData } from "./models/game-data";
 import { FullPlayer } from "../functions/src/game";
 import { CharacterSelection } from "./CharacterSelection";
-import {
-    CharacterSelectionRequest,
-    InputId,
-    ReceiveInitialSkillsResponse,
-    ReceiveSkillsResponse
-} from "./models/inputs";
+import { InputId, ReceiveInitialSkillsResponse, ReceiveSkillsResponse } from "./models/inputs";
 import { SkillSelection } from "./SkillSelection";
 import firebase from "./firebase";
 import { myUserId } from "./App";
 
-interface InputDialogsProps {
+export interface InputDialogsProps {
     gameId: string;
     game: ViewableGameData;
     player: FullPlayer;
@@ -30,22 +25,10 @@ export class InputDialogs extends React.Component<InputDialogsProps, any> {
     render() {
         return (
             <div>
-                {this.shouldShowCharacterSelection() ? this.characterSelection() : null}
+                <CharacterSelection gameId={this.props.gameId} game={this.props.game} player={this.props.player}/>
                 {this.shouldShowInitialSkillSelection() ? this.initialSkillSelection() : null}
                 {this.shouldShowSkillSelection() ? this.skillSelection() : null}
             </div>
-        );
-    }
-
-    private request() {
-        const g = this.props.game;
-        return g ? g.inputRequest : null;
-    }
-
-    private characterSelection() {
-        return (
-            <CharacterSelection request={this.request() as CharacterSelectionRequest}
-                                gameId={this.props.gameId}/>
         );
     }
 
@@ -76,12 +59,6 @@ export class InputDialogs extends React.Component<InputDialogsProps, any> {
     private handleSkillSelection(selectedSkills: SkillType[]) {
         firebase.database().ref('/games/' + this.props.gameId + '/responses')
             .push(makeResponse(InputId.ReceiveSkills, selectedSkills));
-    }
-
-    private shouldShowCharacterSelection(): boolean {
-        const g = this.props.game;
-        return g && g.inputRequest.userId === g.players[0].userId &&
-            g.inputRequest.inputId === InputId.SelectCharacter;
     }
 
     private shouldShowInitialSkillSelection(): boolean {
