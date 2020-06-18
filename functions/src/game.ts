@@ -34,6 +34,7 @@ export interface FullPlayer {
     characterId?: CharacterId;
     admiral?: boolean;
     president?: boolean;
+    revealedCylon?: boolean;
     location?: LocationId;
     loyaltyCards?: LoyaltyCardId[];
     skillCards?: SkillCard[];
@@ -84,6 +85,7 @@ export interface FullGameData {
     quorumDeck?: QuorumCardId[];
     destinationDeck?: DestinationCardId[];
     skillDecks?: SkillDecks;
+    discardedSkillDecks? : SkillDecks;
     destinyDeck?: SkillCard[];
     crisisDeck?: CrisisCardId[];
     superCrisisDeck?: CrisisCardId[];

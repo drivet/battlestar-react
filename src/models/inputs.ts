@@ -1,4 +1,4 @@
-import { CharacterId, SkillType } from "./game-data";
+import { CharacterId, LocationId, SkillCard, SkillType } from "./game-data";
 import { CharacterPool } from "../../functions/src/character";
 
 export enum InputId {
@@ -46,3 +46,15 @@ export interface ReceiveSkillsResponse extends InputResponse {
 }
 
 export interface ReceiveSkillsInput extends InputRequest, ReceiveInitialSkillsResponse {}
+
+export interface MoveSelectionRequest extends InputRequest {
+    availableLocations: LocationId[];
+}
+
+export interface MoveSelectionResponse extends InputResponse {
+    location: LocationId;
+    discardedSkill?: SkillCard;
+}
+
+export interface MoveSelectionInput extends InputRequest, MoveSelectionResponse {
+}

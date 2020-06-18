@@ -86,6 +86,7 @@ export function convertToViewable(full: FullGameData, players: { [key: string]: 
         crisisDeck: full.crisisDeck ? full.crisisDeck.length: 0,
         superCrisisDeck: full.superCrisisDeck ? full.superCrisisDeck.length: 0,
         loyaltyDeck: full.loyaltyDeck ? full.loyaltyDeck.length: 0,
-        skillDecks: redactSkillDecks(full.skillDecks!)
+        skillDecks: redactSkillDecks(full.skillDecks!),
+        discardedSkillDecks: full.discardedSkillDecks ? full.discardedSkillDecks : null,
     }
 }

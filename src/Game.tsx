@@ -1,11 +1,12 @@
 import React from 'react';
 import './Game.css';
 import { Board } from "./Board";
-import { PlayerData, ViewableGameData } from "./models/game-data";
+import { LocationId, PlayerData, ViewableGameData } from "./models/game-data";
 import firebase from "./firebase";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { InputDialogs } from "./InputDialogs";
+import { InputId } from "./models/inputs";
 
 interface GameState {
     game: ViewableGameData;
@@ -54,7 +55,9 @@ export class GameComponent extends React.Component<any, GameState> {
                     {this.state.game.players.map(p => this.player(p, currentPlayer))}
                 </div>
                 <div className={'middleCol'}>
-                    <Board game={this.state.game} locationSelect={false}/>
+                    <Board game={this.state.game}
+                           locationSelect={this.isMovementPhase()}
+                           locationSelectCb={loc => this.handleLocationSelection(loc)}/>
                 </div>
                 <div className={'rightCol'}>
                     <div>Vipers: {this.state.game.vipers}</div>
@@ -77,5 +80,14 @@ export class GameComponent extends React.Component<any, GameState> {
                 </div>
             </div>
         );
+    }
+
+    private isMovementPhase() {
+        return this.state.game?.inputRequest.inputId === InputId.Movement &&
+            this.state.game?.inputRequest.userId === myUserId;
+    }
+
+    private handleLocationSelection(loc: LocationId) {
+        console.log('picked a location ' + loc);
     }
 }

@@ -1,4 +1,4 @@
-import { CharacterId, GameState, getCharacter, LocationId, SkillType } from "../../src/models/game-data";
+import { CharacterId, GameState, getCharacter, LocationId, SkillType, SkillTypeKeys } from "../../src/models/game-data";
 import {
     distributeTitles,
     FullPlayer,
@@ -14,19 +14,28 @@ import {
     InitialLocationInput,
     InputId,
     InputResponse,
+    MoveSelectionInput,
     ReceiveInitialSkillsInput,
     ReceiveSkillsInput
 } from "../../src/models/inputs";
 import { selectCharacter } from "./character";
 import { addCard, addCards, deal, dealOne } from "./deck";
+import { SkillDecks } from "./skills";
+import { handleMovement } from "./location";
 
 
 /**
  * It appears that Firebase doesn't preserve empty arrays when doing a read.  But the objects are
- * easier to use f we have them so fill those out those sharp edges here.
+ * easier to use if we have them so fill those out those sharp edges here.
  */
 export function sandGameDoc(gameDoc: GameDocument) {
     gameDoc.gameState.quorumDeck = gameDoc.gameState.quorumDeck ? gameDoc.gameState.quorumDeck : [];
+    gameDoc.gameState.discardedSkillDecks =
+        gameDoc.gameState.discardedSkillDecks ? gameDoc.gameState.discardedSkillDecks : {}
+    sandSkillDecks(gameDoc.gameState.discardedSkillDecks);
+    gameDoc.view.discardedSkillDecks =
+        gameDoc.view.discardedSkillDecks ? gameDoc.view.discardedSkillDecks : {}
+    sandSkillDecks(gameDoc.view.discardedSkillDecks);
 
     const players = Object.values(gameDoc.players)
     players.forEach(p => {
@@ -34,6 +43,21 @@ export function sandGameDoc(gameDoc: GameDocument) {
         p.quorumHand = p.quorumHand ? p.quorumHand : [];
         p.skillCards = p.skillCards ? p.skillCards : [];
     });
+}
+
+
+
+function sandSkillDecks(skillDecks: SkillDecks) {
+    sandSkillDeck(skillDecks, SkillType.Tactics);
+    sandSkillDeck(skillDecks, SkillType.Engineering);
+    sandSkillDeck(skillDecks, SkillType.Leadership);
+    sandSkillDeck(skillDecks, SkillType.Politics);
+    sandSkillDeck(skillDecks, SkillType.Piloting);
+}
+
+function sandSkillDeck(skillDecks: SkillDecks, skillType: SkillType) {
+    const key = SkillType[skillType];
+    skillDecks[key] = skillDecks[key] ? skillDecks[key] : [];
 }
 
 /**
@@ -73,7 +97,7 @@ export function runGame(gameDoc: GameDocument, response: InputResponse) {
         } else if (gameDoc.gameState.state === GameState.ReceiveSkills) {
             handleReceiveSkills(gameDoc, data as ReceiveSkillsInput);
         } else if (gameDoc.gameState.state === GameState.Movement) {
-            handleMovement(gameDoc);
+            handleMovement(gameDoc, data as MoveSelectionInput);
         }
 
         // we assume the data was used up in one iteration
@@ -231,13 +255,6 @@ function handleReceiveStandardSkills(gameDoc: GameDocument) {
     gameDoc.gameState.state = GameState.Movement;
 }
 
-function handleMovement(gameDoc: GameDocument) {
-    gameDoc.gameState.inputRequest = {
-        userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
-        inputId: InputId.Movement,
-    }
-}
-
 function hasMultiSkills(character: CharacterId): boolean {
     return getCharacter(character).cardsDue.some(cd => cd.skills.length > 1);
 }
@@ -267,7 +284,7 @@ function botInitialSkills(character: CharacterId): SkillType[] {
     return [skill, skill, skill];
 }
 
-function getCurrentPlayer(gameDoc: GameDocument): FullPlayer {
+export function getCurrentPlayer(gameDoc: GameDocument): FullPlayer {
     return gameDoc.players[gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer]];
 }
 

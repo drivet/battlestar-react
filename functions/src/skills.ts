@@ -1,12 +1,6 @@
 import { shuffle } from "./deck";
-import {
-    CharacterId,
-    getCharacter,
-    SkillCard,
-    SkillCardType,
-    SkillType,
-    SkillTypeKeys
-} from "../../src/models/game-data";
+import { SkillCard, SkillCardType, SkillType, SkillTypeKeys } from "../../src/models/game-data";
+import { FullPlayer } from "./game";
 
 function skillCard(skillType: SkillType, card: SkillCardType, strength: number): SkillCard {
     return {
@@ -182,8 +176,8 @@ export function createSkillDecks(): SkillDecks {
     }
 }
 
-export function getAllSkills(character: CharacterId): SkillType[] {
-    const skills: SkillType[] = [];
-    getCharacter(character).cardsDue.forEach(d => skills.push(...d.skills));
-    return skills;
+export function findMatchingSkillCard(player: FullPlayer, card: SkillCard): SkillCard  {
+    return player.skillCards.find(s => s.strength === card.strength &&
+        s.type === card.type &&
+        s.cardType === card.cardType);
 }

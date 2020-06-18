@@ -1,4 +1,5 @@
 import { InputRequest } from "./inputs";
+import { SkillDecks } from "../../functions/src/skills";
 
 export enum CharacterId {
     LeeAdama, GaiusBaltar, GalenTyrol, SaulTigh,
@@ -511,6 +512,7 @@ export interface ViewableGameData {
     quorumDeck: number;
     destinationDeck: number;
     skillDecks: SkillDeckCounts;
+    discardedSkillDecks: SkillDecks;
     destinyDeck: number;
     crisisDeck: number;
     superCrisisDeck: number;

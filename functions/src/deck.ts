@@ -6,12 +6,22 @@ export function addCard<T>(cards: T[], card: T) {
     cards.push(card);
 }
 
+
+export function addCardToTop<T>(cards: T[], card: T) {
+    cards.unshift(card);
+}
+
 export function dealOne<T>(cards: T[]): T {
     return deal(cards, 1)[0];
 }
 
 export function deal<T>(cards: T[], count: number): T[] {
     return cards.splice(0, count);
+}
+
+export function removeCard<T>(cards: T[], card: T) {
+    const cardIndex = cards.indexOf(card);
+    cards.splice(cardIndex, 1);
 }
 
 export function shuffle<T>(cards: T[]): T[] {
