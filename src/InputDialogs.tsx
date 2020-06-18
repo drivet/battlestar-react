@@ -15,9 +15,9 @@ export class InputDialogs extends React.Component<InputDialogsProps, any> {
     render() {
         return (
             <div>
-                <CharacterSelection gameId={this.props.gameId} game={this.props.game} player={this.props.player}/>
-                <InitialSkillSelection gameId={this.props.gameId} game={this.props.game} player={this.props.player}/>
-                <SkillSelection gameId={this.props.gameId} game={this.props.game} player={this.props.player}/>
+                <CharacterSelection {...this.props}/>
+                <InitialSkillSelection {...this.props}/>
+                <SkillSelection {...this.props}/>
             </div>
         );
     }
