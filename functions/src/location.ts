@@ -10,8 +10,8 @@ import {
 } from "../../src/models/game-data";
 import { InputId, MoveSelectionInput, MoveSelectionRequest } from "../../src/models/inputs";
 import { getCurrentPlayer } from "./game-manager";
-import { findMatchingSkillCard } from "./skills";
 import { addCardToTop, removeCard } from "./deck";
+import { findMatchingSkillCard } from "../../src/models/skills";
 
 export function handleMovement(gameDoc: GameDocument, possibleInput: MoveSelectionInput) {
     const currentPlayer = getCurrentPlayer(gameDoc);
