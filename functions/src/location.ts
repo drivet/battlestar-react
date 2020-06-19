@@ -1,5 +1,13 @@
 import { FullPlayer, GameDocument } from "./game";
-import { CharacterType, getCharacter, isSpace, LocationId, SkillCard, SkillType } from "../../src/models/game-data";
+import {
+    CharacterType,
+    GameState,
+    getCharacter,
+    isSpace,
+    LocationId,
+    SkillCard,
+    SkillType
+} from "../../src/models/game-data";
 import { InputId, MoveSelectionInput, MoveSelectionRequest } from "../../src/models/inputs";
 import { getCurrentPlayer } from "./game-manager";
 import { findMatchingSkillCard } from "./skills";
@@ -17,6 +25,7 @@ export function handleMovement(gameDoc: GameDocument, possibleInput: MoveSelecti
             addCardToTop(gameDoc.gameState.discardedSkillDecks[SkillType[cardFromHand.type]], cardFromHand);
             removeCard(currentPlayer.skillCards, cardFromHand);
         }
+        gameDoc.gameState.state = GameState.Action;
     } else {
         gameDoc.gameState.inputRequest = {
             userId: gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer],
@@ -73,13 +82,13 @@ function requiresDiscard(location: LocationId, player: FullPlayer): boolean {
 }
 
 function onGalactica(location: LocationId) {
-    return location in [LocationId.FtlControl, LocationId.WeaponsControl, LocationId.Communications, LocationId.Command,
+    return [LocationId.FtlControl, LocationId.WeaponsControl, LocationId.Communications, LocationId.Command,
         LocationId.AdmiralsQuarters, LocationId.Armory, LocationId.ResearchLab, LocationId.HangarDeck, LocationId.Sickbay,
-        LocationId.Brig];
+        LocationId.Brig].indexOf(location) !== -1;
 }
 
 function onColonialOne(location: LocationId) {
-    return location in [LocationId.PressRoom, LocationId.PresidentsOffice, LocationId.Administration];
+    return [LocationId.PressRoom, LocationId.PresidentsOffice, LocationId.Administration].indexOf(location) !== -1;
 }
 
 function getAdjacentLocations(location: LocationId): LocationId[] {

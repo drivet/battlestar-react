@@ -72,6 +72,7 @@ export enum LocationId {
     ResearchLab,
     Armory,
     AdmiralsQuarters,
+
     BackAbove,
     FrontAbove,
     Back,
@@ -463,7 +464,8 @@ export enum GameState {
     SetupDestiny,
     SetupInitialShips,
     ReceiveSkills,
-    Movement
+    Movement,
+    Action
 }
 
 export interface ViewableGameData {

@@ -22,6 +22,7 @@ import { selectCharacter } from "./character";
 import { addCard, addCards, deal, dealOne } from "./deck";
 import { SkillDecks } from "./skills";
 import { handleMovement } from "./location";
+import { handleAction } from "./action";
 
 
 /**
@@ -98,6 +99,8 @@ export function runGame(gameDoc: GameDocument, response: InputResponse) {
             handleReceiveSkills(gameDoc, data as ReceiveSkillsInput);
         } else if (gameDoc.gameState.state === GameState.Movement) {
             handleMovement(gameDoc, data as MoveSelectionInput);
+        } else if (gameDoc.gameState.state === GameState.Action) {
+            handleAction(gameDoc)
         }
 
         // we assume the data was used up in one iteration

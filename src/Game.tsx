@@ -6,11 +6,19 @@ import firebase from "./firebase";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { InputDialogs } from "./InputDialogs";
-import { InputId } from "./models/inputs";
+import { InputId, MoveSelectionRequest, MoveSelectionResponse } from "./models/inputs";
 
 interface GameState {
     game: ViewableGameData;
     player: FullPlayer;
+}
+
+function makeMoveResponse(location: LocationId): MoveSelectionResponse {
+    return {
+        userId: myUserId,
+        inputId: InputId.Movement,
+        location: location
+    }
 }
 
 export class GameComponent extends React.Component<any, GameState> {
@@ -57,6 +65,7 @@ export class GameComponent extends React.Component<any, GameState> {
                 <div className={'middleCol'}>
                     <Board game={this.state.game}
                            locationSelect={this.isMovementPhase()}
+                           availableLocations={this.getAvailableLocations()}
                            locationSelectCb={loc => this.handleLocationSelection(loc)}/>
                 </div>
                 <div className={'rightCol'}>
@@ -87,7 +96,13 @@ export class GameComponent extends React.Component<any, GameState> {
             this.state.game?.inputRequest.userId === myUserId;
     }
 
+    private getAvailableLocations(): LocationId[] {
+        return (this.state.game?.inputRequest as MoveSelectionRequest).availableLocations;
+    }
+
     private handleLocationSelection(loc: LocationId) {
         console.log('picked a location ' + loc);
+        firebase.database().ref('/games/' + this.gameId() + '/responses')
+            .push(makeMoveResponse(loc));
     }
 }

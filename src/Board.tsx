@@ -12,6 +12,7 @@ import { LocationId, ViewableGameData } from "./models/game-data";
 interface IBoardProps {
     game: ViewableGameData;
     locationSelect: boolean;
+    availableLocations: LocationId[]
     locationSelectCb: (LocationId) => void;
 }
 
@@ -48,6 +49,8 @@ export class Board extends React.Component<IBoardProps> {
             <g>
                 {this.rect(LocationId.PressRoom, "157", "34", "105", "142")}
                 {this.rect(LocationId.PresidentsOffice, "300", "34", "105", "142")}
+                {this.rect(LocationId.Administration, "435", "34", "122", "142")}
+
                 {this.rect(LocationId.FtlControl, "267", "612", "105", "142")}
                 {this.rect(LocationId.WeaponsControl, "425", "526", "105", "142")}
                 {this.rect(LocationId.Command, "425", "698", "105", "142")}
@@ -58,7 +61,7 @@ export class Board extends React.Component<IBoardProps> {
                 {this.rect(LocationId.Sickbay, "1056", "527", "105", "142")}
                 {this.rect(LocationId.Brig, "1046", "700", "125", "142")}
                 {this.rect(LocationId.AdmiralsQuarters, "574", "698", "122", "142")}
-                {this.rect(LocationId.Administration, "435", "34", "122", "142")}
+
                 {this.rect(LocationId.Caprica, "744", "55", "90", "139")}
                 {this.rect(LocationId.CylonFleet, "846", "55", "90", "139")}
                 {this.rect(LocationId.HumanFleet, "947", "55", "90", "139")}
@@ -75,11 +78,18 @@ export class Board extends React.Component<IBoardProps> {
     }
 
     private polygon(location: LocationId, points: string) {
+        if (this.props.availableLocations.indexOf(location) === -1) {
+            return null;
+        }
         return (
             <polygon onClick={() => this.props.locationSelectCb(location)} className={"spaceLocation"}
                      points={points}/>)
     }
+
     private rect(location: LocationId, x: string, y: string, width: string, height: string) {
+        if (this.props.availableLocations.indexOf(location) === -1) {
+            return null;
+        }
         return (
             <rect onClick={() => this.props.locationSelectCb(location)} className={"location"} x={x} y={y}
                 width={width} height={height}/>

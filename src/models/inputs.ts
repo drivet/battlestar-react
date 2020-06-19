@@ -6,7 +6,8 @@ export enum InputId {
     SelectInitialLocation,
     ReceiveInitialSkills,
     ReceiveSkills,
-    Movement
+    Movement,
+    Action
 }
 
 export interface InputRequest {
