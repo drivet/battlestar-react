@@ -12,6 +12,7 @@ import { InputId, MoveSelectionInput, MoveSelectionRequest } from "../../src/mod
 import { getCurrentPlayer } from "./game-manager";
 import { addCardToTop, removeCard } from "./deck";
 import { findMatchingSkillCard } from "../../src/models/skills";
+import { requiresDiscard } from "../../src/models/location";
 
 export function handleMovement(gameDoc: GameDocument, possibleInput: MoveSelectionInput) {
     const currentPlayer = getCurrentPlayer(gameDoc);
@@ -73,22 +74,6 @@ function getAvailableLocations(gameDoc: GameDocument, player: FullPlayer): Locat
         }
     }
     return locations;
-}
-
-function requiresDiscard(location: LocationId, player: FullPlayer): boolean {
-    return (onColonialOne(player.location) && onGalactica(location)) ||
-           (onGalactica(player.location) && onColonialOne(location)) ||
-           (isSpace(player.location) && (onGalactica(location) || onColonialOne(location)))
-}
-
-function onGalactica(location: LocationId) {
-    return [LocationId.FtlControl, LocationId.WeaponsControl, LocationId.Communications, LocationId.Command,
-        LocationId.AdmiralsQuarters, LocationId.Armory, LocationId.ResearchLab, LocationId.HangarDeck, LocationId.Sickbay,
-        LocationId.Brig].indexOf(location) !== -1;
-}
-
-function onColonialOne(location: LocationId) {
-    return [LocationId.PressRoom, LocationId.PresidentsOffice, LocationId.Administration].indexOf(location) !== -1;
 }
 
 function getAdjacentLocations(location: LocationId): LocationId[] {
