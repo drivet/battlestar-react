@@ -3,6 +3,7 @@ import { SkillCard } from "./models/game-data";
 import Modal from 'react-modal';
 import { getSkillCardImage } from "./models/skills";
 import './SkillCardSelectionModel.css';
+import { customModalStyles } from "./view";
 
 interface SkillCardSelectionProps {
     availableCards: SkillCard[];
@@ -14,18 +15,6 @@ interface SkillCardSelectionState {
     selectedCards: number[];
     open: boolean;
 }
-
-const customStyles = {
-    content : {
-        top                   : '50%',
-        left                  : '50%',
-        right                 : 'auto',
-        bottom                : 'auto',
-        marginRight           : '-50%',
-        transform             : 'translate(-50%, -50%)'
-    }
-};
-
 
 function skillCardImgElement(skillCard: SkillCard) {
     return (<img className={'skillCard'} src={getSkillCardImage(skillCard)} alt={'skill card'}/>);
@@ -42,7 +31,7 @@ export class SkillCardSelectionModal extends React.Component<SkillCardSelectionP
 
     render() {
         return (
-            <Modal isOpen={this.state.open} style={customStyles}>
+            <Modal isOpen={this.state.open} style={customModalStyles}>
                 <div className={'availableSkillCards'}>
                     {this.props.availableCards.map((s, i) => this.renderAvailCard(s, i))}
                 </div>

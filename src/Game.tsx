@@ -9,6 +9,8 @@ import { InputDialogs } from "./InputDialogs";
 import { InputId, MoveSelectionRequest, MoveSelectionResponse } from "./models/inputs";
 import { SkillCardSelectionModal } from "./SkillCardSelectionModal";
 import { requiresDiscard } from "./models/location";
+import { gameViewOn, playerOn, pushResponse } from "./firebase-game";
+import { GameViewState, getGameViewState } from "./view";
 
 interface GameState {
     game: ViewableGameData;
@@ -37,20 +39,19 @@ export class GameComponent extends React.Component<any, GameState> {
     }
 
     componentDidMount() {
-        const gameRef = firebase.database().ref('games/' + this.gameId() + '/view');
-        gameRef.on('value', snapshot => {
+        gameViewOn(this.gameId(),game => this.reset(game));
+
+        playerOn(this.gameId(), player => {
             this.setState({
-                // probably should be moved to general reset routine
-                moveMade: false,
-                game: snapshot.val()
+                player: player
             });
         });
+    }
 
-        const playerRef = firebase.database().ref('games/' + this.gameId() + '/players/' + myUserId);
-        playerRef.on('value', snapshot => {
-            this.setState({
-                player: snapshot.val()
-            });
+    private reset(game: ViewableGameData) {
+        this.setState({
+            game: game,
+            moveMade: false
         });
     }
 
@@ -68,7 +69,7 @@ export class GameComponent extends React.Component<any, GameState> {
             <div className={'Game'}>
                 <div className={'leftCol'}>
                     <div>Players</div>
-                    {this.state.game.players.map(p => this.player(p, currentPlayer))}
+                    {this.state.game.players.map(p => this.renderPlayer(p, currentPlayer))}
                 </div>
                 <div className={'middleCol'}>
                     <Board game={this.state.game}
@@ -89,7 +90,7 @@ export class GameComponent extends React.Component<any, GameState> {
         );
     }
 
-    private player(p: PlayerData, currentPlayer: PlayerData) {
+    private renderPlayer(p: PlayerData, currentPlayer: PlayerData) {
         return (
             <div key={p.userId} className={'Player'}>
                 <div>
@@ -143,7 +144,7 @@ export class GameComponent extends React.Component<any, GameState> {
     }
 
     private pushMoveResponse(moveResponse: MoveSelectionResponse) {
-        firebase.database().ref('/games/' + this.gameId() + '/responses').push(moveResponse);
+        pushResponse(this.gameId(), moveResponse);
         this.setState({
             moveSelection: null,
             moveMade: true

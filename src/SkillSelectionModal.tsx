@@ -9,6 +9,7 @@ import engineering from './images/engineering.png';
 import leadership from './images/leadership.png';
 import { InputId, ReceiveInitialSkillsResponse, ReceiveSkillsResponse } from "./models/inputs";
 import { myUserId } from "./App";
+import { customModalStyles } from "./view";
 
 interface SkillSelectionProps {
     availableSkills: SkillType[];
@@ -20,17 +21,6 @@ interface SkillSelectionState {
     selectedSkills: SkillType[];
     open: boolean;
 }
-
-const customStyles = {
-    content : {
-        top                   : '50%',
-        left                  : '50%',
-        right                 : 'auto',
-        bottom                : 'auto',
-        marginRight           : '-50%',
-        transform             : 'translate(-50%, -50%)'
-    }
-};
 
 const skillImages = {
     [SkillType.Politics]: politics,
@@ -63,7 +53,7 @@ export class SkillSelectionModal extends React.Component<SkillSelectionProps, Sk
 
     render() {
         return(
-            <Modal isOpen={this.state.open} style={customStyles}>
+            <Modal isOpen={this.state.open} style={customModalStyles}>
                 Select skill cards from the options on the left
                 <div className={'skillSelectionPanel'}>
                     <div className={'availableSkillList'}>

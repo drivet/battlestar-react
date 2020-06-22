@@ -82,12 +82,6 @@ export enum LocationId {
 }
 export type LocationIdKeys = keyof typeof LocationId;
 
-export function isSpace(location: LocationId): boolean {
-    return location in [LocationId.Back, LocationId.Front,
-        LocationId.FrontBelow, LocationId.FrontAbove,
-        LocationId.BackBelow, LocationId.BackAbove];
-}
-
 export interface Character {
     id: CharacterId;
     type: CharacterType;

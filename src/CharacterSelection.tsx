@@ -15,6 +15,7 @@ import firebase from "./firebase";
 import { CharacterSelectionRequest, CharacterSelectionResponse, InputId } from "./models/inputs";
 import { myUserId } from "./App";
 import { InputDialogsProps } from "./InputDialogs";
+import { customModalStyles } from "./view";
 
 const charImages = {
     [CharacterId.KarlAgathon]: karlagathon,
@@ -42,17 +43,6 @@ interface CharacterSelectionState {
     displayedCharacter: number;
     open: boolean;
 }
-
-const customStyles = {
-    content : {
-        top                   : '50%',
-        left                  : '50%',
-        right                 : 'auto',
-        bottom                : 'auto',
-        marginRight           : '-50%',
-        transform             : 'translate(-50%, -50%)'
-    }
-};
 
 function makeResponse(selectedCharacter: CharacterId): CharacterSelectionResponse {
     return {
@@ -91,7 +81,7 @@ class CharacterSelectionModal extends React.Component<CharacterSelectionProps, C
 
     render() {
         return(
-            <Modal isOpen={this.state.open} style={customStyles}>
+            <Modal isOpen={this.state.open} style={customModalStyles}>
                 {charImgElement(this.currentCharacterId())}
                 <div>
                     <button onClick={e => this.handlePrev(e)}>Previous</button>

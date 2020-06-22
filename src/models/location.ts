@@ -1,5 +1,11 @@
-import { isSpace, LocationId } from "./game-data";
+import { LocationId } from "./game-data";
 import { FullPlayer } from "../../functions/src/game";
+
+export function isSpace(location: LocationId): boolean {
+    return location in [LocationId.Back, LocationId.Front,
+        LocationId.FrontBelow, LocationId.FrontAbove,
+        LocationId.BackBelow, LocationId.BackAbove];
+}
 
 export function requiresDiscard(location: LocationId, player: FullPlayer): boolean {
     return (onColonialOne(player.location) && onGalactica(location)) ||
