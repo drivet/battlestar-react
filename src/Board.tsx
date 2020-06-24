@@ -87,23 +87,32 @@ export class Board extends React.Component<BoardProps> {
 
     private rect(location: LocationId, x: string, y: string, width: string, height: string) {
         const cn = 'fill-current text-blue-700 opacity-0 ' + this.getHover(location);
-        const char = this.getCharOnLoc(location);
+        const chars = this.getCharsOnLoc(location);
         return (
             <svg x={x} y={y} width={width} height={height}>
-                {char ? this.makeTokenLocation(char) : null}
+                {this.makeTokenLocations(chars)}
                 <rect onClick={() => this.handleLocationClick(location)} className={cn} x={"0"} y={"y"}
                     width={"100%"} height={"100%"}/>
             </svg>
         );
     }
 
-    private makeTokenLocation(character: CharacterId) {
-        return (<image href={getTokenImage(character)} x={"2"} y={"2"} width={"30"} height={"30"}/>);
+    private makeTokenLocations(character: CharacterId[]) {
+        return character.map((c,i) => {
+            return (
+                <g>
+                    <rect x={(i * 20).toString()} y={"0"} width={"20"} height={"30"} stroke="green" stroke-width="5"
+                          fill="none"/>
+                    <image href={getTokenImage(c)} x={(i * 20).toString()} y={"0"} width={"20"} height={"30"}/>
+                </g>
+            )
+        });
     }
 
-    private getCharOnLoc(location: LocationId): CharacterId {
-        const player: PlayerData = this.props.game.players.find(p => p.location === location);
-        return player ? player.characterId : null;
+    private getCharsOnLoc(location: LocationId): CharacterId[] {
+        return this.props.game.players
+            .filter(p => p.location === location)
+            .map(p => p.characterId);
     }
 
     private getHover(location: LocationId): string {
