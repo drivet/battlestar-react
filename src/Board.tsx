@@ -6,7 +6,8 @@ import jump03 from './images/jump03.png';
 import jump04 from './images/jump04.png';
 import jump05 from './images/jump05.png';
 
-import { LocationId, ViewableGameData } from "./models/game-data";
+import { CharacterId, LocationId, PlayerData, ViewableGameData } from "./models/game-data";
+import { getTokenImage } from "./models/char-token-image";
 
 interface BoardProps {
     game: ViewableGameData;
@@ -38,7 +39,7 @@ export class Board extends React.Component<BoardProps> {
             <svg className={"w-bw h-bh"} viewBox={"0 0 1440 1080"}>
                 <image href={board} x={"0"} y={"0"} width={"100%"} height={"100%"}/>
                 <image href={jumpImage} x={"1158"} y={"20"} width={"278"} height={"94"}/>
-                {this.props.locationSelect ? this.locationOverlays() : null}
+                {this.locationOverlays()}
             </svg>
         )
     }
@@ -77,23 +78,45 @@ export class Board extends React.Component<BoardProps> {
     }
 
     private polygon(location: LocationId, points: string) {
-        if (this.props.availableLocations.indexOf(location) === -1) {
-            return null;
-        }
+        const cn = "fill-current text-gray-600 opacity-0 " + this.getHover(location);
         return (
-            <polygon onClick={() => this.props.locationSelectCb(location)}
-                     className={"fill-current text-gray-600 opacity-0 hover:opacity-50"}
-                     points={points}/>)
+            <polygon onClick={() => this.handleLocationClick(location)} className={cn}
+                     points={points}/>
+        )
     }
 
     private rect(location: LocationId, x: string, y: string, width: string, height: string) {
-        if (this.props.availableLocations.indexOf(location) === -1) {
-            return null;
-        }
+        const cn = 'fill-current text-blue-700 opacity-0 ' + this.getHover(location);
+        const char = this.getCharOnLoc(location);
         return (
-            <rect onClick={() => this.props.locationSelectCb(location)}
-                  className={"fill-current text-blue-700 opacity-0 hover:opacity-50"} x={x} y={y}
-                width={width} height={height}/>
+            <svg x={x} y={y} width={width} height={height}>
+                {char ? this.makeTokenLocation(char) : null}
+                <rect onClick={() => this.handleLocationClick(location)} className={cn} x={"0"} y={"y"}
+                    width={"100%"} height={"100%"}/>
+            </svg>
         );
+    }
+
+    private makeTokenLocation(character: CharacterId) {
+        return (<image href={getTokenImage(character)} x={"2"} y={"2"} width={"30"} height={"30"}/>);
+    }
+
+    private getCharOnLoc(location: LocationId): CharacterId {
+        const player: PlayerData = this.props.game.players.find(p => p.location === location);
+        return player ? player.characterId : null;
+    }
+
+    private getHover(location: LocationId): string {
+        let hover = '';
+        if (this.props.locationSelect && this.props.availableLocations.indexOf(location) !== -1) {
+            hover = 'hover:opacity-50';
+        }
+        return hover;
+    }
+
+    private handleLocationClick(location: LocationId) {
+        if (this.props.locationSelect) {
+            this.props.locationSelectCb(location);
+        }
     }
 }

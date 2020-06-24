@@ -2,9 +2,9 @@ import { LocationId } from "./game-data";
 import { FullPlayer } from "../../functions/src/game";
 
 export function isSpace(location: LocationId): boolean {
-    return location in [LocationId.Back, LocationId.Front,
+    return [LocationId.Back, LocationId.Front,
         LocationId.FrontBelow, LocationId.FrontAbove,
-        LocationId.BackBelow, LocationId.BackAbove];
+        LocationId.BackBelow, LocationId.BackAbove].indexOf(location) !== -1;
 }
 
 export function requiresDiscard(location: LocationId, player: FullPlayer): boolean {

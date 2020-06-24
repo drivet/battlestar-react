@@ -22,24 +22,21 @@ function redactActiveCivilians(locatedCivilians: LocatedCivilianShips): Location
 }
 
 function redactPlayer(player: FullPlayer): PlayerData {
-    const data: PlayerData = {
+    const playerData: PlayerData = {
         userId: player.userId,
         admiral: player.admiral,
         president: player.president,
         skillCounts: {}
     }
-
-    if (player.characterId) {
-        data.characterId = player.characterId;
+    if (player.characterId !== undefined) {
+        playerData.characterId = player.characterId
     }
-
-    if (player.location) {
-        data.location = player.location
+    if (player.location !== undefined) {
+        playerData.location = player.location;
     }
-
-    data.skillCounts = countSkills(player.skillCards);
-    data.quorumCount = player.quorumHand.length;
-    return data;
+    playerData.skillCounts = countSkills(player.skillCards);
+    playerData.quorumCount = player.quorumHand.length;
+    return playerData;
 }
 
 function redactSkillDecks(skillDecks: SkillDecks): SkillDeckCounts {
