@@ -6,10 +6,9 @@ import jump03 from './images/jump03.png';
 import jump04 from './images/jump04.png';
 import jump05 from './images/jump05.png';
 
-import './Board.css';
 import { LocationId, ViewableGameData } from "./models/game-data";
 
-interface IBoardProps {
+interface BoardProps {
     game: ViewableGameData;
     locationSelect: boolean;
     availableLocations: LocationId[]
@@ -32,11 +31,11 @@ function jumpPositionImage(position: number): any {
     }
 }
 
-export class Board extends React.Component<IBoardProps> {
+export class Board extends React.Component<BoardProps> {
     render() {
         const jumpImage = jumpPositionImage(this.props.game.jumpPosition);
         return (
-            <svg className={"board"} viewBox={"0 0 1440 1080"}>
+            <svg className={"w-bw h-bh"} viewBox={"0 0 1440 1080"}>
                 <image href={board} x={"0"} y={"0"} width={"100%"} height={"100%"}/>
                 <image href={jumpImage} x={"1158"} y={"20"} width={"278"} height={"94"}/>
                 {this.props.locationSelect ? this.locationOverlays() : null}
@@ -82,7 +81,8 @@ export class Board extends React.Component<IBoardProps> {
             return null;
         }
         return (
-            <polygon onClick={() => this.props.locationSelectCb(location)} className={"spaceLocation"}
+            <polygon onClick={() => this.props.locationSelectCb(location)}
+                     className={"fill-current text-gray-600 opacity-0 hover:opacity-50"}
                      points={points}/>)
     }
 
@@ -91,7 +91,8 @@ export class Board extends React.Component<IBoardProps> {
             return null;
         }
         return (
-            <rect onClick={() => this.props.locationSelectCb(location)} className={"location"} x={x} y={y}
+            <rect onClick={() => this.props.locationSelectCb(location)}
+                  className={"fill-current text-blue-700 opacity-0 hover:opacity-50"} x={x} y={y}
                 width={width} height={height}/>
         );
     }

@@ -1,8 +1,6 @@
 import React from 'react';
-import './Game.css';
 import { Board } from "./Board";
 import { LocationId, PlayerData, SkillCard, ViewableGameData } from "./models/game-data";
-import firebase from "./firebase";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { InputDialogs } from "./InputDialogs";
@@ -10,7 +8,10 @@ import { InputId, MoveSelectionRequest, MoveSelectionResponse } from "./models/i
 import { SkillCardSelectionModal } from "./SkillCardSelectionModal";
 import { requiresDiscard } from "./models/location";
 import { gameViewOn, playerOn, pushResponse } from "./firebase-game";
-import { GameViewState, getGameViewState } from "./view";
+import CurrentPlayer from "./images/BSG_Current_Player.png";
+import { CharToken } from "./CharToken";
+import President from './images/BSG_president.gif';
+import Admiral from './images/BSG_admiral.gif';
 
 interface GameState {
     game: ViewableGameData;
@@ -66,18 +67,18 @@ export class GameComponent extends React.Component<any, GameState> {
 
         const currentPlayer = this.state.game.players[this.state.game.currentPlayer];
         return (
-            <div className={'Game'}>
-                <div className={'leftCol'}>
+            <div className={'grid grid-cols-12'}>
+                <div className={'col-span-2'}>
                     <div>Players</div>
                     {this.state.game.players.map(p => this.renderPlayer(p, currentPlayer))}
                 </div>
-                <div className={'middleCol'}>
+                <div className={'col-span-8 grid justify-center'}>
                     <Board game={this.state.game}
                            locationSelect={this.isLocationSelectPhase()}
                            availableLocations={this.getAvailableLocations()}
                            locationSelectCb={loc => this.handleLocationSelection(loc)}/>
                 </div>
-                <div className={'rightCol'}>
+                <div className={'col-span-2'}>
                     <div>Vipers: {this.state.game.vipers}</div>
                     <div>Raptors: {this.state.game.raptors}</div>
                     <div>Civilian ships: {this.state.game.civilianShips}</div>
@@ -92,10 +93,26 @@ export class GameComponent extends React.Component<any, GameState> {
 
     private renderPlayer(p: PlayerData, currentPlayer: PlayerData) {
         return (
-            <div key={p.userId} className={'Player'}>
-                <div>
-                    {p.userId === currentPlayer.userId ? <span>=></span>: null}
-                    {p.userId}
+            <div key={p.userId}>
+                <div className={'grid grid-cols-8 bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-2 m-2'}>
+                    <div className={'grid content-center px-1'}>
+                        {p.userId === currentPlayer.userId ? <img src={CurrentPlayer} /> : null}
+                    </div>
+
+                    <div className={'grid content-center px-1'}>
+                        {p.president ? <img src={President} /> : null}
+                    </div>
+
+                    <div className={'grid content-center px-1'}>
+                        {p.admiral ? <img src={Admiral} /> : null}
+                    </div>
+
+                    <div className={'grid content-center px-1'}>
+                        <CharToken characterId={p.characterId} />
+                    </div>
+                    <div className={'col-span-4 grid content-center px-1'}>
+                        {p.userId}
+                    </div>
                 </div>
             </div>
         );

@@ -2,7 +2,6 @@ import React from "react";
 import { SkillCard } from "./models/game-data";
 import Modal from 'react-modal';
 import { getSkillCardImage } from "./models/skills";
-import './SkillCardSelectionModel.css';
 import { customModalStyles } from "./view";
 
 interface SkillCardSelectionProps {
@@ -32,7 +31,7 @@ export class SkillCardSelectionModal extends React.Component<SkillCardSelectionP
     render() {
         return (
             <Modal isOpen={this.state.open} style={customModalStyles}>
-                <div className={'availableSkillCards'}>
+                <div className={'flex'}>
                     {this.props.availableCards.map((s, i) => this.renderAvailCard(s, i))}
                 </div>
                 <div>
@@ -47,7 +46,7 @@ export class SkillCardSelectionModal extends React.Component<SkillCardSelectionP
 
     private renderAvailCard(skillCard: SkillCard, index: number) {
         return (
-            <div className={'cardWrapper ' + (this.isSelected(index) ? 'selected' : 'unselected')}
+            <div className={'p-1 ' + (this.isSelected(index) ? 'bg-green-500' : 'bg-white')}
                  onClick={() => this.handleCardSelect(index)}>
                 {skillCardImgElement(skillCard)}
             </div>

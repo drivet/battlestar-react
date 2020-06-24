@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from 'react-router-dom'
 import firebase from './firebase';
-import './Tables.css'
 import { Table } from "./Table";
 
 
@@ -38,15 +37,15 @@ export class Tables extends React.Component<any, TableListState> {
         return (
             <div>
                 <Link to='/create'>Create new table</Link>
-                <div className={'tableList'}>
-                    <div className={'tableHeader'}>
-                        <div>
+                <div className={'table'}>
+                    <div className={'table-row'}>
+                        <div className={'table-cell p-1'}>
                             Number of players
                         </div>
-                        <div>
+                        <div className={'table-cell p-1'}>
                             Delete?
                         </div>
-                        <div>
+                        <div className={'table-cell p-1'}>
                             Join?
                         </div>
                     </div>
@@ -58,14 +57,14 @@ export class Tables extends React.Component<any, TableListState> {
 
     private tableRow(table: Table) {
         return (
-            <div key={table.tableId} className={'tableRow'}>
-                <div>
+            <div key={table.tableId} className={'table-row'}>
+                <div className={'table-cell p-1'}>
                     {table.users.length}
                 </div>
-                <div>
+                <div className={'table-cell p-1'}>
                     <button onClick={e => this.handleDelete(e, table.tableId)}>Delete</button>
                 </div>
-                <div>
+                <div className={'table-cell p-1'}>
                     <Link to={'/tables/' + table.tableId}>Join</Link>
                 </div>
             </div>
