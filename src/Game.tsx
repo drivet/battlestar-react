@@ -1,6 +1,6 @@
 import React from 'react';
 import { Board } from "./Board";
-import { LocationId, PlayerData, SkillCard, ViewableGameData } from "./models/game-data";
+import { LocationId, SkillCard, ViewableGameData } from "./models/game-data";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { InputDialogs } from "./InputDialogs";
@@ -8,10 +8,7 @@ import { InputId, MoveSelectionRequest, MoveSelectionResponse } from "./models/i
 import { SkillCardSelectionModal } from "./SkillCardSelectionModal";
 import { requiresDiscard } from "./models/location";
 import { gameViewOn, playerOn, pushResponse } from "./firebase-game";
-import CurrentPlayer from "./images/BSG_Current_Player.png";
-import { CharToken } from "./CharToken";
-import President from './images/BSG_president.gif';
-import Admiral from './images/BSG_admiral.gif';
+import { renderPlayer } from "./Player";
 
 interface GameState {
     game: ViewableGameData;
@@ -70,7 +67,7 @@ export class GameComponent extends React.Component<any, GameState> {
             <div className={'grid grid-cols-12'}>
                 <div className={'col-span-2'}>
                     <div>Players</div>
-                    {this.state.game.players.map(p => this.renderPlayer(p, currentPlayer))}
+                    {this.state.game.players.map(p => renderPlayer(p, currentPlayer))}
                 </div>
                 <div className={'col-span-8 grid justify-center'}>
                     <Board game={this.state.game}
@@ -87,33 +84,6 @@ export class GameComponent extends React.Component<any, GameState> {
                 </div>
                 <InputDialogs gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
                 {this.isMoveDiscardPhase() ? this.getSkillCardSelectionModal(cards => this.handleMoveDiscard(cards[0])) : null}
-            </div>
-        );
-    }
-
-    private renderPlayer(p: PlayerData, currentPlayer: PlayerData) {
-        return (
-            <div key={p.userId}>
-                <div className={'grid grid-cols-8 bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-2 m-2'}>
-                    <div className={'grid content-center px-1'}>
-                        {p.userId === currentPlayer.userId ? <img src={CurrentPlayer} /> : null}
-                    </div>
-
-                    <div className={'grid content-center px-1'}>
-                        {p.president ? <img src={President} /> : null}
-                    </div>
-
-                    <div className={'grid content-center px-1'}>
-                        {p.admiral ? <img src={Admiral} /> : null}
-                    </div>
-
-                    <div className={'grid content-center px-1'}>
-                        <CharToken characterId={p.characterId} />
-                    </div>
-                    <div className={'col-span-4 grid content-center px-1'}>
-                        {p.userId}
-                    </div>
-                </div>
             </div>
         );
     }

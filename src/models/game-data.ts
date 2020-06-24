@@ -448,6 +448,8 @@ export interface PlayerData {
     admiral?: boolean;
     president?: boolean;
     location?: LocationId;
+    skillCounts?: SkillDeckCounts;
+    quorumCount?: number;
 }
 
 export enum GameState {

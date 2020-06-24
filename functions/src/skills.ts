@@ -1,5 +1,6 @@
 import { shuffle } from "./deck";
 import { SkillCard, SkillCardType, SkillType, SkillTypeKeys } from "../../src/models/game-data";
+import { FullPlayer } from "./game";
 
 function skillCard(skillType: SkillType, card: SkillCardType, strength: number): SkillCard {
     return {
@@ -175,3 +176,8 @@ export function createSkillDecks(): SkillDecks {
     }
 }
 
+export function findMatchingSkillCard(player: FullPlayer, card: SkillCard): SkillCard {
+    return player.skillCards.find(s => s.strength === card.strength &&
+        s.type === card.type &&
+        s.cardType === card.cardType);
+}

@@ -2,7 +2,7 @@ import { FullGameData, FullPlayer } from "./game";
 import {
     LocationCounts,
     LocationIdKeys,
-    PlayerData, SkillDeckCounts, SkillTypeKeys,
+    PlayerData, SkillCard, SkillDeckCounts, SkillType, SkillTypeKeys,
     ViewableGameData
 } from "../../src/models/game-data";
 import { LocatedCivilianShips } from "./civilians";
@@ -26,13 +26,19 @@ function redactPlayer(player: FullPlayer): PlayerData {
         userId: player.userId,
         admiral: player.admiral,
         president: player.president,
+        skillCounts: {}
     }
+
     if (player.characterId) {
         data.characterId = player.characterId;
     }
+
     if (player.location) {
         data.location = player.location
     }
+
+    data.skillCounts = countSkills(player.skillCards);
+    data.quorumCount = player.quorumHand.length;
     return data;
 }
 
@@ -47,6 +53,18 @@ function redactSkillDecks(skillDecks: SkillDecks): SkillDeckCounts {
     } else {
         return null;
     }
+}
+
+function countSkills(skillCards: SkillCard[]): SkillDeckCounts {
+    const result: SkillDeckCounts = {};
+    skillCards.forEach(c => {
+        const key = SkillType[c.type];
+        if (!result[key]) {
+            result[key] = 0;
+        }
+        result[key]++;
+    });
+    return result;
 }
 
 export function convertToViewable(full: FullGameData, players: { [key: string]: FullPlayer}): ViewableGameData {

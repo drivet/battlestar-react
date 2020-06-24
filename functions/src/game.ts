@@ -107,8 +107,9 @@ function makeFullPlayer (userId: string, bot: boolean): FullPlayer {
         characterId: null,
         admiral: false,
         president: false,
-        loyaltyCards: null,
-        skillCards: null
+        loyaltyCards: [],
+        skillCards: [],
+        quorumHand: []
     }
 }
 
