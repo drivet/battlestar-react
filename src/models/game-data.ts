@@ -450,6 +450,7 @@ export interface PlayerData {
     location?: LocationId;
     skillCounts?: SkillDeckCounts;
     quorumCount?: number;
+    loyaltyCount?: number;
 }
 
 export enum GameState {

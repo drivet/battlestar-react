@@ -6,7 +6,13 @@ import jump03 from './images/jump03.png';
 import jump04 from './images/jump04.png';
 import jump05 from './images/jump05.png';
 
-import { CharacterId, LocationId, PlayerData, ViewableGameData } from "./models/game-data";
+import basestar from './images/BSG_basestar.gif';
+import raider from './images/BSG_Raider.gif';
+import viper from './images/BSG_Viper.gif';
+import civilian from './images/BSG_ship_bk.gif';
+import heavyRaider from './images/BSG_HeavyRaider.gif';
+
+import { ActiveBasestar, CharacterId, LocationId, PlayerData, ViewableGameData } from "./models/game-data";
 import { getTokenImage } from "./models/char-token-image";
 
 interface BoardProps {
@@ -80,8 +86,14 @@ export class Board extends React.Component<BoardProps> {
     private polygon(location: LocationId, points: string) {
         const cn = "fill-current text-gray-600 opacity-0 " + this.getHover(location);
         return (
-            <polygon onClick={() => this.handleLocationClick(location)} className={cn}
-                     points={points}/>
+            <g>
+                {this.getBasestarCompOnLoc(location)}
+                {this.getRaidersCompOnLoc(location)}
+                {this.getHeavyRaidersCompOnLoc(location)}
+                {this.getVipersCompOnLoc(location)}
+                {this.getCiviliansCompOnLoc(location)}
+                <polygon onClick={() => this.handleLocationClick(location)} className={cn} points={points}/>
+            </g>
         )
     }
 
@@ -121,6 +133,207 @@ export class Board extends React.Component<BoardProps> {
             hover = 'hover:opacity-50';
         }
         return hover;
+    }
+
+    private getBasestarCompOnLoc(location: LocationId) {
+        const activeBasestars = this.getBasestarsOnLoc(location);
+        let count = activeBasestars.length;
+        if (count === 0) {
+            return null;
+        }
+        let x, y;
+        if (location === LocationId.FrontAbove) {
+            x = "130";
+            y = "250";
+        } else if (location === LocationId.Front) {
+            x = "25";
+            y = "350";
+        } else if (location === LocationId.FrontBelow) {
+            x = "200";
+            y = "980";
+        } else if (location === LocationId.BackAbove) {
+            x = "1250";
+            y = "250";
+        } else if (location === LocationId.Back) {
+            x = "1325";
+            y = "375";
+        } else if (location === LocationId.BackBelow) {
+            x = "1150";
+            y = "980";
+        }
+        return (
+            <svg x={x} y ={y} width={"100"} height={"100"}>
+                { count > 1 ? <text x="0" y="0" fill="white" dominantBaseline={"hanging"}>{count}</text> : null}
+                <image href={basestar} width={"100%"} height={"100%"}/>
+            </svg>
+        );
+    }
+    private getBasestarsOnLoc(location: LocationId): ActiveBasestar[] {
+        if (!this.props.game.activeBasestars) {
+            return [];
+        }
+        return this.props.game.activeBasestars.filter(ab => ab.location === location);
+    }
+
+    private getRaidersCompOnLoc(location: LocationId) {
+        let count = this.getRaidersOnLoc(location);
+        if (!count) {
+            return null;
+        }
+        let x, y;
+        if (location === LocationId.FrontAbove) {
+            x = "240";
+            y = "250";
+        } else if (location === LocationId.Front) {
+            x = "25";
+            y = "450";
+        } else if (location === LocationId.FrontBelow) {
+            x = "330";
+            y = "980";
+        } else if (location === LocationId.BackAbove) {
+            x = "1160";
+            y = "270";
+        } else if (location === LocationId.Back) {
+            x = "1325";
+            y = "475";
+        } else if (location === LocationId.BackBelow) {
+            x = "1050";
+            y = "980";
+        }
+
+        return (
+            <svg x={x} y ={y} width={"60"} height={"60"}>
+                { count > 1 ? <text x="0" y="0" fill="white" dominantBaseline={"hanging"}>{count}</text> : null}
+                <image href={raider} width={"100%"} height={"100%"}/>
+            </svg>
+        );
+    }
+    private getRaidersOnLoc(location: LocationId): number {
+        if (!this.props.game.activeRaiders) {
+            return 0;
+        }
+        return this.props.game.activeRaiders[LocationId[location]];
+    }
+
+    private getHeavyRaidersCompOnLoc(location: LocationId) {
+        let count = this.getHeavyRaidersOnLoc(location);
+        if (!count) {
+            return null;
+        }
+        let x, y;
+        if (location === LocationId.FrontAbove) {
+            x = "220";
+            y = "310";
+        } else if (location === LocationId.Front) {
+            x = "100";
+            y = "420";
+        } else if (location === LocationId.FrontBelow) {
+            x = "300";
+            y = "920";
+        } else if (location === LocationId.BackAbove) {
+            x = "1160";
+            y = "350";
+        } else if (location === LocationId.Back) {
+            x = "1230";
+            y = "420";
+        } else if (location === LocationId.BackBelow) {
+            x = "1050";
+            y = "920";
+        }
+
+        return (
+            <svg x={x} y ={y} width={"60"} height={"60"}>
+                { count > 1 ? <text x="0" y="0" fill="white" dominantBaseline={"hanging"}>{count}</text> : null}
+                <image href={heavyRaider} width={"100%"} height={"100%"}/>
+            </svg>
+        );
+    }
+
+    private getHeavyRaidersOnLoc(location: LocationId): number {
+        if (!this.props.game.activeHeavyRaiders) {
+            return 0;
+        }
+        return this.props.game.activeHeavyRaiders[LocationId[location]];
+    }
+
+    private getVipersCompOnLoc(location: LocationId) {
+        let count = this.getVipersOnLoc(location);
+        if (!count) {
+            return null;
+        }
+        let x, y;
+        if (location === LocationId.FrontAbove) {
+            x = "640";
+            y = "250";
+        } else if (location === LocationId.Front) {
+            x = "25";
+            y = "950";
+        } else if (location === LocationId.FrontBelow) {
+            x = "640";
+            y = "1010";
+        } else if (location === LocationId.BackAbove) {
+            x = "750";
+            y = "250";
+        } else if (location === LocationId.Back) {
+            x = "1325";
+            y = "950";
+        } else if (location === LocationId.BackBelow) {
+            x = "750";
+            y = "1010";
+        }
+
+        return (
+            <svg x={x} y ={y} width={"60"} height={"60"}>
+                { count > 1 ? <text x="0" y="0" fill="white" dominantBaseline={"hanging"}>{count}</text> : null}
+                <image href={viper} width={"100%"} height={"100%"}/>
+            </svg>
+        );
+    }
+    private getVipersOnLoc(location: LocationId): number {
+        if (!this.props.game.activeVipers) {
+            return 0;
+        }
+        return this.props.game.activeVipers[LocationId[location]];
+    }
+
+    private getCiviliansCompOnLoc(location: LocationId) {
+        let count = this.getCiviliansOnLoc(location);
+        if (!count) {
+            return null;
+        }
+        let x, y;
+        if (location === LocationId.FrontAbove) {
+            x = "640";
+            y = "300";
+        } else if (location === LocationId.Front) {
+            x = "25";
+            y = "875";
+        } else if (location === LocationId.FrontBelow) {
+            x = "620";
+            y = "950";
+        } else if (location === LocationId.BackAbove) {
+            x = "750";
+            y = "300";
+        } else if (location === LocationId.Back) {
+            x = "1325";
+            y = "880";
+        } else if (location === LocationId.BackBelow) {
+            x = "750";
+            y = "950";
+        }
+
+        return (
+            <svg x={x} y ={y} width={"75"} height={"75"}>
+                { count > 1 ? <text x="0" y="0" fill="white" dominantBaseline={"hanging"}>{count}</text> : null}
+                <image href={civilian} width={"100%"} height={"100%"}/>
+            </svg>
+        );
+    }
+    private getCiviliansOnLoc(location: LocationId): number {
+        if (!this.props.game.activeCivilians) {
+            return 0;
+        }
+        return this.props.game.activeCivilians[LocationId[location]];
     }
 
     private handleLocationClick(location: LocationId) {

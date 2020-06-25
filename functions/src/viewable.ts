@@ -17,7 +17,7 @@ function redactActiveCivilians(locatedCivilians: LocatedCivilianShips): Location
         });
         return result;
     } else {
-        return null;
+        return {};
     }
 }
 
@@ -36,6 +36,7 @@ function redactPlayer(player: FullPlayer): PlayerData {
     }
     playerData.skillCounts = countSkills(player.skillCards);
     playerData.quorumCount = player.quorumHand.length;
+    playerData.loyaltyCount = player.loyaltyCards.length;
     return playerData;
 }
 
@@ -87,11 +88,11 @@ export function convertToViewable(full: FullGameData, players: { [key: string]: 
         basestarDamage: full.basestarDamage.length,
         damagedVipers: full.damagedVipers,
         damagedLocations: full.damagedLocations ? full.damagedLocations : null,
-        activeVipers: full.activeVipers ? full.activeVipers: null,
-        activeRaiders: full.activeRaiders ? full.activeRaiders: null,
-        activeHeavyRaiders: full.activeHeavyRaiders ? full.activeHeavyRaiders: null,
+        activeVipers: full.activeVipers ? full.activeVipers: {},
+        activeRaiders: full.activeRaiders ? full.activeRaiders: {},
+        activeHeavyRaiders: full.activeHeavyRaiders ? full.activeHeavyRaiders: {},
         activeCivilians: redactActiveCivilians(full.activeCivilians),
-        activeBasestars: full.activeBasestars ? full.activeBasestars : null,
+        activeBasestars: full.activeBasestars ? full.activeBasestars : [],
         boardedCenturions: full.boardedCenturions ? full.boardedCenturions: null,
         nukes: full.nukes,
         jumpPosition: full.jumpPosition,

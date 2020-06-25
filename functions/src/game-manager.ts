@@ -24,7 +24,6 @@ import { SkillDecks } from "./skills";
 import { handleMovement } from "./location";
 import { handleAction } from "./action";
 
-
 /**
  * It appears that Firebase doesn't preserve empty arrays when doing a read.  But the objects are
  * easier to use if we have them so fill those out those sharp edges here.
@@ -38,6 +37,11 @@ export function sandGameDoc(gameDoc: GameDocument) {
         gameDoc.view.discardedSkillDecks ? gameDoc.view.discardedSkillDecks : {}
     sandSkillDecks(gameDoc.view.discardedSkillDecks);
 
+    gameDoc.view.activeRaiders = gameDoc.view.activeRaiders ? gameDoc.view.activeRaiders: {};
+    gameDoc.view.activeHeavyRaiders = gameDoc.view.activeHeavyRaiders ? gameDoc.view.activeHeavyRaiders: {};
+    gameDoc.view.activeCivilians = gameDoc.view.activeCivilians ? gameDoc.view.activeCivilians: {};
+    gameDoc.view.activeBasestars = gameDoc.view.activeBasestars ? gameDoc.view.activeBasestars: [];
+
     const players = Object.values(gameDoc.players)
     players.forEach(p => {
         p.loyaltyCards = p.loyaltyCards ? p.loyaltyCards : [];
@@ -45,8 +49,6 @@ export function sandGameDoc(gameDoc: GameDocument) {
         p.skillCards = p.skillCards ? p.skillCards : [];
     });
 }
-
-
 
 function sandSkillDecks(skillDecks: SkillDecks) {
     sandSkillDeck(skillDecks, SkillType.Tactics);

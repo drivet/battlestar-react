@@ -31,26 +31,26 @@ export function renderPlayer(p: PlayerData, currentPlayer: PlayerData) {
             </div>
             {p.skillCounts ? skillCards(p.skillCounts): null}
             {p.quorumCount ? quorumCount(p.quorumCount) : null}
+            {p.loyaltyCount ? loyaltyCount(p.loyaltyCount) : null}
         </div>
     );
 }
 
 function skillCards(skillCounts: SkillDeckCounts) {
     return (<div>
-        {Object.keys(skillCounts).map(s => skillCounts[s] ? skillCardLine(s, skillCounts[s]) : null)}
+        {Object.keys(skillCounts).map(s => skillCounts[s] ? cardLine(s, skillCounts[s]) : null)}
     </div>);
 }
 
 function quorumCount(count: number) {
-    return(
-        <div>
-            <span>Quorum:</span>
-            <span>{count}</span>
-        </div>
-    );
+    return cardLine("Quorum", count);
 }
 
-function skillCardLine(s: string, counts: number) {
+function loyaltyCount(count: number) {
+    return cardLine("Loyalty", count);
+}
+
+function cardLine(s: string, counts: number) {
     return (
         <div>
             <span>{s}:</span>
