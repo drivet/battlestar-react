@@ -3,7 +3,7 @@ module.exports = {
     extend: {
       spacing: {
         bw: '1200px',
-        bh: '900px'
+        bh: '850px'
       }
     }
   }

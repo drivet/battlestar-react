@@ -1,5 +1,6 @@
 import React from 'react';
 import { Board } from "./Board";
+import { Banner } from "./Banner";
 import { LocationId, SkillCard, ViewableGameData } from "./models/game-data";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
@@ -65,8 +66,10 @@ export class GameComponent extends React.Component<any, GameState> {
         const currentPlayer = this.state.game.players[this.state.game.currentPlayer];
         return (
             <div className={'grid grid-cols-12'}>
+                <div className={'col-span-12'}>
+                    <Banner game={this.state.game}/>
+                </div>
                 <div className={'col-span-2'}>
-                    <div>Players</div>
                     {this.state.game.players.map(p => renderPlayer(p, currentPlayer))}
                 </div>
                 <div className={'col-span-8 grid justify-center'}>

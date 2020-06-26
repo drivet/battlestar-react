@@ -80,7 +80,7 @@ export interface FullGameData {
     activeCivilians?: LocatedCivilianShips;
     activeBasestars?: ActiveBasestar[];
 
-    boardedCenturions?: number[];
+    boardedCenturions?: number;
 
     quorumDeck?: QuorumCardId[];
     destinationDeck?: DestinationCardId[];
@@ -184,6 +184,7 @@ function newGameState(userIds: string[]): FullGameData {
         centurions: 4,
         basestars: 2,
         jumpPosition: 0,
+        boardedCenturions: 0,
         galacticaDamage: createGalacticaDamageTokens(),
         basestarDamage: createBasestarDamageTokens(),
         civilianShips: createCivilianPile(),

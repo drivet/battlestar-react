@@ -93,7 +93,7 @@ export function convertToViewable(full: FullGameData, players: { [key: string]: 
         activeHeavyRaiders: full.activeHeavyRaiders ? full.activeHeavyRaiders: {},
         activeCivilians: redactActiveCivilians(full.activeCivilians),
         activeBasestars: full.activeBasestars ? full.activeBasestars : [],
-        boardedCenturions: full.boardedCenturions ? full.boardedCenturions: null,
+        boardedCenturions: full.boardedCenturions,
         nukes: full.nukes,
         jumpPosition: full.jumpPosition,
         quorumDeck: full.quorumDeck ? full.quorumDeck.length : 0,
