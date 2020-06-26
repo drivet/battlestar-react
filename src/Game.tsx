@@ -74,6 +74,7 @@ export class GameComponent extends React.Component<any, GameState> {
                     <Banner game={this.state.game}/>
                 </div>
                 <div className={'col-span-2 px-2'}>
+                    {this.renderGameState()}
                     {this.state.game.players.map(p => renderPlayer(this.state.game, p, currentPlayer))}
                 </div>
                 <div className={'col-span-8 grid justify-center'}>
@@ -156,6 +157,14 @@ export class GameComponent extends React.Component<any, GameState> {
             moveSelection: null,
             moveMade: true
         })
+    }
+
+    private renderGameState() {
+        return (
+            <div>
+                Game state here
+            </div>
+        );
     }
 }
 

@@ -1,4 +1,4 @@
-import { PlayerData, ViewableGameData } from "./models/game-data";
+import { GameState, PlayerData, ViewableGameData } from "./models/game-data";
 import CurrentPlayer from "./images/BSG_Current_Player.png";
 import President from "./images/BSG_president.gif";
 import Admiral from "./images/BSG_admiral.gif";
@@ -21,7 +21,7 @@ export function renderPlayer(game: ViewableGameData, p: PlayerData, currentPlaye
                 <div className={'flex-1'}/>
 
                 <div className={'px-1'}>
-                    {p.userId === currentPlayer.userId ? <img  className={'h-8'} src={CurrentPlayer}/> : null}
+                    {isCurrent(p, currentPlayer) ? <img  className={'h-8'} src={CurrentPlayer}/> : null}
                 </div>
 
                 <div className={'px-1'}>
@@ -32,13 +32,45 @@ export function renderPlayer(game: ViewableGameData, p: PlayerData, currentPlaye
                     {p.admiral ? <img className={'h-8'} src={Admiral}/> : null}
                 </div>
             </div>
+            {isCurrent(p, currentPlayer) ? phase(game) : null}
             {cards(game, p)}
         </div>
     );
 }
 
+function isCurrent(player: PlayerData, currentPlayer: PlayerData): boolean {
+    return player.userId === currentPlayer.userId;
+}
+
+function phase(game: ViewableGameData) {
+    const state = stateString(game.state);
+    return (
+        <div>
+            Phase: {state}
+        </div>
+    )
+}
+
+function stateString(state: GameState) {
+    if (state === GameState.CharacterSelection) {
+        return 'Character selection';
+    } else if (state === GameState.CharacterSetup) {
+        return 'Character setup';
+    } else if (state === GameState.InitialSkillSelection) {
+        return 'Initial skills selection';
+    } else if (state === GameState.ReceiveSkills) {
+        return 'Skill selection';
+    } else if (state === GameState.Movement) {
+        return 'Movement';
+    } else if (state === GameState.Action) {
+        return 'Action selection';
+    }
+}
+
 function cards(game: ViewableGameData, player: PlayerData) {
-    const totalSkills = Object.values(player.skillCounts).reduce((a, c) => a + c);
+
+    const totalSkills = player.skillCounts ? Object.values(player.skillCounts)
+        .reduce((a, c) => a + c): 0;
     return (
         <div className={'flex'}>
 
