@@ -13,10 +13,7 @@ import { renderPlayer } from "./Player";
 
 import basestar from './images/BSG_basestar.gif';
 import raider from './images/BSG_Raider.gif';
-import viper from './images/BSG_Viper.gif';
-import civilian from './images/BSG_ship_bk.gif';
 import heavyRaider from './images/BSG_HeavyRaider.gif';
-import raptor from './images/BSG_Raptor.png';
 
 interface GameState {
     game: ViewableGameData;
@@ -77,7 +74,7 @@ export class GameComponent extends React.Component<any, GameState> {
                     <Banner game={this.state.game}/>
                 </div>
                 <div className={'col-span-2 px-2'}>
-                    {this.state.game.players.map(p => renderPlayer(p, currentPlayer))}
+                    {this.state.game.players.map(p => renderPlayer(this.state.game, p, currentPlayer))}
                 </div>
                 <div className={'col-span-8 grid justify-center'}>
                     <Board game={this.state.game}
@@ -85,89 +82,24 @@ export class GameComponent extends React.Component<any, GameState> {
                            availableLocations={this.getAvailableLocations()}
                            locationSelectCb={loc => this.handleLocationSelection(loc)}/>
                 </div>
-                <div className={'col-span-2 px-2'}>
-                    <div className={'mb-3'}>
-                        <div
-                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
-                            <img src={viper} className={'w-8 mr-1'}/>
-                            <div>Vipers</div>
-                        </div>
-                        <div className={'flex items-center'}>
-                            <div>Reserve: </div>
-                            <div className={'flex-1'}/>
-                            <div>{this.state.game.vipers}</div>
-                        </div>
-                        <div className={'flex items-center'}>
-                            <div>Damaged: </div>
-                            <div className={'flex-1'}/>
-                            <div>{this.state.game.damagedVipers}</div>
-                        </div>
-                        <div className={'flex items-center'}>
-                            <div>Active: </div>
-                            <div className={'flex-1'}/>
-                            <div>{totalLocationCounts(this.state.game.activeVipers)}</div>
-                        </div>
+                <div className={'col-span-2 p-2'}>
+                    <div>
+                        Remaining Cylons
                     </div>
-                    <div className={'mb-3'}>
-                        <div
-                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
-                            <img src={raptor} className={'w-8 mr-1'}/>
-                            <div>Raptors</div>
-                            <div className={'flex-1'}/>
-
-                            <div>{this.state.game.raptors}</div>
-                        </div>
-                    </div>
-                    <div className={'mb-3'}>
-                        <div
-                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
-                            <img src={civilian} className={'w-8 mr-1'}/>
-                            <div>Civilian ships</div>
-                        </div>
-                        <div className={'flex items-center'}>
-                            <div>Reserve: </div>
-                            <div className={'flex-1'}/>
-                            <div>{this.state.game.civilianShips}</div>
-                        </div>
-                        <div className={'flex items-center'}>
-                            <div>Active: </div>
-                            <div className={'flex-1'}/>
-                            <div>{totalLocationCounts(this.state.game.activeCivilians)}</div>
-                        </div>
-                    </div>
-                    <div className={'mb-3'}>
-                        <div
-                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
-                            <img src={raider} className={'w-8 mr-1'}/>
-                            <div>Raiders</div>
-                        </div>
-                        <div className={'flex items-center'}>
-                            <div>Reserve: </div>
-                            <div className={'flex-1'}/>
+                    <div className={'flex'}>
+                        <div className={'flex mr-2'}>
+                            <img src={raider} title={'Raiders'} className={'w-8 mr-1'}/>
                             <div>{this.state.game.raiders}</div>
                         </div>
-                        <div className={'flex items-center'}>
-                            <div>Active: </div>
-                            <div className={'flex-1'}/>
-                            <div>{totalLocationCounts(this.state.game.activeRaiders)}</div>
-                        </div>
-                    </div>
-                    <div className={'mb-3'}>
-                        <div
-                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
-                            <img src={heavyRaider} className={'w-8 mr-1'}/>
-                            <div>Heavy raiders</div>
-                        </div>
-                        <div className={'flex items-center'}>
-                            <div>Reserve: </div>
-                            <div className={'flex-1'}/>
+                        <div className={'flex mr-2'}>
+                            <img src={heavyRaider} title={'Heavy Raiders'} className={'w-8 mr-1'}/>
                             <div>{this.state.game.heavyRaiders}</div>
                         </div>
-                        <div className={'flex items-center'}>
-                            <div>Active: </div>
-                            <div className={'flex-1'}/>
-                            <div>{totalLocationCounts(this.state.game.activeHeavyRaiders)}</div>
+                        <div className={'flex mr-2'}>
+                            <img src={basestar} title={'Basestars'} className={'w-8 mr-1'}/>
+                            <div>{this.state.game.basestars}</div>
                         </div>
+
                     </div>
                 </div>
                 <InputDialogs gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
