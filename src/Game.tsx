@@ -1,7 +1,7 @@
 import React from 'react';
 import { Board } from "./Board";
 import { Banner } from "./Banner";
-import { LocationId, SkillCard, ViewableGameData } from "./models/game-data";
+import { LocationCounts, LocationId, SkillCard, ViewableGameData } from "./models/game-data";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { InputDialogs } from "./InputDialogs";
@@ -10,6 +10,13 @@ import { SkillCardSelectionModal } from "./SkillCardSelectionModal";
 import { requiresDiscard } from "./models/location";
 import { gameViewOn, playerOn, pushResponse } from "./firebase-game";
 import { renderPlayer } from "./Player";
+
+import basestar from './images/BSG_basestar.gif';
+import raider from './images/BSG_Raider.gif';
+import viper from './images/BSG_Viper.gif';
+import civilian from './images/BSG_ship_bk.gif';
+import heavyRaider from './images/BSG_HeavyRaider.gif';
+import raptor from './images/BSG_Raptor.png';
 
 interface GameState {
     game: ViewableGameData;
@@ -69,7 +76,7 @@ export class GameComponent extends React.Component<any, GameState> {
                 <div className={'col-span-12'}>
                     <Banner game={this.state.game}/>
                 </div>
-                <div className={'col-span-2'}>
+                <div className={'col-span-2 px-2'}>
                     {this.state.game.players.map(p => renderPlayer(p, currentPlayer))}
                 </div>
                 <div className={'col-span-8 grid justify-center'}>
@@ -78,12 +85,90 @@ export class GameComponent extends React.Component<any, GameState> {
                            availableLocations={this.getAvailableLocations()}
                            locationSelectCb={loc => this.handleLocationSelection(loc)}/>
                 </div>
-                <div className={'col-span-2'}>
-                    <div>Vipers: {this.state.game.vipers}</div>
-                    <div>Raptors: {this.state.game.raptors}</div>
-                    <div>Civilian ships: {this.state.game.civilianShips}</div>
-                    <div>Raiders: {this.state.game.raiders}</div>
-                    <div>Heavy Raiders: {this.state.game.heavyRaiders}</div>
+                <div className={'col-span-2 px-2'}>
+                    <div className={'mb-3'}>
+                        <div
+                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
+                            <img src={viper} className={'w-8 mr-1'}/>
+                            <div>Vipers</div>
+                        </div>
+                        <div className={'flex items-center'}>
+                            <div>Reserve: </div>
+                            <div className={'flex-1'}/>
+                            <div>{this.state.game.vipers}</div>
+                        </div>
+                        <div className={'flex items-center'}>
+                            <div>Damaged: </div>
+                            <div className={'flex-1'}/>
+                            <div>{this.state.game.damagedVipers}</div>
+                        </div>
+                        <div className={'flex items-center'}>
+                            <div>Active: </div>
+                            <div className={'flex-1'}/>
+                            <div>{totalLocationCounts(this.state.game.activeVipers)}</div>
+                        </div>
+                    </div>
+                    <div className={'mb-3'}>
+                        <div
+                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
+                            <img src={raptor} className={'w-8 mr-1'}/>
+                            <div>Raptors</div>
+                            <div className={'flex-1'}/>
+
+                            <div>{this.state.game.raptors}</div>
+                        </div>
+                    </div>
+                    <div className={'mb-3'}>
+                        <div
+                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
+                            <img src={civilian} className={'w-8 mr-1'}/>
+                            <div>Civilian ships</div>
+                        </div>
+                        <div className={'flex items-center'}>
+                            <div>Reserve: </div>
+                            <div className={'flex-1'}/>
+                            <div>{this.state.game.civilianShips}</div>
+                        </div>
+                        <div className={'flex items-center'}>
+                            <div>Active: </div>
+                            <div className={'flex-1'}/>
+                            <div>{totalLocationCounts(this.state.game.activeCivilians)}</div>
+                        </div>
+                    </div>
+                    <div className={'mb-3'}>
+                        <div
+                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
+                            <img src={raider} className={'w-8 mr-1'}/>
+                            <div>Raiders</div>
+                        </div>
+                        <div className={'flex items-center'}>
+                            <div>Reserve: </div>
+                            <div className={'flex-1'}/>
+                            <div>{this.state.game.raiders}</div>
+                        </div>
+                        <div className={'flex items-center'}>
+                            <div>Active: </div>
+                            <div className={'flex-1'}/>
+                            <div>{totalLocationCounts(this.state.game.activeRaiders)}</div>
+                        </div>
+                    </div>
+                    <div className={'mb-3'}>
+                        <div
+                            className={'flex align-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2'}>
+                            <img src={heavyRaider} className={'w-8 mr-1'}/>
+                            <div>Heavy raiders</div>
+                        </div>
+                        <div className={'flex items-center'}>
+                            <div>Reserve: </div>
+                            <div className={'flex-1'}/>
+                            <div>{this.state.game.heavyRaiders}</div>
+                        </div>
+                        <div className={'flex items-center'}>
+                            <div>Active: </div>
+                            <div className={'flex-1'}/>
+                            <div>{totalLocationCounts(this.state.game.activeHeavyRaiders)}</div>
+                        </div>
+                    </div>
                 </div>
                 <InputDialogs gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
                 {this.isMoveDiscardPhase() ? this.getSkillCardSelectionModal(cards => this.handleMoveDiscard(cards[0])) : null}
@@ -140,4 +225,11 @@ export class GameComponent extends React.Component<any, GameState> {
             moveMade: true
         })
     }
+}
+
+function totalLocationCounts(locations: LocationCounts): number {
+    if(!locations) {
+        return 0;
+    }
+    return Object.values(locations).reduce((a,c) => a + c);
 }
