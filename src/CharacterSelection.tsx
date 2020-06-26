@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import Modal from 'react-modal';
 import baltar from './images/chars_baltar.jpg';
 import billadama from './images/chars_bill_adama.jpg';
@@ -10,11 +10,10 @@ import leeadama from './images/chars_lee_adama.jpg';
 import saultigh from './images/chars_saul_tigh.jpg';
 import sharonvalaerii from './images/chars_sharon_valerii.jpg';
 import tomzarek from './images/chars_tom_zarek.jpg';
-import { CharacterId } from "./models/game-data";
+import { CharacterId, PlayerData, ViewableGameData } from "./models/game-data";
 import firebase from "./firebase";
 import { CharacterSelectionRequest, CharacterSelectionResponse, InputId } from "./models/inputs";
 import { myUserId } from "./App";
-import { InputDialogsProps } from "./InputDialogs";
 import { customModalStyles } from "./view";
 
 const charImages = {
@@ -36,12 +35,14 @@ function charImgElement(character: CharacterId) {
 
 interface CharacterSelectionProps {
     gameId: string;
-    selectable: CharacterId[];
+    game: ViewableGameData;
+    player: PlayerData;
 }
 
 interface CharacterSelectionState {
     displayedCharacter: number;
-    open: boolean;
+    show: boolean;
+    selected: boolean;
 }
 
 function makeResponse(selectedCharacter: CharacterId): CharacterSelectionResponse {
@@ -52,69 +53,94 @@ function makeResponse(selectedCharacter: CharacterId): CharacterSelectionRespons
     }
 }
 
-export function CharacterSelection(props: InputDialogsProps) {
-    function shouldShowCharacterSelection(): boolean {
-        const g = props.game;
+export class CharacterSelection extends Component<CharacterSelectionProps, CharacterSelectionState> {
+    state = {
+        show: false,
+        displayedCharacter: 0,
+        selected: false
+    };
+
+    render() {
+        if (!this.shouldShowCharacterSelection()) {
+            return null;
+        }
+        return (
+            <div>
+                {this.state.selected ? <div className={'my-1'}>Character selected</div> :
+                <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1'}
+                        type="button" onClick={this.showModal}>Select Character</button> }
+                {this.renderModal()}
+            </div>
+        );
+    }
+
+    private showModal = () => {
+        this.setState({ show: true });
+    };
+
+    private shouldShowCharacterSelection(): boolean {
+        const g = this.props.game;
         return g && g.inputRequest.userId === g.players[0].userId &&
             g.inputRequest.inputId === InputId.SelectCharacter;
     }
 
-    function characterSelection() {
-        const characterSelectionRequest = props.game.inputRequest as CharacterSelectionRequest;
-        return (
-            <CharacterSelectionModal selectable={characterSelectionRequest.characterPool.selectable}
-                                     gameId={props.gameId}/>
-        );
+    private selectable() {
+        const request = this.props.game.inputRequest as CharacterSelectionRequest;
+        return request.characterPool.selectable;
     }
 
-    return (<div>{shouldShowCharacterSelection() ? characterSelection() : null}</div>);
-}
-
-class CharacterSelectionModal extends React.Component<CharacterSelectionProps, CharacterSelectionState> {
-    constructor(props) {
-        super(props);
-        this.state = {
-            displayedCharacter: 0,
-            open: true
-        };
-    }
-
-    render() {
+    private renderModal() {
         return(
-            <Modal isOpen={this.state.open} style={customModalStyles}>
+            <Modal isOpen={this.state.show} style={customModalStyles}>
                 {charImgElement(this.currentCharacterId())}
                 <div>
-                    <button onClick={e => this.handlePrev(e)}>Previous</button>
-                    <button onClick={e => this.handleSelect(e)}>Select</button>
-                    <button onClick={e => this.handleNext(e)}>Next</button>
+                    <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1 mr-1'}
+                            onClick={e => this.handlePrev(e)}>Previous</button>
+                    <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1 mr-1'}
+                            onClick={e => this.handleSelect(e)}>Select</button>
+                    <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1 mr-1'}
+                            onClick={e => this.handleNext(e)}>Next</button>
+                    <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1 mr-1'}
+                            onClick={e => this.handleCancel()}>Cancel</button>
                 </div>
             </Modal>
         );
     }
 
-    private handleSelect(e) {
-        firebase.database().ref('/games/' + this.props.gameId + '/responses')
-            .push(makeResponse(this.props.selectable[this.state.displayedCharacter]));
+    private handleCancel() {
         this.setState({
-            open: false
+            show: false
         });
     }
 
-    private handleNext(e) {
+    private handleSelect(e) {
+        const selectable = this.selectable();
+        firebase.database().ref('/games/' + this.props.gameId + '/responses')
+            .push(makeResponse(selectable[this.state.displayedCharacter]));
         this.setState({
-            displayedCharacter: this.state.displayedCharacter === this.props.selectable.length -1 ?
+            show: false,
+            selected: true
+        })
+    }
+
+    private handleNext(e) {
+        const selectable = this.selectable();
+        this.setState({
+            displayedCharacter: this.state.displayedCharacter === selectable.length -1 ?
                 0 : this.state.displayedCharacter + 1
         });
     }
 
     private handlePrev(e) {
+        const selectable = this.selectable();
         this.setState({
             displayedCharacter: this.state.displayedCharacter === 0 ?
-                this.props.selectable.length - 1 : this.state.displayedCharacter - 1
+                selectable.length - 1 : this.state.displayedCharacter - 1
         });
     }
 
     private currentCharacterId(): CharacterId {
-        return this.props.selectable[this.state.displayedCharacter];
+        const selectable = this.selectable();
+        return selectable[this.state.displayedCharacter];
     }
 }

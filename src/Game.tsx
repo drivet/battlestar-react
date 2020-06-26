@@ -14,6 +14,7 @@ import { renderPlayer } from "./Player";
 import basestar from './images/BSG_basestar.gif';
 import raider from './images/BSG_Raider.gif';
 import heavyRaider from './images/BSG_HeavyRaider.gif';
+import { CharacterSelection } from "./CharacterSelection";
 
 interface GameState {
     game: ViewableGameData;
@@ -103,6 +104,7 @@ export class GameComponent extends React.Component<any, GameState> {
 
                     </div>
                 </div>
+
                 <InputDialogs gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
                 {this.isMoveDiscardPhase() ? this.getSkillCardSelectionModal(cards => this.handleMoveDiscard(cards[0])) : null}
             </div>
@@ -162,15 +164,8 @@ export class GameComponent extends React.Component<any, GameState> {
     private renderGameState() {
         return (
             <div>
-                Game state here
+                <CharacterSelection gameId={this.gameId()} game={this.state.game} player={this.state.player} />
             </div>
         );
     }
-}
-
-function totalLocationCounts(locations: LocationCounts): number {
-    if(!locations) {
-        return 0;
-    }
-    return Object.values(locations).reduce((a,c) => a + c);
 }

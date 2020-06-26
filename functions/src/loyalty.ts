@@ -35,7 +35,7 @@ export function loyaltyDeck(playerCount: number, extraHumans: number): LoyaltyDi
 
     shuffle(deck);
 
-    const distributed: LoyaltyCardId[] = deal(deck, playerCount);
+    const distributed: LoyaltyCardId[] = deal(deck, playerCount + extraHumans);
 
     if (playerCount === 4 || playerCount === 6) {
         addCard(deck, LoyaltyCardId.Sympathizer);

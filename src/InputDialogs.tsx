@@ -15,7 +15,6 @@ export class InputDialogs extends React.Component<InputDialogsProps, any> {
     render() {
         return (
             <div>
-                <CharacterSelection {...this.props}/>
                 <InitialSkillSelection {...this.props}/>
                 <SkillSelection {...this.props}/>
             </div>
