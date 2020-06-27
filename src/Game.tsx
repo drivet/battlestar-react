@@ -20,6 +20,7 @@ import quorumBack from './images/BSG_Quorum_Back.png';
 import destinationBack from './images/BSG_Destination_Back.png';
 import { SkillSelection } from "./SkillSelection";
 import { InitialSkillSelection } from "./InitialSkillSelection";
+import { IconInfo } from "./utils/IconInfo";
 
 interface GameState {
     game: ViewableGameData;
@@ -92,38 +93,17 @@ export class GameComponent extends React.Component<any, GameState> {
                 <div className={'col-span-2 p-2'}>
                     <div>Remaining Cards</div>
                     <div className={'flex'}>
-                        <div className={'flex items-center mr-2'}>
-                            <img src={destinationBack} title={'Destination'} className={'w-8 mr-1'}/>
-                            <div>{this.state.game.destinationDeck}</div>
-                        </div>
-                        <div className={'flex items-center mr-2'}>
-                            <img src={loyaltyBack} title={'Loyalty'} className={'w-8 mr-1'}/>
-                            <div>{this.state.game.loyaltyDeck}</div>
-                        </div>
-                        <div className={'flex items-center mr-2'}>
-                            <img src={quorumBack} title={'Quorum'} className={'w-8 mr-1'}/>
-                            <div>{this.state.game.quorumDeck}</div>
-                        </div>
-                        <div className={'flex items-center mr-2'}>
-                            <img src={skillBack} title={'Destiny'} className={'w-8 mr-1'}/>
-                            <div>{this.state.game.destinyDeck}</div>
-                        </div>
+                        <IconInfo icon={destinationBack} text={this.state.game.destinationDeck} title={'Destination'}/>
+                        <IconInfo icon={loyaltyBack} text={this.state.game.loyaltyDeck} title={'Loyalty'} />
+                        <IconInfo icon={quorumBack} text={this.state.game.quorumDeck} title={'Quorum'} />
+                        <IconInfo icon={skillBack} text={this.state.game.destinyDeck} title={'Destiny'} />
                     </div>
 
                     <div className={'mt-2'}>Remaining Cylons</div>
                     <div className={'flex'}>
-                        <div className={'flex mr-2'}>
-                            <img src={raider} title={'Raiders'} className={'w-8 mr-1'}/>
-                            <div>{this.state.game.raiders}</div>
-                        </div>
-                        <div className={'flex mr-2'}>
-                            <img src={heavyRaider} title={'Heavy Raiders'} className={'w-8 mr-1'}/>
-                            <div>{this.state.game.heavyRaiders}</div>
-                        </div>
-                        <div className={'flex mr-2'}>
-                            <img src={basestar} title={'Basestars'} className={'w-8 mr-1'}/>
-                            <div>{this.state.game.basestars}</div>
-                        </div>
+                        <IconInfo icon={raider} text={this.state.game.raiders} title={'Raiders'} className={'mr-4'} />
+                        <IconInfo icon={heavyRaider} text={this.state.game.heavyRaiders} title={'Heavy Raiders'}  className={'mr-4'}/>
+                        <IconInfo icon={basestar} text={this.state.game.basestars} title={'Basestars'}  className={'mr-4'} />
                     </div>
                 </div>
                 {this.isMoveDiscardPhase() ? this.getSkillCardSelectionModal(cards => this.handleMoveDiscard(cards[0])) : null}

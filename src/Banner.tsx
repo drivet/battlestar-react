@@ -8,7 +8,7 @@ import pop from './images/pop.png';
 import viper from './images/BSG_Viper.gif';
 import raptor from './images/BSG_Raptor.png';
 import civilian from './images/BSG_ship_bk.gif';
-import destBack from './images/BSG_Destination_Back.png';
+import { IconInfo } from "./utils/IconInfo";
 
 interface BannerProps {
     game: ViewableGameData
@@ -27,40 +27,32 @@ export class Banner extends React.Component<BannerProps, any> {
     private renderStats() {
         return (
             <div className={'flex items-center text-white'}>
-                <div className={'flex items-center px-2'}>
-                    <img src={morale} title={'Morale'} className={'w-6'}/>
-                    <div className={'px-1'}>{this.props.game.morale}</div>
-                </div>
-                <div className={'flex items-center px-2'}>
-                    <img src={food} title={'Food'} className={'w-6'}/>
-                    <div className={'px-1'}>{this.props.game.food}</div>
-                </div>
-                <div className={'flex items-center px-2'}>
-                    <img src={fuel} title={'Fuel'} className={'w-6'}/>
-                    <div className={'px-1'}>{this.props.game.fuel}</div>
-                </div>
-                <div className={'flex items-center px-2'}>
-                    <img src={pop} title={'Population'} className={'w-6'}/>
-                    <div className={'px-1'}>{this.props.game.population}</div>
-                </div>
-                <div className={'flex items-center px-2'}>
-                    <img src={viper} title={'Vipers'} className={'w-8'}/>
-                    <div className={'px-1'}>Reserve: {this.props.game.vipers}</div>
-                    <div className={'px-1'}>Damaged: {this.props.game.damagedVipers}</div>
-                </div>
-                <div className={'flex items-center px-2'}>
-                    <img src={raptor} title={'Raptors'} className={'w-8'}/>
-                    <div className={'px-1'}>{this.props.game.raptors}</div>
-                </div>
-                <div className={'flex items-center px-2'}>
-                    <img src={civilian} title={'Civilians'} className={'w-8'}/>
-                    <div className={'px-1'}>{this.props.game.civilianShips}</div>
-                </div>
+                <IconInfo icon={morale} size={'sm'} className={'px-2'} text={this.props.game.morale} title={'Morale'} />
+                <IconInfo icon={food} size={'sm'} className={'px-2'} text={this.props.game.food} title={'Food'} />
+                <IconInfo icon={fuel} size={'sm'} className={'px-2'} text={this.props.game.fuel} title={'Fuel'} />
+                <IconInfo icon={pop} size={'sm'} className={'px-2'} text={this.props.game.population} title={'Population'} />
+
+                <IconInfo icon={viper} size={'sm'} className={'px-2'}
+                          text={this.getViperText()}
+                          title={'Viper'} />
+
+                <IconInfo icon={raptor} size={'sm'} className={'px-2'}
+                          text={this.props.game.raptors}
+                          title={'Raptors'} />
+
+                <IconInfo icon={civilian} size={'sm'} className={'px-2'}
+                          text={this.props.game.civilianShips}
+                          title={'Civilians'} />
+
                 <div className={'flex items-center px-2'}>
                     <div>Distance traveled: </div>
                     <div className={'px-1'}>{this.props.game.distance}</div>
                 </div>
             </div>
         );
+    }
+
+    private getViperText() {
+        return 'Reserve: ' + this.props.game.vipers + ', Damaged: ' + this.props.game.damagedVipers
     }
 }

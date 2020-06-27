@@ -2,34 +2,33 @@ import { GameState, PlayerData, ViewableGameData } from "./models/game-data";
 import CurrentPlayer from "./images/BSG_Current_Player.png";
 import President from "./images/BSG_president.gif";
 import Admiral from "./images/BSG_admiral.gif";
-import { CharToken } from "./CharToken";
 import React from "react";
 import skillBack from './images/BSG_Skill_Back.png';
 import loyaltyBack from './images/BSG_Loyalty_Back.png';
 import quorumBack from './images/BSG_Quorum_Back.png';
 import nuke from './images/BSG_nuke1.gif';
+import { IconInfo } from "./utils/IconInfo";
+import { getTokenImage } from "./models/char-token-image";
+import { Icon } from "./utils/Icon";
 
 export function renderPlayer(game: ViewableGameData, p: PlayerData, currentPlayer: PlayerData) {
     return (
         <div key={p.userId} className={'mb-8'}>
             <div className={'flex items-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2 mb-2'}>
-                <CharToken className={'h-8'} characterId={p.characterId}/>
-                <div className={'px-1'}>
-                    {p.userId}
-                </div>
+                <IconInfo icon={getTokenImage(p.characterId)} text={p.userId} title={'Character'} />
 
                 <div className={'flex-1'}/>
 
                 <div className={'px-1'}>
-                    {isCurrent(p, currentPlayer) ? <img  className={'h-8'} src={CurrentPlayer}/> : null}
+                    {isCurrent(p, currentPlayer) ? <Icon icon={CurrentPlayer} title={'Current player'}/> : null}
                 </div>
 
                 <div className={'px-1'}>
-                    {p.president ? <img className={'h-8'}  src={President}/> : null}
+                    {p.president ? <Icon icon={President} title={'President'}/> : null}
                 </div>
 
                 <div className={'px-1'}>
-                    {p.admiral ? <img className={'h-8'} src={Admiral}/> : null}
+                    {p.admiral ? <Icon icon={Admiral} title={'Admiral'}/> : null}
                 </div>
             </div>
             {isCurrent(p, currentPlayer) ? phase(game) : null}
@@ -73,29 +72,10 @@ function cards(game: ViewableGameData, player: PlayerData) {
         .reduce((a, c) => a + c): 0;
     return (
         <div className={'flex'}>
-
-            <div className={'flex mr-2 items-center'}>
-                <img className={'h-10'} src={loyaltyBack} title={'Loyalty'}/>
-                <div>{player.loyaltyCount}</div>
-            </div>
-
-            <div className={'flex mr-2 items-center'}>
-                <img className={'h-10'} src={skillBack} title={'Skills'}/>
-                <div>{totalSkills}</div>
-            </div>
-
-            {player.president ?
-                (<div className={'flex mr-2 items-center'}>
-                    <img className={'h-10'} src={quorumBack} title={'Quorum'}/>
-                    <div>{player.quorumCount}</div>
-                </div>) : null
-            }
-            {player.admiral ?
-                (<div className={'flex mr-2 items-center'}>
-                    <img className={'h-8'} src={nuke} title={'Nukes'}/>
-                    <div>{game.nukes}</div>
-                </div>) : null
-            }
+            <IconInfo icon={loyaltyBack} text={player.loyaltyCount} title={'Loyalty'} className={'mr-1'}/>
+            <IconInfo icon={skillBack} text={totalSkills} title={'Skills'} className={'mr-1'}/>
+            {player.president ? <IconInfo icon={quorumBack} text={player.quorumCount} title={'Quorum'} className={'mr-1'}/> : null}
+            {player.admiral ? <IconInfo icon={nuke} text={game.nukes} title={'Nukes'} className={'mr-1'}/> : null}
         </div>
     )
 }
