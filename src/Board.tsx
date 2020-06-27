@@ -14,6 +14,7 @@ import heavyRaider from './images/BSG_HeavyRaider.gif';
 
 import { ActiveBasestar, CharacterId, LocationId, PlayerData, ViewableGameData } from "./models/game-data";
 import { getTokenImage } from "./models/char-token-image";
+import { getPlayerColor } from "./Player";
 
 interface BoardProps {
     game: ViewableGameData;
@@ -99,32 +100,28 @@ export class Board extends React.Component<BoardProps> {
 
     private rect(location: LocationId, x: string, y: string, width: string, height: string) {
         const cn = 'fill-current text-blue-700 opacity-0 ' + this.getHover(location);
-        const chars = this.getCharsOnLoc(location);
+        const players = this.getPlayersOnLoc(location);
         return (
             <svg x={x} y={y} width={width} height={height}>
-                {this.makeTokenLocations(chars)}
+                {this.makeTokenLocations(players)}
                 <rect onClick={() => this.handleLocationClick(location)} className={cn} x={"0"} y={"y"}
                     width={"100%"} height={"100%"}/>
             </svg>
         );
     }
 
-    private makeTokenLocations(character: CharacterId[]) {
-        return character.map((c,i) => {
+    private makeTokenLocations(players: PlayerData[]) {
+        return players.map((p,i) => {
             return (
-                <g>
-                    <rect x={(i * 20).toString()} y={"0"} width={"20"} height={"30"} stroke="green" stroke-width="5"
-                          fill="none"/>
-                    <image href={getTokenImage(c)} x={(i * 20).toString()} y={"0"} width={"20"} height={"30"}/>
-                </g>
+                <svg className={'fill-current text-'+getPlayerColor(this.props.game, p) }>
+                    <circle cx={( (i * 20) + 15).toString()} cy="15" r="15"/>
+                </svg>
             )
         });
     }
 
-    private getCharsOnLoc(location: LocationId): CharacterId[] {
-        return this.props.game.players
-            .filter(p => p.location === location)
-            .map(p => p.characterId);
+    private getPlayersOnLoc(location: LocationId): PlayerData[] {
+        return this.props.game.players.filter(p => p.location === location);
     }
 
     private getHover(location: LocationId): string {

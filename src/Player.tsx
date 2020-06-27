@@ -11,11 +11,19 @@ import { IconInfo } from "./utils/IconInfo";
 import { getTokenImage } from "./models/char-token-image";
 import { Icon } from "./utils/Icon";
 
+const playerColors = ['red-500', 'green-500', 'blue-500', 'purple-500', 'yellow-500', 'orange-500'];
+
+export function getPlayerColor(game: ViewableGameData, player: PlayerData): string {
+    return playerColors[game.players.indexOf(player)];
+}
+
 export function renderPlayer(game: ViewableGameData, p: PlayerData, currentPlayer: PlayerData) {
+    const color = getPlayerColor(game, p);
     return (
         <div key={p.userId} className={'mb-8'}>
             <div className={'flex items-center bg-blue-100 border-t border-b border-blue-500 text-blue-700 py-2 mb-2'}>
-                <IconInfo icon={getTokenImage(p.characterId)} text={p.userId} title={'Character'} />
+
+                <IconInfo icon={getTokenImage(p.characterId)} text={p.userId} title={'Character'} className={"text-"+color}/>
 
                 <div className={'flex-1'}/>
 
