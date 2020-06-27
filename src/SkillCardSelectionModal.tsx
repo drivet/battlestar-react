@@ -15,8 +15,8 @@ interface SkillCardSelectionState {
     open: boolean;
 }
 
-function skillCardImgElement(skillCard: SkillCard) {
-    return (<img className={'skillCard'} src={getSkillCardImage(skillCard)} alt={'skill card'}/>);
+export function skillCardImgElement(skillCard: SkillCard) {
+    return (<img src={getSkillCardImage(skillCard)} alt={'Skill card'}/>);
 }
 
 export class SkillCardSelectionModal extends React.Component<SkillCardSelectionProps, SkillCardSelectionState> {

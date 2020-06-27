@@ -32,17 +32,28 @@ export function renderPlayer(game: ViewableGameData, p: PlayerData, currentPlaye
                 </div>
 
                 <div className={'px-1'}>
-                    {p.president ? <Icon icon={President} title={'President'}/> : null}
+                    {p.president ? <Icon icon={President} title={'President'}
+                                         onClick={e => handlePresClick()}/> : null}
                 </div>
 
                 <div className={'px-1'}>
-                    {p.admiral ? <Icon icon={Admiral} title={'Admiral'}/> : null}
+                    {p.admiral ? <Icon icon={Admiral} title={'Admiral'}
+                                       onClick={e => handleAdmiralClick()}/> : null}
                 </div>
             </div>
             {isCurrent(p, currentPlayer) ? phase(game) : null}
             {cards(game, p)}
         </div>
     );
+}
+
+function handlePresClick() {
+    console.log('president');
+}
+
+
+function handleAdmiralClick() {
+    console.log('admiral');
 }
 
 function isCurrent(player: PlayerData, currentPlayer: PlayerData): boolean {

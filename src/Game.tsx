@@ -21,6 +21,7 @@ import destinationBack from './images/BSG_Destination_Back.png';
 import { SkillSelection } from "./SkillSelection";
 import { InitialSkillSelection } from "./InitialSkillSelection";
 import { IconInfo } from "./utils/IconInfo";
+import { PlayerHand } from "./Hand";
 
 interface GameState {
     game: ViewableGameData;
@@ -81,6 +82,7 @@ export class GameComponent extends React.Component<any, GameState> {
                     <Banner game={this.state.game}/>
                 </div>
                 <div className={'col-span-2 px-2'}>
+                    {this.renderHand()}
                     {this.renderGameState()}
                     {this.state.game.players.map(p => renderPlayer(this.state.game, p, currentPlayer))}
                 </div>
@@ -161,6 +163,11 @@ export class GameComponent extends React.Component<any, GameState> {
         })
     }
 
+    private renderHand() {
+        return (
+            <PlayerHand player={this.state.player} />
+        );
+    }
     private renderGameState() {
         return (
             <div>

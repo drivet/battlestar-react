@@ -6,6 +6,7 @@ interface IconProps {
     size?: string;
     title: string;
     className?: string;
+    onClick?: (e: any) => void;
 }
 
 export class Icon extends Component<IconProps, {}> {
@@ -16,7 +17,8 @@ export class Icon extends Component<IconProps, {}> {
         return (
             <div className={cn}>
                 <div className={'flex align-center justify-center ' + size[0] + ' ' + size[1]}>
-                    <img src={this.props.icon} title={this.props.title} className={'w-full h-full object-contain'}/>
+                    <img src={this.props.icon} title={this.props.title} className={'w-full h-full object-contain'}
+                         onClick={e => this.props.onClick ? this.props.onClick(e): {}}/>
                 </div>
             </div>
         );
