@@ -30,7 +30,7 @@ const charImages = {
 }
 
 function charImgElement(character: CharacterId) {
-    return (<img src={charImages[character]} alt={'character'}/>);
+    return (<img src={charImages[character]} alt={'character'} className={'mb-1'}/>);
 }
 
 interface CharacterSelectionProps {
@@ -67,7 +67,7 @@ export class CharacterSelection extends Component<CharacterSelectionProps, Chara
         return (
             <div>
                 {this.state.selected ? <div className={'my-1'}>Character selected</div> :
-                <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1'}
+                <button className={'btn btn-std my-1'}
                         type="button" onClick={this.showModal}>Select Character</button> }
                 {this.renderModal()}
             </div>
@@ -92,15 +92,16 @@ export class CharacterSelection extends Component<CharacterSelectionProps, Chara
     private renderModal() {
         return(
             <Modal isOpen={this.state.show} style={customModalStyles}>
+                <h1 className={'text-xl mb-1'}>Please select your character</h1>
                 {charImgElement(this.currentCharacterId())}
-                <div>
-                    <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1 mr-1'}
+                <div className={'flex justify-center'}>
+                    <button className={'btn btn-std mr-1'}
                             onClick={e => this.handlePrev(e)}>Previous</button>
-                    <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1 mr-1'}
+                    <button className={'btn btn-std mr-1'}
                             onClick={e => this.handleSelect(e)}>Select</button>
-                    <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1 mr-1'}
+                    <button className={'btn btn-std mr-1'}
                             onClick={e => this.handleNext(e)}>Next</button>
-                    <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1 mr-1'}
+                    <button className={'btn btn-std mr-1'}
                             onClick={e => this.handleCancel()}>Cancel</button>
                 </div>
             </Modal>

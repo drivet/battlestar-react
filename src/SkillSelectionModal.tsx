@@ -1,5 +1,4 @@
 import React from "react";
-import './SkillSelectionModal.css';
 import { SkillType } from "./models/game-data";
 import Modal from 'react-modal';
 import politics from './images/politics.png';
@@ -31,7 +30,7 @@ const skillImages = {
 }
 
 function skillImgElement(skillType: SkillType) {
-    return (<img className={'skillImg'} src={skillImages[skillType]} alt={'skill type'}/>);
+    return (<img className={'w-full h-full'} src={skillImages[skillType]} alt={'skill type'}/>);
 }
 
 export function makeResponse(input: InputId, selectedSkills: SkillType[]): ReceiveInitialSkillsResponse | ReceiveSkillsResponse {
@@ -54,17 +53,17 @@ export class SkillSelectionModal extends React.Component<SkillSelectionProps, Sk
         return(
             <Modal isOpen={this.props.show} style={customModalStyles}>
                 Select skill cards from the options on the left
-                <div className={'skillSelectionPanel'}>
-                    <div className={'availableSkillList'}>
+                <div className={'flex mb-1'}>
+                    <div>
                         {this.props.availableSkills.map(s => this.renderAvailSkill(s))}
                     </div>
-                    <div className={'selectedSkillList'}>
+                    <div>
                         {this.getSelectedSkills()
                             .map((s, i) => this.renderSelectedSkill(s, i))}
                     </div>
                 </div>
-                <div>
-                    <button onClick={e => this.handleDone(e)}
+                <div className={'flex justify-center'}>
+                    <button className={'btn btn-std'} onClick={e => this.handleDone(e)}
                             disabled={this.state.selectedSkills.length < this.props.count}>
                         Done
                     </button>
@@ -85,7 +84,7 @@ export class SkillSelectionModal extends React.Component<SkillSelectionProps, Sk
 
     private renderAvailSkill(s: SkillType) {
         return (
-            <div className={'availableSkillItem'} onClick={() => this.skillClick(s)}>
+            <div className={'w-40 h-10 p-1'} onClick={() => this.skillClick(s)}>
                 {skillImgElement(s)}
             </div>
         );
@@ -93,8 +92,8 @@ export class SkillSelectionModal extends React.Component<SkillSelectionProps, Sk
 
     private renderSelectedSkill(s: SkillType, index: number) {
         return (
-            <div className={'selectedSkillRow'} key={index}>
-                <div className={'selectedSkillItem'} onClick={() => this.skillClick(s)}>
+            <div className={'flex align-center'} key={index}>
+                <div className={'w-40 h-10 p-1'} onClick={() => this.skillClick(s)}>
                     {s !== undefined ? skillImgElement(s) : null}
                 </div>
                 {s !== undefined ? this.renderRemoveButton(index) : null}
@@ -103,7 +102,7 @@ export class SkillSelectionModal extends React.Component<SkillSelectionProps, Sk
     }
 
     private renderRemoveButton(index: number) {
-        return (<a href={'#'} onClick={e => {this.remove(e, index)}}>Remove</a>)
+        return (<a className={'btn btn-std'} href={'#'} onClick={e => {this.remove(e, index)}}>Remove</a>)
     }
 
     private remove(e: any, index: number) {
