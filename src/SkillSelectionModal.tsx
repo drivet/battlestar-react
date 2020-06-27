@@ -12,6 +12,7 @@ import { myUserId } from "./App";
 import { customModalStyles } from "./view";
 
 interface SkillSelectionProps {
+    show: boolean;
     availableSkills: SkillType[];
     count: number;
     doneCb: (skills: SkillType[]) => void;
@@ -19,7 +20,6 @@ interface SkillSelectionProps {
 
 interface SkillSelectionState {
     selectedSkills: SkillType[];
-    open: boolean;
 }
 
 const skillImages = {
@@ -46,14 +46,13 @@ export class SkillSelectionModal extends React.Component<SkillSelectionProps, Sk
     constructor(props) {
         super(props);
         this.state = {
-            selectedSkills: [],
-            open: true
+            selectedSkills: []
         };
     }
 
     render() {
         return(
-            <Modal isOpen={this.state.open} style={customModalStyles}>
+            <Modal isOpen={this.props.show} style={customModalStyles}>
                 Select skill cards from the options on the left
                 <div className={'skillSelectionPanel'}>
                     <div className={'availableSkillList'}>
@@ -82,9 +81,6 @@ export class SkillSelectionModal extends React.Component<SkillSelectionProps, Sk
 
     private handleDone(e) {
         this.props.doneCb(this.state.selectedSkills);
-        this.setState({
-            open: false
-        });
     }
 
     private renderAvailSkill(s: SkillType) {

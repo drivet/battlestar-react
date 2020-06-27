@@ -4,7 +4,6 @@ import { Banner } from "./Banner";
 import { LocationId, SkillCard, ViewableGameData } from "./models/game-data";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
-import { InputDialogs } from "./InputDialogs";
 import { InputId, MoveSelectionRequest, MoveSelectionResponse } from "./models/inputs";
 import { SkillCardSelectionModal } from "./SkillCardSelectionModal";
 import { requiresDiscard } from "./models/location";
@@ -19,6 +18,8 @@ import skillBack from './images/BSG_Skill_Back.png';
 import loyaltyBack from './images/BSG_Loyalty_Back.png';
 import quorumBack from './images/BSG_Quorum_Back.png';
 import destinationBack from './images/BSG_Destination_Back.png';
+import { SkillSelection } from "./SkillSelection";
+import { InitialSkillSelection } from "./InitialSkillSelection";
 
 interface GameState {
     game: ViewableGameData;
@@ -125,8 +126,6 @@ export class GameComponent extends React.Component<any, GameState> {
                         </div>
                     </div>
                 </div>
-
-                <InputDialogs gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
                 {this.isMoveDiscardPhase() ? this.getSkillCardSelectionModal(cards => this.handleMoveDiscard(cards[0])) : null}
             </div>
         );
@@ -186,6 +185,8 @@ export class GameComponent extends React.Component<any, GameState> {
         return (
             <div>
                 <CharacterSelection gameId={this.gameId()} game={this.state.game} player={this.state.player} />
+                <SkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
+                <InitialSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
             </div>
         );
     }

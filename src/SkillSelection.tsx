@@ -1,42 +1,80 @@
-import { InputDialogsProps } from "./InputDialogs";
-import { getCharacter, SkillType } from "./models/game-data";
+import { getCharacter, PlayerData, SkillType, ViewableGameData } from "./models/game-data";
 import firebase from "./firebase";
 import { InputId } from "./models/inputs";
-import React from "react";
+import React, { Component } from "react";
 import { makeResponse, SkillSelectionModal } from "./SkillSelectionModal";
 
-export function SkillSelection(props: InputDialogsProps) {
-    function skillSelection() {
-        const multiSkills = getMultiSkills();
-        const count = multiSkills[0];
-        const skills = multiSkills[1];
+interface SkillSelectionProps {
+    gameId: string;
+    game: ViewableGameData;
+    player: PlayerData;
+}
+
+interface SkillSelectionState {
+    show: boolean;
+    done: boolean;
+}
+
+export class SkillSelection extends Component<SkillSelectionProps, SkillSelectionState> {
+    state = {
+        show: false,
+        done: false
+    };
+
+    render() {
+        if (!this.shouldShowSkillSelection()) {
+            return null;
+        }
         return (
-            <SkillSelectionModal availableSkills={skills}
-                                 count={count}
-                                 doneCb={skills => handleSkillSelection(skills)}/>
+            <div>
+                {this.state.done ? <div className={'my-1'}>Skills selected</div> :
+                    <button className={'bg-blue-500 hover:bg-blue-700 text-white font-bold p-1 rounded my-1'}
+                            type="button" onClick={this.showModal}>Select Skills</button> }
+                {this.skillSelection()}
+            </div>
         );
     }
 
-    function handleSkillSelection(selectedSkills: SkillType[]) {
-        firebase.database().ref('/games/' + props.gameId + '/responses')
-            .push(makeResponse(InputId.ReceiveSkills, selectedSkills));
+    private skillSelection() {
+        const multiSkills = this.getMultiSkills();
+        const count = multiSkills[0];
+        const skills = multiSkills[1];
+        return (
+            <SkillSelectionModal show={this.state.show}
+                                 availableSkills={skills}
+                                 count={count}
+                                 doneCb={skills => this.handleSkillSelection(skills)}/>
+        );
     }
 
-    function shouldShowSkillSelection(): boolean {
-        if (!props.player) {
+    private showModal = () => {
+        this.setState({ show: true });
+    };
+
+    private shouldShowSkillSelection(): boolean {
+        if (!this.props.player) {
             return false;
         }
-        const g = props.game;
+        const g = this.props.game;
         const r = g && g.inputRequest.userId === g.players[0].userId &&
             g.inputRequest.inputId === InputId.ReceiveSkills;
         return r;
     }
 
-    function getMultiSkills(): [number, SkillType[]] {
-        if (!shouldShowSkillSelection()) {
+    private handleSkillSelection(selectedSkills: SkillType[]) {
+        firebase.database().ref('/games/' + this.props.gameId + '/responses')
+            .push(makeResponse(InputId.ReceiveSkills, selectedSkills));
+        this.setState({
+            show: false,
+            done: true
+        });
+    }
+
+    private getMultiSkills(): [number, SkillType[]] {
+        if (!this.shouldShowSkillSelection()) {
             return [0, []];
         }
-        const character = getCharacter(props.player.characterId);
+        const character = getCharacter(this.props.player.characterId);
         const skills = [];
         let count = 0;
         character.cardsDue
@@ -48,9 +86,4 @@ export function SkillSelection(props: InputDialogsProps) {
         return [count, skills];
     }
 
-    return (
-        <div>
-            {shouldShowSkillSelection() ? skillSelection() : null}
-        </div>
-    );
 }
