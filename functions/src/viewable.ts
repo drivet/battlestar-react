@@ -73,6 +73,7 @@ export function convertToViewable(full: FullGameData, players: { [key: string]: 
         players: redactedPlayers,
         currentPlayer: full.currentPlayer,
         selectableCharacters: full.characterPool ? full.characterPool.selectable : null,
+        distance: full.distance,
         food: full.food,
         fuel: full.fuel,
         morale: full.morale,

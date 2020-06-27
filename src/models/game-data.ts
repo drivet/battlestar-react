@@ -507,6 +507,7 @@ export interface ViewableGameData {
     nukes: number;
 
     jumpPosition: number;
+    distance: number;
 
     quorumDeck: number;
     destinationDeck: number;

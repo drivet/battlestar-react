@@ -1,7 +1,7 @@
 import React from 'react';
 import { Board } from "./Board";
 import { Banner } from "./Banner";
-import { LocationCounts, LocationId, SkillCard, ViewableGameData } from "./models/game-data";
+import { LocationId, SkillCard, ViewableGameData } from "./models/game-data";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { InputDialogs } from "./InputDialogs";
@@ -15,6 +15,10 @@ import basestar from './images/BSG_basestar.gif';
 import raider from './images/BSG_Raider.gif';
 import heavyRaider from './images/BSG_HeavyRaider.gif';
 import { CharacterSelection } from "./CharacterSelection";
+import skillBack from './images/BSG_Skill_Back.png';
+import loyaltyBack from './images/BSG_Loyalty_Back.png';
+import quorumBack from './images/BSG_Quorum_Back.png';
+import destinationBack from './images/BSG_Destination_Back.png';
 
 interface GameState {
     game: ViewableGameData;
@@ -85,9 +89,27 @@ export class GameComponent extends React.Component<any, GameState> {
                            locationSelectCb={loc => this.handleLocationSelection(loc)}/>
                 </div>
                 <div className={'col-span-2 p-2'}>
-                    <div>
-                        Remaining Cylons
+                    <div>Remaining Cards</div>
+                    <div className={'flex'}>
+                        <div className={'flex items-center mr-2'}>
+                            <img src={destinationBack} title={'Destination'} className={'w-8 mr-1'}/>
+                            <div>{this.state.game.destinationDeck}</div>
+                        </div>
+                        <div className={'flex items-center mr-2'}>
+                            <img src={loyaltyBack} title={'Loyalty'} className={'w-8 mr-1'}/>
+                            <div>{this.state.game.loyaltyDeck}</div>
+                        </div>
+                        <div className={'flex items-center mr-2'}>
+                            <img src={quorumBack} title={'Quorum'} className={'w-8 mr-1'}/>
+                            <div>{this.state.game.quorumDeck}</div>
+                        </div>
+                        <div className={'flex items-center mr-2'}>
+                            <img src={skillBack} title={'Destiny'} className={'w-8 mr-1'}/>
+                            <div>{this.state.game.destinyDeck}</div>
+                        </div>
                     </div>
+
+                    <div className={'mt-2'}>Remaining Cylons</div>
                     <div className={'flex'}>
                         <div className={'flex mr-2'}>
                             <img src={raider} title={'Raiders'} className={'w-8 mr-1'}/>
@@ -101,7 +123,6 @@ export class GameComponent extends React.Component<any, GameState> {
                             <img src={basestar} title={'Basestars'} className={'w-8 mr-1'}/>
                             <div>{this.state.game.basestars}</div>
                         </div>
-
                     </div>
                 </div>
 

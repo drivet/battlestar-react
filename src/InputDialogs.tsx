@@ -1,7 +1,6 @@
 import React from "react";
 import { ViewableGameData } from "./models/game-data";
 import { FullPlayer } from "../functions/src/game";
-import { CharacterSelection } from "./CharacterSelection";
 import { InitialSkillSelection } from "./InitialSkillSelection";
 import { SkillSelection } from "./SkillSelection";
 

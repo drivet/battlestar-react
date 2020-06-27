@@ -8,6 +8,7 @@ import pop from './images/pop.png';
 import viper from './images/BSG_Viper.gif';
 import raptor from './images/BSG_Raptor.png';
 import civilian from './images/BSG_ship_bk.gif';
+import destBack from './images/BSG_Destination_Back.png';
 
 interface BannerProps {
     game: ViewableGameData
@@ -54,6 +55,10 @@ export class Banner extends React.Component<BannerProps, any> {
                 <div className={'flex items-center px-2'}>
                     <img src={civilian} title={'Civilians'} className={'w-8'}/>
                     <div className={'px-1'}>{this.props.game.civilianShips}</div>
+                </div>
+                <div className={'flex items-center px-2'}>
+                    <div>Distance traveled: </div>
+                    <div className={'px-1'}>{this.props.game.distance}</div>
                 </div>
             </div>
         );

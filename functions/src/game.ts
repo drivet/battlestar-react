@@ -52,6 +52,8 @@ export interface FullGameData {
 
     jumpPosition: number;
 
+    distance: number;
+
     // resource counters
     food: number;
     fuel: number;
@@ -190,6 +192,7 @@ function newGameState(userIds: string[]): FullGameData {
         civilianShips: createCivilianPile(),
         nukes: 2,
         damagedVipers: 0,
+        distance: 0
     }
 }
 
