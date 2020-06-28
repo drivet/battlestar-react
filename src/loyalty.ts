@@ -1,10 +1,10 @@
 import { LoyaltyCardId } from "./models/game-data";
-import sympathizer from './images/BSG_Loyalty_Sympathizer.png';
-import human from './images/BSG_Loyalty_Not_Cylon.png';
-import brig from './images/BSG_Loyalty_Brig.png';
-import damage from './images/BSG_Loyalty_Damage_Gal.png';
-import morale from './images/BSG_Loyalty_Morale.png';
-import sickbay from './images/BSG_Loyalty_Sickbay.png';
+import sympathizer from './images/loyalty/BSG_Loyalty_Sympathizer.png';
+import human from './images/loyalty/BSG_Loyalty_Not_Cylon.png';
+import brig from './images/loyalty/BSG_Loyalty_Brig.png';
+import damage from './images/loyalty/BSG_Loyalty_Damage_Gal.png';
+import morale from './images/loyalty/BSG_Loyalty_Morale.png';
+import sickbay from './images/loyalty/BSG_Loyalty_Sickbay.png';
 
 const cards = {
     [LoyaltyCardId[LoyaltyCardId.Sympathizer]]: sympathizer,

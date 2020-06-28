@@ -1,14 +1,14 @@
 import { CharacterId } from "./game-data";
-import apollo from "../images/Player_Piece_Lee_Adama.png";
-import starbuck from "../images/PlayerPiece_Starbuck.png";
-import helo from "../images/PlayerPiece_Helo.png";
-import adama from "../images/PlayerPiece_Bill_Adama.png";
-import boomer from "../images/PlayerPiece_Boomer.png";
-import baltar from "../images/PlayerPiece_Baltar.png";
-import galen from "../images/PlayerPiece_Galen.png";
-import tigh from "../images/PlayerPiece_Tigh.png";
-import roslin from "../images/PlayerPiece_Laura_Roslin.png";
-import zarek from "../images/PlayerPiece_Tom_Zarek.png";
+import apollo from "../images/charactertokens/Player_Piece_Lee_Adama.png";
+import starbuck from "../images/charactertokens/PlayerPiece_Starbuck.png";
+import helo from "../images/charactertokens/PlayerPiece_Helo.png";
+import adama from "../images/charactertokens/PlayerPiece_Bill_Adama.png";
+import boomer from "../images/charactertokens/PlayerPiece_Boomer.png";
+import baltar from "../images/charactertokens/PlayerPiece_Baltar.png";
+import galen from "../images/charactertokens/PlayerPiece_Galen.png";
+import tigh from "../images/charactertokens/PlayerPiece_Tigh.png";
+import roslin from "../images/charactertokens/PlayerPiece_Laura_Roslin.png";
+import zarek from "../images/charactertokens/PlayerPiece_Tom_Zarek.png";
 
 export function getTokenImage(c: CharacterId) {
     if (c === CharacterId.LeeAdama) {
