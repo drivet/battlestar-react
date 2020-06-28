@@ -20,6 +20,7 @@ import quorumBack from './images/quorum/BSG_Quorum_Back.png';
 import destinationBack from './images/BSG_Destination_Back.png';
 import { SkillSelection } from "./SkillSelection";
 import { InitialSkillSelection } from "./InitialSkillSelection";
+import { ActionSelection } from "./ActionSelection";
 import { IconInfo } from "./utils/IconInfo";
 import { PlayerHand } from "./Hand";
 
@@ -174,6 +175,7 @@ export class GameComponent extends React.Component<any, GameState> {
                 <CharacterSelection gameId={this.gameId()} game={this.state.game} player={this.state.player} />
                 <SkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
                 <InitialSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
+                <ActionSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
             </div>
         );
     }

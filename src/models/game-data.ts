@@ -313,6 +313,10 @@ export enum DestinationCardId {
     TyliumPlanet,
 }
 
+export enum ActionId {
+    Nothing
+}
+
 export enum CrisisCardId {
     // cylon attack
     JammedAssault,
@@ -429,16 +433,6 @@ export interface CivilianShip {
     fuel: number;
     morale: number;
     population: number;
-}
-
-// only visible to the player identified by the userId
-export interface PlayerHand {
-    userId: string;
-    loyaltyCards: LoyaltyCardId[];
-    skillCards: SkillCard[];
-
-    // only president has these
-    quorumCards?: QuorumCardId[];
 }
 
 // publicly visible player data

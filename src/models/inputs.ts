@@ -1,4 +1,4 @@
-import { CharacterId, LocationId, SkillCard, SkillType } from "./game-data";
+import { ActionId, CharacterId, LocationId, SkillCard, SkillType } from "./game-data";
 import { CharacterPool } from "../../functions/src/character";
 
 export enum InputId {
@@ -58,4 +58,8 @@ export interface MoveSelectionResponse extends InputResponse {
 }
 
 export interface MoveSelectionInput extends InputRequest, MoveSelectionResponse {
+}
+
+export interface ActionSelectionResponse extends InputResponse {
+    selectedAction: ActionId;
 }
