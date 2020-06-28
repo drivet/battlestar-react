@@ -314,7 +314,67 @@ export enum DestinationCardId {
 }
 
 export enum ActionId {
-    Nothing
+    Nothing,
+
+    // Title actions
+    LaunchNuke,
+    DrawQuorumCard,
+
+    // Pilot Action
+    ActivateViper,
+
+    // Character actions
+    UnconventionalTactics,
+    DeclareMartialLaw,
+    CAG,
+    CylonDetector,
+    SkilledPolitician,
+
+    // Quorum
+    InspirationalSpeech,
+    ArrestOrder,
+    AcceptProphecy,
+    PresidentialPardon,
+    EncourageMutiny,
+    AssignArbitrator,
+    AssignVicePresident,
+    ReleaseMugshots,
+    FoodRationing,
+    BrutalForce,
+    AssignMissionSpecialist,
+
+    // Skills
+    MaximumFirepower,
+    Repair,
+    ConsolidatePower,
+    ExecutiveOrder,
+    LaunchScout,
+
+    // Galactica Location
+    PressRoom,
+    PresidentsOffice,
+    Administration,
+    FtlControl,
+    WeaponsControl,
+    Command,
+    Communications,
+    AdmiralsQuarters,
+    ResearchLab,
+    HangarDeck,
+    Armory,
+    Brig,
+
+    // Cylon reveal
+    SendToBrig,
+    DamageGalactica,
+    ReduceMorale,
+    SendToSickbay,
+
+    // Cylon Location
+    Caprica,
+    CylonFleet,
+    HumanFleet,
+    ResurrectionShip,
 }
 
 export enum CrisisCardId {
