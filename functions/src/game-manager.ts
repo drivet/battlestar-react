@@ -1,4 +1,4 @@
-import { CharacterId, GameState, getCharacter, LocationId, SkillType, SkillTypeKeys } from "../../src/models/game-data";
+import { CharacterId, GameState, getCharacter, LocationId, SkillType } from "../../src/models/game-data";
 import {
     distributeTitles,
     FullPlayer,
@@ -13,104 +13,47 @@ import {
     CharacterSelectionRequest,
     InitialLocationInput,
     InputId,
-    InputResponse,
-    MoveSelectionInput,
     ReceiveInitialSkillsInput,
     ReceiveSkillsInput
 } from "../../src/models/inputs";
 import { selectCharacter } from "./character";
 import { addCard, addCards, deal, dealOne } from "./deck";
-import { SkillDecks } from "./skills";
 import { handleMovement } from "./location";
 import { handleAction } from "./action";
 
 /**
- * It appears that Firebase doesn't preserve empty arrays when doing a read.  But the objects are
- * easier to use if we have them so fill those out those sharp edges here.
- */
-export function sandGameDoc(gameDoc: GameDocument) {
-    gameDoc.gameState.quorumDeck = gameDoc.gameState.quorumDeck ? gameDoc.gameState.quorumDeck : [];
-    gameDoc.gameState.discardedSkillDecks =
-        gameDoc.gameState.discardedSkillDecks ? gameDoc.gameState.discardedSkillDecks : {}
-    sandSkillDecks(gameDoc.gameState.discardedSkillDecks);
-    gameDoc.view.discardedSkillDecks =
-        gameDoc.view.discardedSkillDecks ? gameDoc.view.discardedSkillDecks : {}
-    sandSkillDecks(gameDoc.view.discardedSkillDecks);
-
-    gameDoc.view.activeRaiders = gameDoc.view.activeRaiders ? gameDoc.view.activeRaiders: {};
-    gameDoc.view.activeHeavyRaiders = gameDoc.view.activeHeavyRaiders ? gameDoc.view.activeHeavyRaiders: {};
-    gameDoc.view.activeCivilians = gameDoc.view.activeCivilians ? gameDoc.view.activeCivilians: {};
-    gameDoc.view.activeBasestars = gameDoc.view.activeBasestars ? gameDoc.view.activeBasestars: [];
-
-    const players = Object.values(gameDoc.players)
-    players.forEach(p => {
-        p.loyaltyCards = p.loyaltyCards ? p.loyaltyCards : [];
-        p.quorumHand = p.quorumHand ? p.quorumHand : [];
-        p.skillCards = p.skillCards ? p.skillCards : [];
-    });
-}
-
-function sandSkillDecks(skillDecks: SkillDecks) {
-    sandSkillDeck(skillDecks, SkillType.Tactics);
-    sandSkillDeck(skillDecks, SkillType.Engineering);
-    sandSkillDeck(skillDecks, SkillType.Leadership);
-    sandSkillDeck(skillDecks, SkillType.Politics);
-    sandSkillDeck(skillDecks, SkillType.Piloting);
-}
-
-function sandSkillDeck(skillDecks: SkillDecks, skillType: SkillType) {
-    const key = SkillType[skillType];
-    skillDecks[key] = skillDecks[key] ? skillDecks[key] : [];
-}
-
-/**
  * This is always called because someone has given an input which in theory should allow us to continue the game
  */
-export function runGame(gameDoc: GameDocument, response: InputResponse) {
-    if (gameDoc.gameState.inputRequest.userId !== response.userId) {
-        console.log('InputRequest userId: ' + gameDoc.gameState.inputRequest.userId +
-            ', response userId: ' + response.userId + ', does not match. Error!');
-        return;
-    }
+export function runGame(gameDoc: GameDocument) {
 
-    if (gameDoc.gameState.inputRequest.inputId !== response.inputId) {
-        console.log('InputRequest inputId: ' + gameDoc.gameState.inputRequest.inputId +
-            ', response inputId: ' + response.inputId + ', does not match. Error!');
-        return;
-    }
-
-    let data = { ...gameDoc.gameState.inputRequest, ...response };
-
-    // We've capture the input into a data variable, so we can delete the input request
-    // Now we crank through the game until we need need another input, which may be a couple of cranks!
-    gameDoc.gameState.inputRequest = null;
     while (!gameDoc.gameState.inputRequest) {
         if (gameDoc.gameState.state === GameState.CharacterSelection) {
-            handleCharacterSelection(gameDoc, data as CharacterSelectionInput);
+            handleCharacterSelection(gameDoc);
         } else if (gameDoc.gameState.state === GameState.CharacterSetup) {
-            handleCharacterSetup(gameDoc, data as InitialLocationInput);
+            handleCharacterSetup(gameDoc);
         } else if (gameDoc.gameState.state === GameState.SetupCards) {
             setupDecksAndTitles(gameDoc);
         } else if (gameDoc.gameState.state === GameState.InitialSkillSelection) {
-            handleReceiveInitialSkills(gameDoc, data as ReceiveInitialSkillsInput);
+            handleReceiveInitialSkills(gameDoc);
         } else if (gameDoc.gameState.state === GameState.SetupDestiny) {
             handleSetupDestiny(gameDoc);
         } else if (gameDoc.gameState.state === GameState.SetupInitialShips) {
             handleSetupInitialShips(gameDoc);
         } else if (gameDoc.gameState.state === GameState.ReceiveSkills) {
-            handleReceiveSkills(gameDoc, data as ReceiveSkillsInput);
+            handleReceiveSkills(gameDoc);
         } else if (gameDoc.gameState.state === GameState.Movement) {
-            handleMovement(gameDoc, data as MoveSelectionInput);
+            handleMovement(gameDoc);
         } else if (gameDoc.gameState.state === GameState.Action) {
             handleAction(gameDoc)
         }
 
         // we assume the data was used up in one iteration
-        data = null;
+        gameDoc.input = null;
     }
 }
 
-function handleCharacterSelection(gameDoc: GameDocument, possibleInput: CharacterSelectionInput) {
+function handleCharacterSelection(gameDoc: GameDocument) {
+    const possibleInput = gameDoc.input as CharacterSelectionInput;
     const currentPlayer = getCurrentPlayer(gameDoc);
     const input = !possibleInput && currentPlayer.bot ? {
         inputId: InputId.SelectCharacter,
@@ -132,16 +75,17 @@ function handleCharacterSelection(gameDoc: GameDocument, possibleInput: Characte
     }
 }
 
-function handleCharacterSetup(gameDoc: GameDocument, input?: any) {
+function handleCharacterSetup(gameDoc: GameDocument) {
     const currentPlayer = getCurrentPlayer(gameDoc);
     if (currentPlayer.characterId === CharacterId.LeeAdama) {
-        handleApolloSetup(gameDoc, currentPlayer, input);
+        handleApolloSetup(gameDoc, currentPlayer);
     } else {
         handleStandardCharacterSetup(gameDoc, currentPlayer);
     }
 }
 
-function handleApolloSetup(gameDoc: GameDocument, player: FullPlayer, possibleInput: InitialLocationInput) {
+function handleApolloSetup(gameDoc: GameDocument, player: FullPlayer) {
+    const possibleInput = gameDoc.input as InitialLocationInput;
     const input = !possibleInput && player.bot ? {
         inputId: InputId.SelectInitialLocation,
         userId: player.userId,
@@ -183,7 +127,8 @@ function setupDecksAndTitles(gameDoc: GameDocument) {
     gameDoc.gameState.currentPlayer = 1;
 }
 
-function handleReceiveInitialSkills(gameDoc: GameDocument, possibleInput: ReceiveInitialSkillsInput) {
+function handleReceiveInitialSkills(gameDoc: GameDocument) {
+    const possibleInput = gameDoc.input as ReceiveInitialSkillsInput;
     const currentPlayer = getCurrentPlayer(gameDoc);
     const input = !possibleInput && currentPlayer.bot ? {
         userId: currentPlayer.userId,
@@ -214,16 +159,17 @@ function handleSetupInitialShips(gameDoc: GameDocument) {
     gameDoc.gameState.state = GameState.ReceiveSkills;
 }
 
-function handleReceiveSkills(gameDoc: GameDocument, input?: ReceiveSkillsInput) {
+function handleReceiveSkills(gameDoc: GameDocument) {
     const currentPlayer = getCurrentPlayer(gameDoc);
     if (hasMultiSkills(currentPlayer.characterId)) {
-        handleReceiveMultiSkills(gameDoc, input);
+        handleReceiveMultiSkills(gameDoc);
     } else {
         handleReceiveStandardSkills(gameDoc);
     }
 }
 
-function handleReceiveMultiSkills(gameDoc: GameDocument, possibleInput: ReceiveSkillsInput) {
+function handleReceiveMultiSkills(gameDoc: GameDocument) {
+    const possibleInput = gameDoc.input as ReceiveSkillsInput;
     const currentPlayer = getCurrentPlayer(gameDoc);
     const input: ReceiveSkillsInput = !possibleInput && currentPlayer.bot ? {
         userId: currentPlayer.userId,

@@ -13,7 +13,8 @@ import { addCardToTop, removeCard } from "./deck";
 import { isSpace, requiresDiscard } from "../../src/models/location";
 import { findMatchingSkillCard } from "./skills";
 
-export function handleMovement(gameDoc: GameDocument, possibleInput: MoveSelectionInput) {
+export function handleMovement(gameDoc: GameDocument) {
+    const possibleInput = gameDoc.input as MoveSelectionInput;
     const currentPlayer = getCurrentPlayer(gameDoc);
     const input: MoveSelectionInput = !possibleInput && currentPlayer.bot ?
         createBotMoveSelectionInput(gameDoc, currentPlayer): possibleInput;

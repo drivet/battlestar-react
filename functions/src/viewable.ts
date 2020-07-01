@@ -65,7 +65,7 @@ function countSkills(skillCards: SkillCard[]): SkillDeckCounts {
     return result;
 }
 
-export function convertToViewable(full: FullGameData, players: { [key: string]: FullPlayer}): ViewableGameData {
+export function refreshView(full: FullGameData, players: { [key: string]: FullPlayer}): ViewableGameData {
     const redactedPlayers = full.userIds.map(u => players[u]).map(redactPlayer);
     return {
         inputRequest: full.inputRequest,

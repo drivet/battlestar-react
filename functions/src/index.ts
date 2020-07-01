@@ -1,9 +1,11 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { GameDocument, newGame } from "./game";
-import { runGame, sandGameDoc } from "./game-manager";
-import { convertToViewable } from "./viewable";
+import { runGame} from "./game-manager";
+import { refreshView } from "./viewable";
 import { InputResponse } from "../../src/models/inputs";
+import { processInput } from "./input";
+import { sandGameDoc } from "./sand";
 
 admin.initializeApp();
 
@@ -39,16 +41,17 @@ export const processResponse = functions.database.ref('/games/{gameId}/responses
         const gameDocRef = admin.database().ref('/games/' + gameId);
         return gameDocRef.once('value').then(snapshot => {
             const gameDoc: GameDocument = snapshot.val();
+
             sandGameDoc(gameDoc);
 
-            // consume the response.  Only need one at a time
-            gameDoc.responses = null;
+            if (!processInput(gameDoc, response)) {
+                console.log('Did not successfully process input, ignoring...');
+                return;
+            }
 
-            // run through simulation
-            runGame(gameDoc, response);
+            runGame(gameDoc);
 
-            // re-create view
-            gameDoc.view = convertToViewable(gameDoc.gameState, gameDoc.players);
+            gameDoc.view = refreshView(gameDoc.gameState, gameDoc.players);
 
             return admin.database().ref('/games/' + gameId).set(gameDoc);
         });

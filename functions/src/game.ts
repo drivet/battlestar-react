@@ -24,7 +24,7 @@ import { createCivilianPile, LocatedCivilianShips } from "./civilians";
 import { loyaltyDeck } from "./loyalty";
 import { createCrisisDeck, createSuperCrisisDeck } from "./crisis";
 import { createDestinationDeck } from "./destination";
-import { convertToViewable } from "./viewable";
+import { refreshView } from "./viewable";
 import { CharacterSelectionRequest, InputId, InputRequest, InputResponse } from "../../src/models/inputs";
 import { CharacterPool, initCharacterPool } from "./character";
 
@@ -100,6 +100,7 @@ export interface GameDocument {
     gameState: FullGameData;
     view?: ViewableGameData;
     responses: { [key: string]: InputResponse }
+    input?: any;
 }
 
 function makeFullPlayer (userId: string, bot: boolean): FullPlayer {
@@ -153,7 +154,7 @@ function makeFullPlayers(userIds: string[]): { [key: string]: FullPlayer } {
 export function newGame(gameId: string, userIds: string[]): GameDocument {
     const gameState = newGameState(userIds);
     const players = makeFullPlayers(userIds);
-    const view = convertToViewable(gameState, players);
+    const view = refreshView(gameState, players);
     return {
         gameId: gameId,
         gameState: gameState,
