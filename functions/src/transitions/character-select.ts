@@ -1,20 +1,23 @@
-import { CharacterId, CharacterType, getCharacter } from "../../src/models/game-data";
+import { CharacterId, CharacterType, GameState, getCharacter } from "../../../src/models/game-data";
+import { GameDocument, getCurrentPlayer } from "../game";
+import { CharacterPool } from "../../../src/models/character";
+import { Input, InputId } from "../../../src/models/inputs";
+import { makeRequest } from "../input";
+import { nextPlayerAndChangeState } from "./defs";
 
-export interface CharacterPool {
-    selectable: CharacterId[];
-    unselectable: CharacterId[];
-}
-
-export function initCharacterPool(): CharacterPool {
-    return {
-        selectable: [CharacterId.TomZarek, CharacterId.LauraRoslin, CharacterId.SaulTigh,
-            CharacterId.GalenTyrol, CharacterId.GaiusBaltar, CharacterId.KarlAgathon, CharacterId.LeeAdama,
-            CharacterId.SharonValerii, CharacterId.WilliamAdama, CharacterId.KaraThrace],
-        unselectable: []
+export function handleSelectCharacter(gameDoc: GameDocument, input: Input<CharacterId, CharacterPool>) {
+    if (!input) {
+        gameDoc.gameState.inputRequest =
+            makeRequest(InputId.SelectCharacter, getCurrentPlayer(gameDoc).userId, gameDoc.gameState.characterPool);
+        return;
     }
+    const player = gameDoc.players[input.userId];
+    player.characterId = input.data;
+    gameDoc.gameState.characterPool = selectCharacter(input.ctx, input.data);
+    nextPlayerAndChangeState(gameDoc, GameState.CharacterSetup);
 }
 
-export function selectCharacter(pool: CharacterPool, selected: CharacterId): CharacterPool {
+function selectCharacter(pool: CharacterPool, selected: CharacterId): CharacterPool {
     const index = pool.selectable.indexOf(selected);
     if (index === -1) {
         throw new Error('invalid character selection');

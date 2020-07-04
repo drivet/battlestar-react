@@ -8,10 +8,10 @@ import {
     QuorumCardId,
     SkillCardType,
     ViewableGameData
-} from "./game-data";
-import { FullPlayer } from "../../functions/src/game";
-import { isSpace } from "./location";
-import { isCylon } from "../loyalty";
+} from "./models/game-data";
+import { FullPlayer } from "../functions/src/game";
+import { isSpace } from "./models/location";
+import { isCylon } from "./loyalty";
 
 export interface AvailableActions {
     miscActions: ActionId[];
@@ -46,7 +46,7 @@ export function getAvailableActions(game: ViewableGameData, player: FullPlayer):
     };
 }
 
-export function getActionsFromLoyalty(player: FullPlayer): ActionId[] {
+function getActionsFromLoyalty(player: FullPlayer): ActionId[] {
     if (!isCylon(player.loyaltyCards)) {
         return [];
     }
@@ -68,12 +68,12 @@ function getActionFromLoyalty(loyalty: LoyaltyCardId): ActionId {
     }
 }
 
-export function isPilot(characterId: CharacterId) {
+function isPilot(characterId: CharacterId) {
     const c = getCharacter(characterId);
     return c.type === CharacterType.Pilot;
 }
 
-export function canActivateViper(player: FullPlayer) {
+function canActivateViper(player: FullPlayer) {
     return isSpace(player.location) && isPilot(player.characterId);
 }
 

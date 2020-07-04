@@ -5,9 +5,10 @@ import 'react-tabs/style/react-tabs.css';
 import { customModalStyles } from "./view";
 import Modal from 'react-modal';
 import { LoyaltyCardId, QuorumCardId } from "./models/game-data";
-import { getLoyaltyImage, isCylon } from "./loyalty";
+import { getLoyaltyImage} from "./loyalty-cards";
 import { skillCardImgElement } from "./SkillCardSelectionModal";
 import { getQuorumImage } from "./quorum";
+import { isCylon } from "./loyalty";
 
 interface PlayerHandProps {
     player: FullPlayer;
@@ -23,6 +24,7 @@ export class PlayerHand extends Component<PlayerHandProps, PlayerHandState>{
     };
 
     render() {
+        console.log('PLAYER ' + JSON.stringify(this.props.player));
         if (!this.props.player || !this.props.player.loyaltyCards) {
             return null;
         }
@@ -48,7 +50,7 @@ export class PlayerHand extends Component<PlayerHandProps, PlayerHandState>{
                 <Tabs>
                     <TabList>
                         <Tab>Loyalty</Tab>
-                        <Tab>Skills</Tab>
+                        {this.props.player.skillCards ? <Tab>Skills</Tab> : null}
                         {this.props.player.president ? <Tab>Quorum</Tab> : null}
                     </TabList>
                     <TabPanel>
@@ -57,12 +59,14 @@ export class PlayerHand extends Component<PlayerHandProps, PlayerHandState>{
                             {this.props.player.loyaltyCards.map(lc => this.renderLoyalty(lc))}
                         </div>
                     </TabPanel>
-                    <TabPanel>
-                        <div className={'mb-2'}>Your available skill cards</div>
-                        <div className={'flex'}>
-                            {this.props.player.skillCards.map(sc => skillCardImgElement(sc))}
-                        </div>
-                    </TabPanel>
+                    {this.props.player.skillCards ?
+                        <TabPanel>
+                            <div className={'mb-2'}>Your available skill cards</div>
+                            <div className={'flex'}>
+                                {this.props.player.skillCards.map(sc => skillCardImgElement(sc))}
+                            </div>
+                        </TabPanel>
+                        : null}
                     {this.props.player.president ?
                         <TabPanel>
                             <div className={'mb-2'}>Your available quorum cards</div>

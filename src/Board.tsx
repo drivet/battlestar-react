@@ -12,8 +12,7 @@ import viper from './images/BSG_Viper.gif';
 import civilian from './images/BSG_ship_bk.gif';
 import heavyRaider from './images/BSG_HeavyRaider.gif';
 
-import { ActiveBasestar, CharacterId, LocationId, PlayerData, ViewableGameData } from "./models/game-data";
-import { getTokenImage } from "./models/char-token-image";
+import { ActiveBasestar, LocationId, PlayerData, ViewableGameData } from "./models/game-data";
 import { getPlayerColor } from "./Player";
 
 interface BoardProps {

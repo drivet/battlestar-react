@@ -80,7 +80,7 @@ function stateString(state: GameState) {
         return 'Skill selection';
     } else if (state === GameState.Movement) {
         return 'Movement';
-    } else if (state === GameState.Action) {
+    } else if (state === GameState.ActionSelection) {
         return 'Action selection';
     }
 }

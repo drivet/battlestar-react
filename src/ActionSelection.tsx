@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import { ActionId, ViewableGameData } from "./models/game-data";
-import { ActionSelectionResponse, InputId } from "./models/inputs";
+import { InputId, InputResponse } from "./models/inputs";
 import { customModalStyles } from "./view";
 import firebase from "./firebase";
 import Modal from 'react-modal';
 import { myUserId } from "./App";
-import { getAvailableActions } from "./models/action";
+import { getAvailableActions } from "./actions";
 import { FullPlayer } from "../functions/src/game";
 
 interface ActionSelectionProps {
@@ -19,11 +19,11 @@ interface ActionSelectionState {
     selected: boolean;
 }
 
-function makeResponse(selectedAction: ActionId): ActionSelectionResponse {
+function makeResponse(selectedAction: ActionId): InputResponse<ActionId> {
     return {
         userId: myUserId,
-        inputId: InputId.Action,
-        selectedAction: selectedAction
+        inputId: InputId.SelectAction,
+        data: selectedAction
     }
 }
 
@@ -58,7 +58,7 @@ export class ActionSelection extends Component<ActionSelectionProps, ActionSelec
         }
         const g = this.props.game;
         return g && g.inputRequest.userId === g.players[0].userId &&
-            g.inputRequest.inputId === InputId.Action;
+            g.inputRequest.inputId === InputId.SelectAction;
     }
 
     private renderModal() {

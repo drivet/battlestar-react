@@ -39,7 +39,7 @@ export function getGameViewState(game: ViewableGameData): GameViewState {
         return GameViewState.SelectingMultiSkills;
     } else if (inputRequest.inputId === InputId.Movement) {
         return GameViewState.SelectingLocation;
-    } else if (inputRequest.inputId === InputId.Action) {
+    } else if (inputRequest.inputId === InputId.SelectAction) {
         return GameViewState.SelectingAction;
     }
 }

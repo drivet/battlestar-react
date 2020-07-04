@@ -6,7 +6,7 @@ import tactics from './images/tactics.png';
 import piloting from './images/piloting.png';
 import engineering from './images/engineering.png';
 import leadership from './images/leadership.png';
-import { InputId, ReceiveInitialSkillsResponse, ReceiveSkillsResponse } from "./models/inputs";
+import { InputId, InputResponse } from "./models/inputs";
 import { myUserId } from "./App";
 import { customModalStyles } from "./view";
 
@@ -33,11 +33,11 @@ function skillImgElement(skillType: SkillType) {
     return (<img className={'w-full h-full'} src={skillImages[skillType]} alt={'skill type'}/>);
 }
 
-export function makeResponse(input: InputId, selectedSkills: SkillType[]): ReceiveInitialSkillsResponse | ReceiveSkillsResponse {
+export function makeResponse(input: InputId, selectedSkills: SkillType[]): InputResponse<SkillType[]> {
     return {
         userId: myUserId,
         inputId: input,
-        skills: selectedSkills,
+        data: selectedSkills,
     }
 }
 

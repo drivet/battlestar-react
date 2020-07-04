@@ -4,7 +4,7 @@ import { Banner } from "./Banner";
 import { LocationId, SkillCard, ViewableGameData } from "./models/game-data";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
-import { InputId, MoveSelectionRequest, MoveSelectionResponse } from "./models/inputs";
+import { InputId, InputRequest, InputResponse } from "./models/inputs";
 import { SkillCardSelectionModal } from "./SkillCardSelectionModal";
 import { requiresDiscard } from "./models/location";
 import { gameViewOn, playerOn, pushResponse } from "./firebase-game";
@@ -23,21 +23,24 @@ import { InitialSkillSelection } from "./InitialSkillSelection";
 import { ActionSelection } from "./ActionSelection";
 import { IconInfo } from "./utils/IconInfo";
 import { PlayerHand } from "./Hand";
+import { Movement } from "../functions/src/locations";
 
 interface GameState {
     game: ViewableGameData;
     player: FullPlayer;
 
     // move selection in progress
-    moveSelection?: MoveSelectionResponse;
+    moveSelection?: InputResponse<Movement>;
     moveMade?: boolean;
 }
 
-function makeMoveResponse(location: LocationId): MoveSelectionResponse {
+function makeMoveResponse(location: LocationId): InputResponse<Movement> {
     return {
         userId: myUserId,
         inputId: InputId.Movement,
-        location: location
+        data: {
+            location
+        }
     }
 }
 
@@ -128,12 +131,12 @@ export class GameComponent extends React.Component<any, GameState> {
 
     private handleMoveDiscard(skillCard: SkillCard) {
         const moveSelect = this.state.moveSelection;
-        moveSelect.discardedSkill = skillCard;
+        moveSelect.data.discardedSkill = skillCard;
         this.pushMoveResponse(moveSelect);
     }
 
     private getAvailableLocations(): LocationId[] {
-        return (this.state.game?.inputRequest as MoveSelectionRequest).availableLocations;
+        return (this.state.game?.inputRequest as InputRequest<LocationId[]>).ctx;
     }
 
     private getSkillCardSelectionModal(handler: (cards: SkillCard[]) => void) {
@@ -156,7 +159,7 @@ export class GameComponent extends React.Component<any, GameState> {
         }
     }
 
-    private pushMoveResponse(moveResponse: MoveSelectionResponse) {
+    private pushMoveResponse(moveResponse: InputResponse<Movement>) {
         pushResponse(this.gameId(), moveResponse);
         this.setState({
             moveSelection: null,

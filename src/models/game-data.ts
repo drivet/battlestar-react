@@ -516,7 +516,7 @@ export enum GameState {
     SetupInitialShips,
     ReceiveSkills,
     Movement,
-    Action
+    ActionSelection
 }
 
 export interface ViewableGameData {

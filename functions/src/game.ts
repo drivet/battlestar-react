@@ -25,8 +25,8 @@ import { loyaltyDeck } from "./loyalty";
 import { createCrisisDeck, createSuperCrisisDeck } from "./crisis";
 import { createDestinationDeck } from "./destination";
 import { refreshView } from "./viewable";
-import { CharacterSelectionRequest, InputId, InputRequest, InputResponse } from "../../src/models/inputs";
-import { CharacterPool, initCharacterPool } from "./character";
+import { InputId, InputRequest, InputResponse } from "../../src/models/inputs";
+import { CharacterPool, initCharacterPool } from "../../src/models/character";
 
 export interface FullPlayer {
     userId: string;
@@ -42,7 +42,7 @@ export interface FullPlayer {
 }
 
 export interface FullGameData {
-    inputRequest: InputRequest,
+    inputRequest: InputRequest<any>,
     state: GameState;
     userIds: string[];
     currentPlayer: number;
@@ -99,8 +99,7 @@ export interface GameDocument {
     players: { [key: string]: FullPlayer }
     gameState: FullGameData;
     view?: ViewableGameData;
-    responses: { [key: string]: InputResponse }
-    input?: any;
+    responses: { [key: string]: InputResponse<any> }
 }
 
 function makeFullPlayer (userId: string, bot: boolean): FullPlayer {
@@ -170,8 +169,8 @@ function newGameState(userIds: string[]): FullGameData {
         inputRequest: {
             userId: userIds[0],
             inputId: InputId.SelectCharacter,
-            characterPool: characterPool
-        } as CharacterSelectionRequest,
+            ctx: characterPool
+        } as InputRequest<CharacterPool>,
         characterPool: characterPool,
         state: GameState.CharacterSelection,
         userIds: userIds,
@@ -352,4 +351,12 @@ function flagAdmiral(players: FullPlayer[]) {
         helo.admiral = true;
         return;
     }
+}
+
+export function getCurrentPlayer(gameDoc: GameDocument): FullPlayer {
+    return gameDoc.players[gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer]];
+}
+
+export function getPlayer(gameDoc: GameDocument, userId: string): FullPlayer {
+    return gameDoc.players[userId];
 }

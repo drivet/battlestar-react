@@ -12,9 +12,10 @@ import sharonvalaerii from './images/charactersheets/chars_sharon_valerii.jpg';
 import tomzarek from './images/charactersheets/chars_tom_zarek.jpg';
 import { CharacterId, PlayerData, ViewableGameData } from "./models/game-data";
 import firebase from "./firebase";
-import { CharacterSelectionRequest, CharacterSelectionResponse, InputId } from "./models/inputs";
+import { InputId, InputRequest, InputResponse } from "./models/inputs";
 import { myUserId } from "./App";
 import { customModalStyles } from "./view";
+import { CharacterPool } from "./models/character";
 
 const charImages = {
     [CharacterId.KarlAgathon]: karlagathon,
@@ -45,11 +46,11 @@ interface CharacterSelectionState {
     selected: boolean;
 }
 
-function makeResponse(selectedCharacter: CharacterId): CharacterSelectionResponse {
+function makeResponse(selectedCharacter: CharacterId): InputResponse<CharacterId> {
     return {
         userId: myUserId,
         inputId: InputId.SelectCharacter,
-        selectedCharacter: selectedCharacter
+        data: selectedCharacter
     }
 }
 
@@ -85,8 +86,8 @@ export class CharacterSelection extends Component<CharacterSelectionProps, Chara
     }
 
     private selectable() {
-        const request = this.props.game.inputRequest as CharacterSelectionRequest;
-        return request.characterPool.selectable;
+        const request = this.props.game.inputRequest as InputRequest<CharacterPool>;
+        return request.ctx.selectable;
     }
 
     private renderModal() {
