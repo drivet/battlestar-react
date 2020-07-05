@@ -20,6 +20,7 @@ function handleApolloSetup(gameDoc: GameDocument, input: Input<boolean>, player:
         return;
     }
     player.location = input.data ? LocationId.FrontBelow : LocationId.BackBelow;
+    gameDoc.gameState.vipers--;
     nextPlayerAndChangeState(gameDoc, GameState.SetupCards)
 }
 

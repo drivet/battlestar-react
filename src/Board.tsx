@@ -11,8 +11,12 @@ import raider from './images/BSG_Raider.gif';
 import viper from './images/BSG_Viper.gif';
 import civilian from './images/BSG_ship_bk.gif';
 import heavyRaider from './images/BSG_HeavyRaider.gif';
+import apollo from './images/BSG_pilot_token_Apollo.png';
+import boomer from './images/BSG_pilot_token_Boomer.png';
+import helo from './images/BSG_pilot_token_Helo.png';
+import starbuck from './images/BSG_pilot_token_Starbuck.png';
 
-import { ActiveBasestar, LocationId, PlayerData, ViewableGameData } from "./models/game-data";
+import { ActiveBasestar, CharacterId, LocationId, PlayerData, ViewableGameData } from "./models/game-data";
 import { getPlayerColor } from "./Player";
 
 interface BoardProps {
@@ -20,6 +24,20 @@ interface BoardProps {
     locationSelect: boolean;
     availableLocations: LocationId[]
     locationSelectCb: (LocationId) => void;
+}
+
+function getPilotImg(character: CharacterId) {
+    if (character === CharacterId.LeeAdama) {
+        return apollo;
+    } else if (character === CharacterId.SharonValerii) {
+        return boomer;
+    } else if (character === CharacterId.KarlAgathon) {
+        return helo;
+    } else if (character === CharacterId.KaraThrace) {
+        return starbuck;
+    } else {
+        return null;
+    }
 }
 
 function jumpPositionImage(position: number): any {
@@ -87,6 +105,7 @@ export class Board extends React.Component<BoardProps> {
         const cn = "fill-current text-gray-600 opacity-0 " + this.getHover(location);
         return (
             <g>
+                {this.getPilotsOnLoc(location)}
                 {this.getBasestarCompOnLoc(location)}
                 {this.getRaidersCompOnLoc(location)}
                 {this.getHeavyRaidersCompOnLoc(location)}
@@ -102,14 +121,50 @@ export class Board extends React.Component<BoardProps> {
         const players = this.getPlayersOnLoc(location);
         return (
             <svg x={x} y={y} width={width} height={height}>
-                {this.makeTokenLocations(players)}
+                {this.makeShipTokenLocations(players)}
                 <rect onClick={() => this.handleLocationClick(location)} className={cn} x={"0"} y={"y"}
                     width={"100%"} height={"100%"}/>
             </svg>
         );
     }
 
-    private makeTokenLocations(players: PlayerData[]) {
+    private getPilotsOnLoc(location: LocationId) {
+        const players = this.getPlayersOnLoc(location);
+        return this.makePilotTokens(players.map(p => p.characterId), location);
+    }
+
+    private makePilotTokens(characters: CharacterId[], location: LocationId) {
+        let x, y;
+        if (location === LocationId.FrontAbove) {
+            x = "550";
+            y = "400";
+        } else if (location === LocationId.BackAbove) {
+            x = "750";
+            y = "400";
+        } else if (location === LocationId.Back) {
+            x = "1275";
+            y = "650";
+        } else if (location === LocationId.BackBelow) {
+            x = "850";
+            y = "950";
+        } else if (location === LocationId.FrontBelow) {
+            x = "425";
+            y = "950";
+        } else if (location === LocationId.Front) {
+            x = "25";
+            y = "675";
+        }
+        return characters.map((c,i) => {
+            const ix = parseInt(x) + (i * 50);
+            return (
+                <svg x={ix.toString()} y ={y} width={"50"} height={"50"}>
+                    <image href={getPilotImg(c)} width={"100%"} height={"100%"}/>
+                </svg>
+            )
+        });
+    }
+
+    private makeShipTokenLocations(players: PlayerData[]) {
         return players.map((p,i) => {
             return (
                 <svg className={'fill-current text-'+getPlayerColor(this.props.game, p) }>
@@ -254,6 +309,7 @@ export class Board extends React.Component<BoardProps> {
 
     private getVipersCompOnLoc(location: LocationId) {
         let count = this.getVipersOnLoc(location);
+
         if (!count) {
             return null;
         }
@@ -294,6 +350,7 @@ export class Board extends React.Component<BoardProps> {
 
     private getCiviliansCompOnLoc(location: LocationId) {
         let count = this.getCiviliansOnLoc(location);
+
         if (!count) {
             return null;
         }

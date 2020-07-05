@@ -32,6 +32,9 @@ interface GameState {
     // move selection in progress
     moveSelection?: InputResponse<Movement>;
     moveMade?: boolean;
+
+    // initial placement in progress
+    setupDone?: boolean;
 }
 
 function makeMoveResponse(location: LocationId): InputResponse<Movement> {
@@ -41,6 +44,14 @@ function makeMoveResponse(location: LocationId): InputResponse<Movement> {
         data: {
             location
         }
+    }
+}
+
+function makeSetupResponse(left: boolean): InputResponse<boolean> {
+    return {
+        userId: myUserId,
+        inputId: InputId.SelectInitialLocation,
+        data: left
     }
 }
 
@@ -66,7 +77,8 @@ export class GameComponent extends React.Component<any, GameState> {
     private reset(game: ViewableGameData) {
         this.setState({
             game: game,
-            moveMade: false
+            moveMade: false,
+            setupDone: false
         });
     }
 
@@ -92,7 +104,7 @@ export class GameComponent extends React.Component<any, GameState> {
                 </div>
                 <div className={'col-span-8 grid justify-center'}>
                     <Board game={this.state.game}
-                           locationSelect={this.isLocationSelectPhase()}
+                           locationSelect={this.isLocationSelectPhase() || this.isInitialSetupPhase()}
                            availableLocations={this.getAvailableLocations()}
                            locationSelectCb={loc => this.handleLocationSelection(loc)}/>
                 </div>
@@ -117,6 +129,11 @@ export class GameComponent extends React.Component<any, GameState> {
         );
     }
 
+    private isInitialSetupPhase(): boolean {
+        return this.state.game?.inputRequest.inputId === InputId.SelectInitialLocation &&
+            this.state.game?.inputRequest.userId === myUserId && !this.state.setupDone;
+    }
+
     private isMovementPhase(): boolean {
         return this.state.game?.inputRequest.inputId === InputId.Movement &&
             this.state.game?.inputRequest.userId === myUserId && !this.state.moveMade;
@@ -136,7 +153,11 @@ export class GameComponent extends React.Component<any, GameState> {
     }
 
     private getAvailableLocations(): LocationId[] {
-        return (this.state.game?.inputRequest as InputRequest<LocationId[]>).ctx;
+        if (this.isMovementPhase()) {
+            return (this.state.game?.inputRequest as InputRequest<LocationId[]>).ctx;
+        } else {
+            return [LocationId.FrontBelow, LocationId.BackBelow];
+        }
     }
 
     private getSkillCardSelectionModal(handler: (cards: SkillCard[]) => void) {
@@ -148,6 +169,10 @@ export class GameComponent extends React.Component<any, GameState> {
     }
 
     private handleLocationSelection(loc: LocationId) {
+        if (this.isInitialSetupPhase()) {
+            this.pushInitialResponse(makeSetupResponse(loc === LocationId.FrontBelow));
+            return;
+        }
         const discard = requiresDiscard(loc, this.state.player);
         if (!discard) {
             this.pushMoveResponse(makeMoveResponse(loc));
@@ -167,6 +192,13 @@ export class GameComponent extends React.Component<any, GameState> {
         })
     }
 
+    private pushInitialResponse(setupResponse: InputResponse<boolean>) {
+        pushResponse(this.gameId(), setupResponse);
+        this.setState({
+            setupDone: true
+        })
+    }
+
     private renderHand() {
         return (
             <PlayerHand player={this.state.player} />
@@ -175,6 +207,7 @@ export class GameComponent extends React.Component<any, GameState> {
     private renderGameState() {
         return (
             <div>
+                {this.isInitialSetupPhase() ? <div>Select initial location</div> : null}
                 <CharacterSelection gameId={this.gameId()} game={this.state.game} player={this.state.player} />
                 <SkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
                 <InitialSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
