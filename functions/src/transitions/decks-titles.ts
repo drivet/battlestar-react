@@ -10,7 +10,7 @@ export function setupDecksAndTitles(gameDoc: GameDocument) {
     setupDecks(gameDoc.gameState);
 
     const president = players.find(p => p.president);
-    addCards(president.quorumHand, deal(gameDoc.gameState.quorumDeck, 2));
+    addCards(president.quorumHand, deal(gameDoc.gameState.quorumDeck, 1));
 
     gameDoc.gameState.state = GameState.InitialSkillSelection;
 

@@ -14,6 +14,7 @@ import { refreshView } from "./viewable";
 import { Input, InputResponse } from "../../src/models/inputs";
 import { TransitionFn } from "./transitions/defs";
 import { getBotResponse } from "./bots/bots";
+import { handleAction } from "./transitions/action";
 
 /**
  * This is always called because someone has given an input which in theory should allow us to continue the game
@@ -81,6 +82,8 @@ function getTransitionFn(state: GameState): TransitionFn {
         return handleMovement;
     } else if (state === GameState.ActionSelection) {
         return handleActionSelection;
+    } else if (state === GameState.Action) {
+        return handleAction;
     }
 }
 

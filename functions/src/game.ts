@@ -1,6 +1,7 @@
 import { addCard, addCards, deal, dealOne, shuffle } from "./deck";
 import { createQuorumDeck } from "./quorum";
 import {
+    ActionId,
     ActiveBasestar,
     BasestarDamage,
     CharacterId,
@@ -39,6 +40,11 @@ export interface FullPlayer {
     loyaltyCards?: LoyaltyCardId[];
     skillCards?: SkillCard[];
     quorumHand?: QuorumCardId[];
+}
+
+export interface ActionCtx {
+    action: ActionId,
+    ctx?: any;
 }
 
 export interface FullGameData {
@@ -92,6 +98,8 @@ export interface FullGameData {
     crisisDeck?: CrisisCardId[];
     superCrisisDeck?: CrisisCardId[];
     loyaltyDeck?: LoyaltyCardId[];
+
+    currentAction?: ActionCtx;
 }
 
 export interface GameDocument {
@@ -359,4 +367,8 @@ export function getCurrentPlayer(gameDoc: GameDocument): FullPlayer {
 
 export function getPlayer(gameDoc: GameDocument, userId: string): FullPlayer {
     return gameDoc.players[userId];
+}
+
+export function roll(): number {
+    return Math.floor(Math.random() * 8) + 1;
 }
