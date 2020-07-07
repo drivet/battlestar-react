@@ -558,7 +558,7 @@ export interface ViewableGameData {
     activeCivilians: LocationCounts;
     activeBasestars: ActiveBasestar[];
 
-    boardedCenturions: number;
+    boardedCenturions: number[];
 
     nukes: number;
 

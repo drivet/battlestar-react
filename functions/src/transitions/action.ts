@@ -11,6 +11,7 @@ import { Input } from "../../../src/models/inputs";
 import { actionResearchLab } from "../actions/research-lab";
 import { actionEncourageMutiny } from "../actions/encourage-mutiny";
 import { TransitionFn } from "./defs";
+import { actionArmory } from "../actions/armory";
 
 export function handleAction(gameDoc: GameDocument, input: Input<any, any>) {
     const action = gameDoc.gameState.currentAction.action;
@@ -37,5 +38,7 @@ function lookupActionHandler(action: ActionId): TransitionFn {
         return actionResearchLab;
     } else if (action === ActionId.EncourageMutiny) {
         return actionEncourageMutiny;
+    } else if (action === ActionId.Armory) {
+        return actionArmory;
     }
 }
