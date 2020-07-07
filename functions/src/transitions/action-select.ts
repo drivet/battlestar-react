@@ -12,7 +12,7 @@ export function handleActionSelection(gameDoc: GameDocument, input: Input<Action
     }
 
     if (!validate(input.data, getAvailableActions(gameDoc.view, player))) {
-        throw new Error('invalid action selected');
+        throw new Error('invalid action selected ' + input.data);
     }
 
     gameDoc.gameState.currentAction = {
@@ -22,12 +22,14 @@ export function handleActionSelection(gameDoc: GameDocument, input: Input<Action
 }
 
 function validate(action: ActionId, availActions: AvailableActions): boolean {
-    const allActions = [...ensure(availActions.locationActions),
+    const allActions = [
+        ...ensure(availActions.locationActions),
         ...ensure(availActions.miscActions),
         ...ensure(availActions.loyaltyActions),
         ...ensure(availActions.skillActions),
         ...ensure(availActions.quorumActions),
-        ...ensure(availActions.characterActions)];
+        ...ensure(availActions.characterActions),
+        ...ensure(availActions.titleActions)];
     return allActions.indexOf(action) !== -1;
 }
 

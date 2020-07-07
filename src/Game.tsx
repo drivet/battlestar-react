@@ -27,6 +27,9 @@ import { Movement } from "../functions/src/locations";
 import { wantsInput } from "./utils/inputs";
 import { ConsolidatePowerSelection } from "./inputComponents/ConsolidatePower";
 import { ResearchLab } from "./inputComponents/ResearchLab";
+import { PlayerSelection } from "./inputComponents/PlayerSelection";
+import { ArrestOrder } from "./inputComponents/ArrestOrder";
+import { EncourageMutiny } from "./inputComponents/EncourageMutiny";
 
 interface GameState {
     game: ViewableGameData;
@@ -217,12 +220,17 @@ export class GameComponent extends React.Component<any, GameState> {
                     <MultiSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
                 {this.wantsInput(InputId.ReceiveInitialSkills) ?
                     <InitialSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                {this.wantsInput(InputId.SelectAction) ?
+                    <ActionSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
                 {this.wantsInput(InputId.ActionConsolidatePowerSkillSelect) ?
                     <ConsolidatePowerSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
                 {this.wantsInput(InputId.ActionResearchLabSkillSelect) ?
                     <ResearchLab gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
-                {this.wantsInput(InputId.SelectAction) ?
-                    <ActionSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                {this.wantsInput(InputId.ActionArrestOrderPlayerSelect) ?
+                    <ArrestOrder gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                {this.wantsInput(InputId.ActionEncourageMutinyPlayerSelect) ?
+                    <EncourageMutiny gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+
             </div>
         );
     }

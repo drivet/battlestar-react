@@ -129,7 +129,7 @@ export const Characters: { [key in CharacterIdKeys]?: Character } = {
     },
     [CharacterId[CharacterId.SharonValerii]]: {
         id: CharacterId.SharonValerii,
-        name: 'Sharon, "Boomer" Valeri',
+        name: 'Sharon "Boomer" Valeri',
         type: CharacterType.Pilot,
         startLocation: LocationId.Armory,
         cardsDue: [
