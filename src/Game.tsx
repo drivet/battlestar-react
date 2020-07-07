@@ -30,6 +30,7 @@ import { ResearchLab } from "./inputComponents/ResearchLab";
 import { PlayerSelection } from "./inputComponents/PlayerSelection";
 import { ArrestOrder } from "./inputComponents/ArrestOrder";
 import { EncourageMutiny } from "./inputComponents/EncourageMutiny";
+import nuke from "./images/BSG_nuke1.gif";
 
 interface GameState {
     game: ViewableGameData;
@@ -128,6 +129,10 @@ export class GameComponent extends React.Component<any, GameState> {
                         <IconInfo icon={raider} text={this.state.game.raiders} title={'Raiders'} className={'mr-4'} />
                         <IconInfo icon={heavyRaider} text={this.state.game.heavyRaiders} title={'Heavy Raiders'}  className={'mr-4'}/>
                         <IconInfo icon={basestar} text={this.state.game.basestars} title={'Basestars'}  className={'mr-4'} />
+                    </div>
+                    <div className={'mt-2'}>Nukes</div>
+                    <div className={'flex'}>
+                        <IconInfo icon={nuke} text={this.state.game.nukes} title={'Nukes'} className={'mr-1'}/>
                     </div>
                 </div>
                 {this.isMoveDiscardPhase() ? this.getSkillCardSelectionModal(cards => this.handleMoveDiscard(cards[0])) : null}

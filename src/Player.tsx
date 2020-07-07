@@ -94,7 +94,6 @@ function cards(game: ViewableGameData, player: PlayerData) {
             <IconInfo icon={loyaltyBack} text={player.loyaltyCount} title={'Loyalty'} className={'mr-1'}/>
             <IconInfo icon={skillBack} text={totalSkills} title={'Skills'} className={'mr-1'}/>
             {player.president ? <IconInfo icon={quorumBack} text={player.quorumCount} title={'Quorum'} className={'mr-1'}/> : null}
-            {player.admiral ? <IconInfo icon={nuke} text={game.nukes} title={'Nukes'} className={'mr-1'}/> : null}
         </div>
     )
 }
