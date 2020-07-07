@@ -1,5 +1,5 @@
 import { FullPlayer, GameDocument } from "../game";
-import { CharacterId, getCharacter, SkillType } from "../../../src/models/game-data";
+import { ActionId, CharacterId, getCharacter, SkillType } from "../../../src/models/game-data";
 import { InputId, InputRequest, InputResponse } from "../../../src/models/inputs";
 import { CharacterPool } from "../../../src/models/character";
 import { getAvailableLocations, Movement } from "../locations";
@@ -22,6 +22,8 @@ function getBotFn(inputId: InputId) {
         return botMultiSkills;
     } else if (inputId === InputId.Movement) {
         return createBotMoveSelectionInput;
+    } else if (inputId === InputId.SelectAction) {
+        return botActionSelect;
     }
 }
 
@@ -86,5 +88,13 @@ function createBotMoveSelectionInput(game: GameDocument, player: FullPlayer): In
             location: location,
             discardedSkill: requiresDiscard(location, player) ? player.skillCards[0] : undefined
         }
+    }
+}
+
+function botActionSelect(game: GameDocument, player: FullPlayer) {
+    return {
+        userId: player.userId,
+        inputId: InputId.SelectAction,
+        data: ActionId.Nothing
     }
 }

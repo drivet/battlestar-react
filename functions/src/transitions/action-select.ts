@@ -1,18 +1,17 @@
 import { GameDocument, getCurrentPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { makeRequest } from "../input";
-import { getAvailableActions } from "../../../src/actions";
+import { AvailableActions, getAvailableActions } from "../../../src/actions";
 import { ActionId, GameState } from "../../../src/models/game-data";
 
-export function handleActionSelection(gameDoc: GameDocument, input: Input<ActionId, ActionId[]>) {
+export function handleActionSelection(gameDoc: GameDocument, input: Input<ActionId>) {
     const player = getCurrentPlayer(gameDoc);
     if (!input) {
-        gameDoc.gameState.inputRequest =
-            makeRequest(InputId.SelectAction, player.userId, getAvailableActions(gameDoc.view, player));
+        gameDoc.gameState.inputRequest = makeRequest(InputId.SelectAction, player.userId);
         return;
     }
 
-    if (input.ctx.indexOf(input.data) === -1) {
+    if (!validate(input.data, getAvailableActions(gameDoc.view, player))) {
         throw new Error('invalid action selected');
     }
 
@@ -20,4 +19,18 @@ export function handleActionSelection(gameDoc: GameDocument, input: Input<Action
         action: input.data
     }
     gameDoc.gameState.state = GameState.Action;
+}
+
+function validate(action: ActionId, availActions: AvailableActions): boolean {
+    const allActions = [...ensure(availActions.locationActions),
+        ...ensure(availActions.miscActions),
+        ...ensure(availActions.loyaltyActions),
+        ...ensure(availActions.skillActions),
+        ...ensure(availActions.quorumActions),
+        ...ensure(availActions.characterActions)];
+    return allActions.indexOf(action) !== -1;
+}
+
+function ensure(actionIds: ActionId[]): ActionId[] {
+    return actionIds ? actionIds : [];
 }

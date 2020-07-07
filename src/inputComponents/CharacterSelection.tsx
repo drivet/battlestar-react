@@ -1,21 +1,21 @@
 import React, { Component } from "react";
 import Modal from 'react-modal';
-import baltar from './images/charactersheets/chars_baltar.jpg';
-import billadama from './images/charactersheets/chars_bill_adama.jpg';
-import galentyrol from './images/charactersheets/chars_galen_tyrol.jpg';
-import karathrace from './images/charactersheets/chars_kara_thrace.jpg';
-import karlagathon from './images/charactersheets/chars_karl_agathon.jpg';
-import lauraroslin from './images/charactersheets/chars_laura_roslin.jpg';
-import leeadama from './images/charactersheets/chars_lee_adama.jpg';
-import saultigh from './images/charactersheets/chars_saul_tigh.jpg';
-import sharonvalaerii from './images/charactersheets/chars_sharon_valerii.jpg';
-import tomzarek from './images/charactersheets/chars_tom_zarek.jpg';
-import { CharacterId, PlayerData, ViewableGameData } from "./models/game-data";
-import firebase from "./firebase";
-import { InputId, InputRequest, InputResponse } from "./models/inputs";
-import { myUserId } from "./App";
-import { customModalStyles } from "./view";
-import { CharacterPool } from "./models/character";
+import baltar from '../images/charactersheets/chars_baltar.jpg';
+import billadama from '../images/charactersheets/chars_bill_adama.jpg';
+import galentyrol from '../images/charactersheets/chars_galen_tyrol.jpg';
+import karathrace from '../images/charactersheets/chars_kara_thrace.jpg';
+import karlagathon from '../images/charactersheets/chars_karl_agathon.jpg';
+import lauraroslin from '../images/charactersheets/chars_laura_roslin.jpg';
+import leeadama from '../images/charactersheets/chars_lee_adama.jpg';
+import saultigh from '../images/charactersheets/chars_saul_tigh.jpg';
+import sharonvalaerii from '../images/charactersheets/chars_sharon_valerii.jpg';
+import tomzarek from '../images/charactersheets/chars_tom_zarek.jpg';
+import { CharacterId, PlayerData, ViewableGameData } from "../models/game-data";
+import firebase from "../firebase";
+import { InputId, InputRequest, InputResponse } from "../models/inputs";
+import { myUserId } from "../App";
+import { customModalStyles } from "../view";
+import { CharacterPool } from "../models/character";
 
 const charImages = {
     [CharacterId.KarlAgathon]: karlagathon,

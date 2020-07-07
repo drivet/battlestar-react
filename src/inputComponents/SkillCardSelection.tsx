@@ -1,8 +1,8 @@
 import React from "react";
-import { SkillCard } from "./models/game-data";
+import { SkillCard } from "../models/game-data";
 import Modal from 'react-modal';
-import { getSkillCardImage } from "./skills";
-import { customModalStyles } from "./view";
+import { getSkillCardImage } from "../skills";
+import { customModalStyles } from "../view";
 
 interface SkillCardSelectionProps {
     availableCards: SkillCard[];

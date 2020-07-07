@@ -4,7 +4,12 @@ export enum InputId {
     ReceiveInitialSkills,
     ReceiveSkills,
     Movement,
-    SelectAction
+    SelectAction,
+    ActionConsolidatePowerSkillSelect,
+    ActionArrestOrderPlayerSelect,
+    ActionResearchLabSkillSelect,
+    ActionEncourageMutinyPlayerSelect,
+    SelectCrisisAction,
 }
 
 export interface InputRequest<T extends any = undefined> {

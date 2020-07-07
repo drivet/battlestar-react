@@ -6,7 +6,7 @@ import { customModalStyles } from "./view";
 import Modal from 'react-modal';
 import { LoyaltyCardId, QuorumCardId } from "./models/game-data";
 import { getLoyaltyImage} from "./loyalty-cards";
-import { skillCardImgElement } from "./SkillCardSelectionModal";
+import { skillCardImgElement } from "./inputComponents/SkillCardSelection";
 import { getQuorumImage } from "./quorum";
 import { isCylon } from "./loyalty";
 

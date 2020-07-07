@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import { ActionId, ViewableGameData } from "./models/game-data";
-import { InputId, InputResponse } from "./models/inputs";
-import { customModalStyles } from "./view";
-import firebase from "./firebase";
+import { ActionId, ViewableGameData } from "../models/game-data";
+import { InputId, InputResponse } from "../models/inputs";
+import { customModalStyles } from "../view";
+import firebase from "../firebase";
 import Modal from 'react-modal';
-import { myUserId } from "./App";
-import { getAvailableActions } from "./actions";
-import { FullPlayer } from "../functions/src/game";
+import { myUserId } from "../App";
+import { getAvailableActions } from "../actions";
+import { FullPlayer } from "../../functions/src/game";
 
 interface ActionSelectionProps {
     gameId: string;

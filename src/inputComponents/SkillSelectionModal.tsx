@@ -1,14 +1,14 @@
 import React from "react";
-import { SkillType } from "./models/game-data";
+import { SkillType } from "../models/game-data";
 import Modal from 'react-modal';
-import politics from './images/politics.png';
-import tactics from './images/tactics.png';
-import piloting from './images/piloting.png';
-import engineering from './images/engineering.png';
-import leadership from './images/leadership.png';
-import { InputId, InputResponse } from "./models/inputs";
-import { myUserId } from "./App";
-import { customModalStyles } from "./view";
+import politics from '../images/politics.png';
+import tactics from '../images/tactics.png';
+import piloting from '../images/piloting.png';
+import engineering from '../images/engineering.png';
+import leadership from '../images/leadership.png';
+import { InputId, InputResponse } from "../models/inputs";
+import { myUserId } from "../App";
+import { customModalStyles } from "../view";
 
 interface SkillSelectionProps {
     show: boolean;

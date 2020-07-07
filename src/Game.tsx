@@ -5,7 +5,7 @@ import { LocationId, SkillCard, ViewableGameData } from "./models/game-data";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { InputId, InputRequest, InputResponse } from "./models/inputs";
-import { SkillCardSelectionModal } from "./SkillCardSelectionModal";
+import { SkillCardSelectionModal } from "./inputComponents/SkillCardSelection";
 import { requiresDiscard } from "./models/location";
 import { gameViewOn, playerOn, pushResponse } from "./firebase-game";
 import { renderPlayer } from "./Player";
@@ -13,17 +13,20 @@ import { renderPlayer } from "./Player";
 import basestar from './images/BSG_basestar.gif';
 import raider from './images/BSG_Raider.gif';
 import heavyRaider from './images/BSG_HeavyRaider.gif';
-import { CharacterSelection } from "./CharacterSelection";
+import { CharacterSelection } from "./inputComponents/CharacterSelection";
 import skillBack from './images/skills/BSG_Skill_Back.png';
 import loyaltyBack from './images/loyalty/BSG_Loyalty_Back.png';
 import quorumBack from './images/quorum/BSG_Quorum_Back.png';
 import destinationBack from './images/BSG_Destination_Back.png';
-import { SkillSelection } from "./SkillSelection";
-import { InitialSkillSelection } from "./InitialSkillSelection";
-import { ActionSelection } from "./ActionSelection";
+import { MultiSkillSelection } from "./inputComponents/MultiSkillSelection";
+import { InitialSkillSelection } from "./inputComponents/InitialSkillSelection";
+import { ActionSelection } from "./inputComponents/ActionSelection";
 import { IconInfo } from "./utils/IconInfo";
 import { PlayerHand } from "./Hand";
 import { Movement } from "../functions/src/locations";
+import { wantsInput } from "./utils/inputs";
+import { ConsolidatePowerSelection } from "./inputComponents/ConsolidatePower";
+import { ResearchLab } from "./inputComponents/ResearchLab";
 
 interface GameState {
     game: ViewableGameData;
@@ -208,11 +211,22 @@ export class GameComponent extends React.Component<any, GameState> {
         return (
             <div>
                 {this.isInitialSetupPhase() ? <div>Select initial location</div> : null}
-                <CharacterSelection gameId={this.gameId()} game={this.state.game} player={this.state.player} />
-                <SkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
-                <InitialSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
-                <ActionSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>
+                {this.wantsInput(InputId.SelectCharacter) ?
+                    <CharacterSelection gameId={this.gameId()} game={this.state.game} player={this.state.player} /> : null}
+                {this.wantsInput(InputId.ReceiveSkills) ?
+                    <MultiSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                {this.wantsInput(InputId.ReceiveInitialSkills) ?
+                    <InitialSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                {this.wantsInput(InputId.ActionConsolidatePowerSkillSelect) ?
+                    <ConsolidatePowerSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                {this.wantsInput(InputId.ActionResearchLabSkillSelect) ?
+                    <ResearchLab gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                {this.wantsInput(InputId.SelectAction) ?
+                    <ActionSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
             </div>
         );
+    }
+    private wantsInput(inputId: InputId) {
+        return wantsInput(this.state.game, this.state.player, inputId);
     }
 }
