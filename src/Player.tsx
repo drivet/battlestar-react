@@ -41,7 +41,6 @@ export function renderPlayer(game: ViewableGameData, p: PlayerData, currentPlaye
                                        onClick={e => handleAdmiralClick()}/> : null}
                 </div>
             </div>
-            {isCurrent(p, currentPlayer) ? phase(game) : null}
             {cards(game, p)}
         </div>
     );
@@ -58,31 +57,6 @@ function handleAdmiralClick() {
 
 function isCurrent(player: PlayerData, currentPlayer: PlayerData): boolean {
     return player.userId === currentPlayer.userId;
-}
-
-function phase(game: ViewableGameData) {
-    const state = stateString(game.state);
-    return (
-        <div>
-            Phase: {state}
-        </div>
-    )
-}
-
-function stateString(state: GameState) {
-    if (state === GameState.CharacterSelection) {
-        return 'Character selection';
-    } else if (state === GameState.CharacterSetup) {
-        return 'Character setup';
-    } else if (state === GameState.InitialSkillSelection) {
-        return 'Initial skills selection';
-    } else if (state === GameState.ReceiveSkills) {
-        return 'Skill selection';
-    } else if (state === GameState.Movement) {
-        return 'Movement';
-    } else if (state === GameState.ActionSelection) {
-        return 'Action selection';
-    }
 }
 
 function cards(game: ViewableGameData, player: PlayerData) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Board } from "./Board";
 import { Banner } from "./Banner";
-import { LocationId, SkillCard, ViewableGameData } from "./models/game-data";
+import { GameState, LocationId, SkillCard, ViewableGameData } from "./models/game-data";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { InputId, InputRequest, InputResponse } from "./models/inputs";
@@ -27,12 +27,11 @@ import { Movement } from "../functions/src/locations";
 import { wantsInput } from "./utils/inputs";
 import { ConsolidatePowerSelection } from "./inputComponents/ConsolidatePower";
 import { ResearchLab } from "./inputComponents/ResearchLab";
-import { PlayerSelection } from "./inputComponents/PlayerSelection";
 import { ArrestOrder } from "./inputComponents/ArrestOrder";
 import { EncourageMutiny } from "./inputComponents/EncourageMutiny";
 import nuke from "./images/BSG_nuke1.gif";
 
-interface GameState {
+interface IGameState {
     game: ViewableGameData;
     player: FullPlayer;
 
@@ -62,7 +61,7 @@ function makeSetupResponse(left: boolean): InputResponse<boolean> {
     }
 }
 
-export class GameComponent extends React.Component<any, GameState> {
+export class GameComponent extends React.Component<any, IGameState> {
     constructor(props) {
         super(props);
         this.state = {
@@ -106,6 +105,7 @@ export class GameComponent extends React.Component<any, GameState> {
                 </div>
                 <div className={'col-span-2 px-2'}>
                     {this.renderHand()}
+                    {this.phase()}
                     {this.renderGameState()}
                     {this.state.game.players.map(p => renderPlayer(this.state.game, p, currentPlayer))}
                 </div>
@@ -241,5 +241,30 @@ export class GameComponent extends React.Component<any, GameState> {
     }
     private wantsInput(inputId: InputId) {
         return wantsInput(this.state.game, this.state.player, inputId);
+    }
+
+    private phase() {
+        return (
+            <div>
+                Turn phase: {this.stateString()}
+            </div>
+        )
+    }
+
+    private stateString() {
+        const state = this.state.game.state;
+        if (state === GameState.CharacterSelection) {
+            return 'Character selection';
+        } else if (state === GameState.CharacterSetup) {
+            return 'Character setup';
+        } else if (state === GameState.InitialSkillSelection) {
+            return 'Initial skills selection';
+        } else if (state === GameState.ReceiveSkills) {
+            return 'Skill selection';
+        } else if (state === GameState.Movement) {
+            return 'Movement';
+        } else if (state === GameState.ActionSelection) {
+            return 'Action selection';
+        }
     }
 }
