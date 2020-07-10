@@ -52,7 +52,7 @@ export class SelectionPanel<T> extends Component<SelectionPanelProps<T>, Selecti
 
     private renderItem(item: T, index: number) {
         return (
-            <div className={'w-40 p-1 ' + (this.isSelected(index) ? 'bg-green-500' : 'bg-white')}
+            <div className={'p-1 ' + (this.isSelected(index) ? 'bg-green-500' : 'bg-white')}
                  onClick={() => this.handleSelect(index)}>
                 {this.props.renderFn(item, index)}
             </div>

@@ -43,7 +43,7 @@ export class PlayerHandModal extends React.Component<PlayerHandModalProps, {}> {
                         </TabPanel>
                         : null}
                 </Tabs>
-                <div>
+                <div className={"flex justify-center"}>
                     <button className={'btn btn-std my-1'} type="button" onClick={this.props.cancelCb}>Close</button>
                 </div>
             </Modal>

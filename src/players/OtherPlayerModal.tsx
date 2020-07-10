@@ -25,21 +25,27 @@ export class OtherPlayerModal extends React.Component<OtherPlayerModalProps, {}>
                     Redacted hand for {this.props.player.userId}
                 </div>
                 <div className={'flex'}>
-                    <div>
-                        <img src={loyaltyBack}/>
-                        <div>{this.props.player.loyaltyCount}</div>
+                    <div className={'m-1'}>
+                        <div>
+                            <img className={"w-40 h-64 mb-1"} src={loyaltyBack}/>
+                            <div className={'text-center'}>Loyalty: {this.props.player.loyaltyCount}</div>
+                        </div>
                     </div>
-                    <div>
-                        <img src={skillBack}/>
-                        <div>{totalSkills}</div>
+                    <div className={'m-1'}>
+                        <div>
+                            <img className={"w-40 h-64 mb-1"} src={skillBack}/>
+                            <div className={'text-center'}>Skills: {totalSkills}</div>
+                        </div>
                     </div>
                     {this.props.player.president ?
-                        <div>
-                            <img src={quorumBack}/>
-                            <div>{this.props.player.quorumCount}</div>
+                        <div className={'w-40 m-1'}>
+                            <div>
+                                <img className={"w-40 h-64 mb-1"} src={quorumBack}/>
+                                <div className={'text-center'}>Quorum: {this.props.player.quorumCount}</div>
+                            </div>
                         </div> : null}
                 </div>
-                <div>
+                <div className={"flex justify-center"}>
                     <button className={'btn btn-std my-1'} type="button" onClick={this.props.cancelCb}>Close</button>
                 </div>
             </Modal>
