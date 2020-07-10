@@ -17,7 +17,7 @@ import helo from './images/BSG_pilot_token_Helo.png';
 import starbuck from './images/BSG_pilot_token_Starbuck.png';
 
 import { ActiveBasestar, CharacterId, LocationId, PlayerData, ViewableGameData } from "./models/game-data";
-import { getPlayerColor } from "./Player";
+import { getPlayerColor } from "./players/PlayerRow";
 
 interface BoardProps {
     game: ViewableGameData;

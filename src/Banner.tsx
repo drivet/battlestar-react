@@ -27,10 +27,10 @@ export class Banner extends React.Component<BannerProps, any> {
     private renderStats() {
         return (
             <div className={'flex items-center text-white'}>
-                <IconInfo icon={morale} size={'sm'} className={'px-2'} text={this.props.game.morale} title={'Morale'} />
-                <IconInfo icon={food} size={'sm'} className={'px-2'} text={this.props.game.food} title={'Food'} />
-                <IconInfo icon={fuel} size={'sm'} className={'px-2'} text={this.props.game.fuel} title={'Fuel'} />
-                <IconInfo icon={pop} size={'sm'} className={'px-2'} text={this.props.game.population} title={'Population'} />
+                <IconInfo icon={morale} size={'xs'} className={'px-2'} text={this.props.game.morale} title={'Morale'} />
+                <IconInfo icon={food} size={'xs'} className={'px-2'} text={this.props.game.food} title={'Food'} />
+                <IconInfo icon={fuel} size={'xs'} className={'px-2'} text={this.props.game.fuel} title={'Fuel'} />
+                <IconInfo icon={pop} size={'xs'} className={'px-2'} text={this.props.game.population} title={'Population'} />
 
                 <IconInfo icon={viper} size={'sm'} className={'px-2'}
                           text={this.getViperText()}

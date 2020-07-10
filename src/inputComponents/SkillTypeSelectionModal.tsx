@@ -41,7 +41,7 @@ export function makeResponse(input: InputId, selectedSkills: SkillType[]): Input
     }
 }
 
-export class SkillSelectionModal extends React.Component<SkillSelectionProps, SkillSelectionState> {
+export class SkillTypeSelectionModal extends React.Component<SkillSelectionProps, SkillSelectionState> {
     constructor(props) {
         super(props);
         this.state = {

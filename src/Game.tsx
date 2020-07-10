@@ -1,15 +1,13 @@
 import React from 'react';
+import Modal from 'react-modal';
 import { Board } from "./Board";
 import { Banner } from "./Banner";
-import { GameState, LocationId, SkillCard, ViewableGameData } from "./models/game-data";
+import { GameState, LocationId, PlayerData, SkillCard, ViewableGameData } from "./models/game-data";
 import { myUserId } from "./App";
 import { FullPlayer } from "../functions/src/game";
 import { InputId, InputRequest, InputResponse } from "./models/inputs";
-import { SkillCardSelectionModal } from "./inputComponents/SkillCardSelection";
 import { requiresDiscard } from "./models/location";
 import { gameViewOn, playerOn, pushResponse } from "./firebase-game";
-import { renderPlayer } from "./Player";
-
 import basestar from './images/BSG_basestar.gif';
 import raider from './images/BSG_Raider.gif';
 import heavyRaider from './images/BSG_HeavyRaider.gif';
@@ -22,7 +20,6 @@ import { MultiSkillSelection } from "./inputComponents/MultiSkillSelection";
 import { InitialSkillSelection } from "./inputComponents/InitialSkillSelection";
 import { ActionSelection } from "./inputComponents/ActionSelection";
 import { IconInfo } from "./utils/IconInfo";
-import { PlayerHand } from "./Hand";
 import { Movement } from "../functions/src/locations";
 import { wantsInput } from "./utils/inputs";
 import { ConsolidatePowerSelection } from "./inputComponents/ConsolidatePower";
@@ -30,10 +27,13 @@ import { ResearchLab } from "./inputComponents/ResearchLab";
 import { ArrestOrder } from "./inputComponents/ArrestOrder";
 import { EncourageMutiny } from "./inputComponents/EncourageMutiny";
 import nuke from "./images/BSG_nuke1.gif";
+import { SkillCardSelectionSelectionPanel } from "./inputComponents/SkillCardSelectionPanel";
+import { customModalStyles } from "./view";
+import { PlayerRow } from "./players/PlayerRow";
 
 interface IGameState {
     game: ViewableGameData;
-    player: FullPlayer;
+    fullPlayer: FullPlayer;
 
     // move selection in progress
     moveSelection?: InputResponse<Movement>;
@@ -61,12 +61,18 @@ function makeSetupResponse(left: boolean): InputResponse<boolean> {
     }
 }
 
+function renderPlayer(game: ViewableGameData, player: PlayerData, fullPlayer: FullPlayer) {
+    return (
+        <PlayerRow game={game} player={player} fullPlayer={fullPlayer} />
+    );
+}
+
 export class GameComponent extends React.Component<any, IGameState> {
     constructor(props) {
         super(props);
         this.state = {
             game: null,
-            player: null,
+            fullPlayer: null,
         }
     }
 
@@ -75,7 +81,7 @@ export class GameComponent extends React.Component<any, IGameState> {
 
         playerOn(this.gameId(), player => {
             this.setState({
-                player: player
+                fullPlayer: player
             });
         });
     }
@@ -97,17 +103,17 @@ export class GameComponent extends React.Component<any, IGameState> {
             return null;
         }
 
-        const currentPlayer = this.state.game.players[this.state.game.currentPlayer];
         return (
             <div className={'grid grid-cols-12'}>
                 <div className={'col-span-12'}>
                     <Banner game={this.state.game}/>
                 </div>
                 <div className={'col-span-2 px-2'}>
-                    {this.renderHand()}
                     {this.phase()}
                     {this.renderGameState()}
-                    {this.state.game.players.map(p => renderPlayer(this.state.game, p, currentPlayer))}
+                    {this.state.fullPlayer ?
+                        this.state.game.players.map(p => renderPlayer(this.state.game, p, this.state.fullPlayer)):
+                        null}
                 </div>
                 <div className={'col-span-8 grid justify-center'}>
                     <Board game={this.state.game}
@@ -172,11 +178,18 @@ export class GameComponent extends React.Component<any, IGameState> {
     }
 
     private getSkillCardSelectionModal(handler: (cards: SkillCard[]) => void) {
-       return (<SkillCardSelectionModal availableCards={this.getSkillCards()} count={1} selectionCb={handler}/>);
+       return (
+           <Modal isOpen={true} style={customModalStyles}>
+               <SkillCardSelectionSelectionPanel
+                   available={this.getSkillCards()}
+                   selectCount={1}
+                   doneCb={handler} />
+           </Modal>
+       )
     }
 
     private getSkillCards() {
-        return this.state.player?.skillCards;
+        return this.state.fullPlayer?.skillCards;
     }
 
     private handleLocationSelection(loc: LocationId) {
@@ -184,7 +197,7 @@ export class GameComponent extends React.Component<any, IGameState> {
             this.pushInitialResponse(makeSetupResponse(loc === LocationId.FrontBelow));
             return;
         }
-        const discard = requiresDiscard(loc, this.state.player);
+        const discard = requiresDiscard(loc, this.state.fullPlayer);
         if (!discard) {
             this.pushMoveResponse(makeMoveResponse(loc));
         } else {
@@ -210,37 +223,32 @@ export class GameComponent extends React.Component<any, IGameState> {
         })
     }
 
-    private renderHand() {
-        return (
-            <PlayerHand player={this.state.player} />
-        );
-    }
     private renderGameState() {
         return (
             <div>
                 {this.isInitialSetupPhase() ? <div>Select initial location</div> : null}
                 {this.wantsInput(InputId.SelectCharacter) ?
-                    <CharacterSelection gameId={this.gameId()} game={this.state.game} player={this.state.player} /> : null}
+                    <CharacterSelection gameId={this.gameId()} game={this.state.game} player={this.state.fullPlayer} /> : null}
                 {this.wantsInput(InputId.ReceiveSkills) ?
-                    <MultiSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                    <MultiSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.fullPlayer}/>: null}
                 {this.wantsInput(InputId.ReceiveInitialSkills) ?
-                    <InitialSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                    <InitialSkillSelection gameId={this.gameId()} game={this.state.game} player={this.state.fullPlayer}/>: null}
                 {this.wantsInput(InputId.SelectAction) ?
-                    <ActionSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                    <ActionSelection gameId={this.gameId()} game={this.state.game} player={this.state.fullPlayer}/>: null}
                 {this.wantsInput(InputId.ActionConsolidatePowerSkillSelect) ?
-                    <ConsolidatePowerSelection gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                    <ConsolidatePowerSelection gameId={this.gameId()} game={this.state.game} player={this.state.fullPlayer}/>: null}
                 {this.wantsInput(InputId.ActionResearchLabSkillSelect) ?
-                    <ResearchLab gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                    <ResearchLab gameId={this.gameId()} game={this.state.game} player={this.state.fullPlayer}/>: null}
                 {this.wantsInput(InputId.ActionArrestOrderPlayerSelect) ?
-                    <ArrestOrder gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                    <ArrestOrder gameId={this.gameId()} game={this.state.game} player={this.state.fullPlayer}/>: null}
                 {this.wantsInput(InputId.ActionEncourageMutinyPlayerSelect) ?
-                    <EncourageMutiny gameId={this.gameId()} game={this.state.game} player={this.state.player}/>: null}
+                    <EncourageMutiny gameId={this.gameId()} game={this.state.game} player={this.state.fullPlayer}/>: null}
 
             </div>
         );
     }
     private wantsInput(inputId: InputId) {
-        return wantsInput(this.state.game, this.state.player, inputId);
+        return wantsInput(this.state.game, this.state.fullPlayer, inputId);
     }
 
     private phase() {

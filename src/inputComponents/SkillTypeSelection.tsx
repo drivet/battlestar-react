@@ -1,6 +1,6 @@
 import { SkillType } from "../models/game-data";
 import React, { Component } from "react";
-import { SkillSelectionModal } from "./SkillSelectionModal";
+import { SkillTypeSelectionModal } from "./SkillTypeSelectionModal";
 import { InputId, InputResponse } from "../models/inputs";
 import { myUserId } from "../App";
 
@@ -57,10 +57,10 @@ export class SkillTypeSelection extends Component<SkillTypeSelectionProps, Skill
 
     private skillSelection() {
         return (
-            <SkillSelectionModal show={this.state.show}
-                                 availableSkills={this.props.available}
-                                 count={this.props.count}
-                                 doneCb={s => this.handleSkillSelection(s)}/>
+            <SkillTypeSelectionModal show={this.state.show}
+                                     availableSkills={this.props.available}
+                                     count={this.props.count}
+                                     doneCb={s => this.handleSkillSelection(s)}/>
         );
     }
 }

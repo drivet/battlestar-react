@@ -24,3 +24,6 @@ export function getLoyaltyImage(loyalty: LoyaltyCardId) {
     return cards[LoyaltyCardId[loyalty]];
 }
 
+export function getLoyaltyBack() {
+
+}

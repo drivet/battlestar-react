@@ -1,7 +1,7 @@
 import { InputId } from "../models/inputs";
 import { PlayerData, SkillType, ViewableGameData } from "../models/game-data";
 import React from "react";
-import { makeResponse } from "./SkillSelectionModal";
+import { makeResponse } from "./SkillTypeSelectionModal";
 import { SkillTypeSelection } from "./SkillTypeSelection";
 import { pushResponse } from "../firebase-game";
 

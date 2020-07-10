@@ -1,7 +1,9 @@
 export function getSize(sizeProp: string): [string, string] {
     let size;
-    if (sizeProp === 'sm') {
-        size = '6';
+    if (sizeProp === 'xs') {
+        size = '8';
+    } else if (sizeProp === 'sm') {
+        size = '10';
     } else if (sizeProp === 'md') {
         size = '12';
     } else if (sizeProp === 'lg') {
