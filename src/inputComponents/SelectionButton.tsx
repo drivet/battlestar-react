@@ -1,6 +1,7 @@
 import React, { Component, ReactNode } from "react";
 import Modal from 'react-modal';
 import { SelectionPanel } from "./SelectionPanel";
+import { customModalStyles } from "../view";
 
 interface SelectionButtonProps<T> {
     available: T[];
@@ -55,7 +56,7 @@ export class SelectionButton<T> extends Component<SelectionButtonProps<T>, Selec
 
     private renderModal() {
         return (
-            <Modal isOpen={this.state.show}>
+            <Modal isOpen={this.state.show} style={customModalStyles}>
                 <SelectionPanel available={this.props.available}
                                 rows={this.props.rows}
                                 columns={this.props.columns}

@@ -273,6 +273,8 @@ export class GameComponent extends React.Component<any, IGameState> {
             return 'Movement';
         } else if (state === GameState.ActionSelection) {
             return 'Action selection';
+        } else if (state === GameState.Action) {
+            return 'Action execution';
         }
     }
 }

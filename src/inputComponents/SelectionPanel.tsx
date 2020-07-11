@@ -17,12 +17,12 @@ interface SelectionPanelProps<T> {
 }
 
 interface SelectionPanelState<T> {
-    selected: T[];
+    selected: number[];
 }
 
 export class SelectionPanel<T> extends Component<SelectionPanelProps<T>, SelectionPanelState<T>> {
     state = {
-        selected: [],
+        selected: [] as number[],
     };
 
     render(): ReactNode {
@@ -96,7 +96,7 @@ export class SelectionPanel<T> extends Component<SelectionPanelProps<T>, Selecti
 
     private handleDone() {
         if (this.props.doneCb) {
-            this.props.doneCb(this.state.selected);
+            this.props.doneCb(this.state.selected.map(i => this.props.available[i]));
         }
     }
 
