@@ -1,8 +1,8 @@
-import { GameDocument, getCurrentPlayer, getPlayer } from "../game";
+import { dealSkillCard, GameDocument, getCurrentPlayer, getPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { GameState, SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
-import { addCard, dealOne } from "../deck";
+import { addCard } from "../deck";
 
 export function actionResearchLab(gameDoc: GameDocument, input: Input<SkillType>) {
     if (!input) {
@@ -10,11 +10,12 @@ export function actionResearchLab(gameDoc: GameDocument, input: Input<SkillType>
             makeRequest(InputId.ActionResearchLabSkillSelect, getCurrentPlayer(gameDoc).userId);
         return;
     }
-    if (!validate(input.data)) {
-        throw new Error('Invalid skill type selected ' + input.data);
+    const skill: SkillType = input.data;
+    if (!validate(skill)) {
+        throw new Error('Invalid skill type selected: ' + JSON.stringify(skill));
     }
     const player = getPlayer(gameDoc, input.userId);
-    addCard(player.skillCards, dealOne(gameDoc.gameState.skillDecks[SkillType[input.data]]));
+    addCard(player.skillCards, dealSkillCard(gameDoc.gameState, skill));
     gameDoc.gameState.state = GameState.CrisisDrawn;
 }
 

@@ -1,7 +1,7 @@
-import { addCard, dealOne } from "../deck";
+import { addCard } from "../deck";
 import { CharacterId, GameState, getCharacter, SkillType } from "../../../src/models/game-data";
 import { nextPlayerAndChangeState } from "./defs";
-import { GameDocument, getCurrentPlayer } from "../game";
+import { dealSkillCard, GameDocument, getCurrentPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { makeRequest } from "../input";
 
@@ -13,8 +13,7 @@ export function handleReceiveInitialSkills(gameDoc: GameDocument, input: Input<S
     }
     const player = gameDoc.players[input.userId];
     validateSkills(player.characterId, input.data);
-    input.data.forEach(s => addCard(player.skillCards,
-        dealOne(gameDoc.gameState.skillDecks[SkillType[s]])));
+    input.data.forEach(s => addCard(player.skillCards, dealSkillCard(gameDoc.gameState, s)));
     nextPlayerAndChangeState(gameDoc, GameState.SetupDestiny);
 }
 

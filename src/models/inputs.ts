@@ -10,6 +10,7 @@ export enum InputId {
     ActionResearchLabSkillSelect,
     ActionEncourageMutinyPlayerSelect,
     SelectCrisisAction,
+    ActionPresidentialPardon,
 }
 
 export interface InputRequest<T extends any = undefined> {

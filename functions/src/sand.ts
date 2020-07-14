@@ -8,6 +8,8 @@ import { GameDocument } from "./game";
  */
 export function sandGameDoc(gameDoc: GameDocument) {
     gameDoc.gameState.quorumDeck = gameDoc.gameState.quorumDeck ? gameDoc.gameState.quorumDeck : [];
+    gameDoc.gameState.discardedQuorumDeck = gameDoc.gameState.discardedQuorumDeck ? gameDoc.gameState.discardedQuorumDeck : [];
+
     gameDoc.gameState.discardedSkillDecks =
         gameDoc.gameState.discardedSkillDecks ? gameDoc.gameState.discardedSkillDecks : {}
     sandSkillDecks(gameDoc.gameState.discardedSkillDecks);

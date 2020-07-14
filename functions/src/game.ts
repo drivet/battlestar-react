@@ -91,6 +91,7 @@ export interface FullGameData {
     boardedCenturions?: number[];
 
     quorumDeck?: QuorumCardId[];
+    discardedQuorumDeck?: QuorumCardId[];
     destinationDeck?: DestinationCardId[];
     skillDecks?: SkillDecks;
     discardedSkillDecks? : SkillDecks;
@@ -252,6 +253,50 @@ export function setupInitialShips(game: FullGameData) {
     placeVipers(game, LocationId.BackBelow, 1);
     placeRaiders(game, LocationId.Front, 3);
     placeCivilians(game, LocationId.Back, 2);
+}
+
+export function dealSkillCard(game: FullGameData, skillType: SkillType): SkillCard {
+    const skillKey = SkillType[skillType] as SkillTypeKeys;
+    if (game.skillDecks[skillKey].length === 0) {
+        game.skillDecks[skillKey] = shuffle(game.discardedSkillDecks[skillKey]);
+        game.discardedSkillDecks[skillKey] = [];
+    }
+    return dealOne(game.skillDecks[skillKey]);
+}
+
+export function dealSkillCards(game: FullGameData, skillType: SkillType, count: number): SkillCard[] {
+    const cards = [];
+    for (let i = 0; i < count; i++) {
+        cards.push(dealSkillCard(game, skillType))
+    }
+    return cards;
+}
+
+export function dealQuorumCard(game: FullGameData): QuorumCardId {
+    if (game.quorumDeck.length === 0) {
+        game.quorumDeck = shuffle(game.discardedQuorumDeck);
+        game.discardedQuorumDeck = [];
+    }
+    return dealOne(game.quorumDeck);
+}
+
+export function dealQuorumCards(game: FullGameData, count: number): QuorumCardId[] {
+    const cards = [];
+    for (let i = 0; i < count; i++) {
+        cards.push(dealQuorumCard(game))
+    }
+    return cards;
+}
+
+export function discardQuorumCard(game: FullGameData, player: FullPlayer, card: QuorumCardId) {
+    const index = player.quorumHand.findIndex(q => q === card);
+    const usedCard = player.quorumHand.splice(index, 1);
+    addCards(game.discardedQuorumDeck, usedCard);
+}
+
+export function removeQuorumCard(game: FullGameData, player: FullPlayer, card: QuorumCardId) {
+    const index = player.quorumHand.findIndex(q => q === card);
+    player.quorumHand.splice(index, 1);
 }
 
 function placeVipers(game: FullGameData, location: LocationId, count: number) {

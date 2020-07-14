@@ -1,12 +1,13 @@
-import { GameDocument, getCurrentPlayer, roll } from "../game";
+import { discardQuorumCard, GameDocument, getCurrentPlayer, roll } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
-import { GameState } from "../../../src/models/game-data";
+import { GameState, QuorumCardId } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
 
 export function actionEncourageMutiny(gameDoc: GameDocument, input: Input<string>) {
+    const player = getCurrentPlayer(gameDoc);
     if (!input) {
         gameDoc.gameState.inputRequest =
-            makeRequest(InputId.ActionEncourageMutinyPlayerSelect, getCurrentPlayer(gameDoc).userId);
+            makeRequest(InputId.ActionEncourageMutinyPlayerSelect, player.userId);
         return;
     }
     const players = Object.values(gameDoc.players);
@@ -19,7 +20,9 @@ export function actionEncourageMutiny(gameDoc: GameDocument, input: Input<string
         chosenPlayer.admiral = true;
         players.find(p => p.admiral).admiral = false;
     } else {
+        console.log('die was less than 3 ' + die);
         gameDoc.gameState.morale--;
     }
+    discardQuorumCard(gameDoc.gameState, player, QuorumCardId.EncourageMutiny);
     gameDoc.gameState.state = GameState.CrisisDrawn;
 }

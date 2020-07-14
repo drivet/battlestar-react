@@ -1,11 +1,11 @@
-import { GameDocument, getCurrentPlayer } from "../game";
-import { addCards, deal } from "../deck";
+import { dealQuorumCard, GameDocument, getCurrentPlayer } from "../game";
+import { addCard } from "../deck";
 import { GameState } from "../../../src/models/game-data";
 
 export function actionDrawQuorumCard(gameDoc: GameDocument) {
     const player = getCurrentPlayer(gameDoc);
     if (player.president) {
-        addCards(player.quorumHand, deal(gameDoc.gameState.quorumDeck, 1));
+        addCard(player.quorumHand, dealQuorumCard(gameDoc.gameState));
     } else {
         console.warn('non-president trying to draw quorum card, skipping...');
     }

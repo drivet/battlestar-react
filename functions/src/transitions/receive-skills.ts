@@ -1,6 +1,6 @@
-import { GameDocument, getCurrentPlayer } from "../game";
+import { dealSkillCard, dealSkillCards, GameDocument, getCurrentPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
-import { addCard, addCards, deal, dealOne } from "../deck";
+import { addCard, addCards } from "../deck";
 import { CharacterId, GameState, getCharacter, SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
 
@@ -24,8 +24,7 @@ function handleReceiveMultiSkills(gameDoc: GameDocument, input: Input<SkillType[
     // validateSkills(currentPlayer.characterId, input.skills);
 
     // hand out the multi skills
-    input.data.forEach(s => addCard(player.skillCards,
-        dealOne(gameDoc.gameState.skillDecks[SkillType[s]])));
+    input.data.forEach(s => addCard(player.skillCards, dealSkillCard(gameDoc.gameState, s)));
 
     // hand out the standard skills
     handleReceiveStandardSkills(gameDoc);
@@ -37,7 +36,7 @@ function handleReceiveStandardSkills(gameDoc: GameDocument) {
     c.cardsDue.filter(cd => cd.skills.length === 1).forEach(cd => {
         const skill = cd.skills[0];
         const count = cd.count;
-        addCards(currentPlayer.skillCards, deal(gameDoc.gameState.skillDecks[SkillType[skill]], count));
+        addCards(currentPlayer.skillCards, dealSkillCards(gameDoc.gameState, skill, count));
     });
     gameDoc.gameState.state = GameState.Movement;
 }
