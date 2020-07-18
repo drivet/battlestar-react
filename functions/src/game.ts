@@ -14,8 +14,8 @@ import {
     LocationId,
     LocationIdKeys,
     LoyaltyCardId,
-    QuorumCardId,
-    SkillCard,
+    QuorumCardId, SelectedAction,
+    SkillCard, SkillCardType,
     SkillType,
     SkillTypeKeys,
     ViewableGameData
@@ -28,6 +28,7 @@ import { createDestinationDeck } from "./destination";
 import { refreshView } from "./viewable";
 import { InputId, InputRequest, InputResponse } from "../../src/models/inputs";
 import { CharacterPool, initCharacterPool } from "../../src/models/character";
+import { SkillCheckCtx } from "./skill-check";
 
 export interface FullPlayer {
     userId: string;
@@ -40,11 +41,6 @@ export interface FullPlayer {
     loyaltyCards?: LoyaltyCardId[];
     skillCards?: SkillCard[];
     quorumHand?: QuorumCardId[];
-}
-
-export interface ActionCtx {
-    action: ActionId,
-    ctx?: any;
 }
 
 export interface FullGameData {
@@ -100,7 +96,9 @@ export interface FullGameData {
     superCrisisDeck?: CrisisCardId[];
     loyaltyDeck?: LoyaltyCardId[];
 
-    currentAction?: ActionCtx;
+    currentAction?: SelectedAction;
+    actionCtx?: any;
+    skillCheckCtx: SkillCheckCtx;
 }
 
 export interface GameDocument {
@@ -201,7 +199,7 @@ function newGameState(userIds: string[]): FullGameData {
         civilianShips: createCivilianPile(),
         nukes: 2,
         damagedVipers: 0,
-        distance: 0
+        distance: 0,
     }
 }
 
@@ -292,6 +290,13 @@ export function discardQuorumCard(game: FullGameData, player: FullPlayer, card: 
     const index = player.quorumHand.findIndex(q => q === card);
     const usedCard = player.quorumHand.splice(index, 1);
     addCards(game.discardedQuorumDeck, usedCard);
+}
+
+export function discardSkillCard(game: FullGameData, player: FullPlayer, card: SkillCard) {
+    const index = player.skillCards.findIndex(s =>
+        s.strength === card.strength && s.cardType === card.cardType && s.type === card.type);
+    const usedCard: SkillCard = player.skillCards.splice(index, 1)[0];
+    addCard(game.discardedSkillDecks[SkillType[usedCard.type]], usedCard);
 }
 
 export function removeQuorumCard(game: FullGameData, player: FullPlayer, card: QuorumCardId) {
@@ -407,13 +412,17 @@ function flagAdmiral(players: FullPlayer[]) {
 }
 
 export function getCurrentPlayer(gameDoc: GameDocument): FullPlayer {
-    return gameDoc.players[gameDoc.gameState.userIds[gameDoc.gameState.currentPlayer]];
+    return getPlayerByIndex(gameDoc, gameDoc.gameState.currentPlayer);
+}
+
+export function getPlayerByIndex(gameDoc: GameDocument, index: number) {
+    return gameDoc.players[gameDoc.gameState.userIds[index]];
 }
 
 export function getPlayer(gameDoc: GameDocument, userId: string): FullPlayer {
     return gameDoc.players[userId];
 }
 
-export function roll(): number {
-    return Math.floor(Math.random() * 8) + 1;
+export function getPlayerCount(gameDoc: GameDocument): number {
+    return Object.keys(gameDoc.players).length;
 }

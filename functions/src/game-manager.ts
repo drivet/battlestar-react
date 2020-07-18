@@ -85,7 +85,7 @@ function getTransitionFn(state: GameState): TransitionFn {
         return handleActionSelection;
     } else if (state === GameState.Action) {
         return handleAction;
-    } else if (state === GameState.CrisisDrawn) {
+    } else if (state === GameState.Crisis) {
         return handleCrisis;
     }
 }

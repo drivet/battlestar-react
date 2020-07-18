@@ -28,7 +28,10 @@ export const startGame = functions.https.onCall((params: StartGameParams, contex
     updates['/tables/' + params.tableId + '/gameId'] = gameId;
 
     return admin.database().ref().update(updates)
-        .then(() => console.log('Game document created'));
+        .then(res => {
+            console.log('Game document created');
+            return res;
+        });
 });
 
 export const processResponse = functions.database.ref('/games/{gameId}/responses')

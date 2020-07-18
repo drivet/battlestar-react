@@ -1,6 +1,6 @@
 import { dealSkillCard, GameDocument, getCurrentPlayer, getPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
-import { GameState, SkillType } from "../../../src/models/game-data";
+import { SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
 import { addCard } from "../deck";
 
@@ -16,7 +16,6 @@ export function actionResearchLab(gameDoc: GameDocument, input: Input<SkillType>
     }
     const player = getPlayer(gameDoc, input.userId);
     addCard(player.skillCards, dealSkillCard(gameDoc.gameState, skill));
-    gameDoc.gameState.state = GameState.CrisisDrawn;
 }
 
 function validate(skill: SkillType): boolean {

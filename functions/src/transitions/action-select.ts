@@ -2,9 +2,9 @@ import { GameDocument, getCurrentPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { makeRequest } from "../input";
 import { AvailableActions, getAvailableActions } from "../../../src/actions";
-import { ActionId, GameState } from "../../../src/models/game-data";
+import { ActionId, GameState, SelectedAction } from "../../../src/models/game-data";
 
-export function handleActionSelection(gameDoc: GameDocument, input: Input<ActionId>) {
+export function handleActionSelection(gameDoc: GameDocument, input: Input<SelectedAction>) {
     const player = getCurrentPlayer(gameDoc);
     if (!input) {
         gameDoc.gameState.inputRequest = makeRequest(InputId.SelectAction, player.userId);
@@ -15,13 +15,11 @@ export function handleActionSelection(gameDoc: GameDocument, input: Input<Action
         throw new Error('invalid action selected ' + input.data);
     }
 
-    gameDoc.gameState.currentAction = {
-        action: input.data
-    }
+    gameDoc.gameState.currentAction = input.data;
     gameDoc.gameState.state = GameState.Action;
 }
 
-function validate(action: ActionId, availActions: AvailableActions): boolean {
+function validate(selectedAction: SelectedAction, availActions: AvailableActions): boolean {
     const allActions = [
         ...ensure(availActions.locationActions),
         ...ensure(availActions.miscActions),
@@ -30,7 +28,7 @@ function validate(action: ActionId, availActions: AvailableActions): boolean {
         ...ensure(availActions.quorumActions),
         ...ensure(availActions.characterActions),
         ...ensure(availActions.titleActions)];
-    return allActions.indexOf(action) !== -1;
+    return allActions.indexOf(selectedAction.actionId) !== -1;
 }
 
 function ensure(actionIds: ActionId[]): ActionId[] {

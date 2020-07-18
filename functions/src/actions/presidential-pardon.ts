@@ -1,7 +1,7 @@
 import { GameDocument, getCurrentPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { makeRequest } from "../input";
-import { GameState, LocationId } from "../../../src/models/game-data";
+import { LocationId } from "../../../src/models/game-data";
 
 export interface PresidentialPardonInput {
     userId: string;
@@ -20,5 +20,4 @@ export function actionPresidentialPardon(gameDoc: GameDocument, input: Input<Pre
         throw new Error('player must be in the brig');
     }
     chosenPlayer.location = input.data.location;
-    gameDoc.gameState.state = GameState.CrisisDrawn;
 }

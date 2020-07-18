@@ -1,5 +1,6 @@
-import { discardQuorumCard, GameDocument, getCurrentPlayer, removeQuorumCard, roll } from "../game";
-import { GameState, QuorumCardId } from "../../../src/models/game-data";
+import { discardQuorumCard, GameDocument, getCurrentPlayer, removeQuorumCard } from "../game";
+import { QuorumCardId } from "../../../src/models/game-data";
+import { roll } from "../roll";
 
 export function actionFoodRationing(gameDoc: GameDocument) {
     const die = roll();
@@ -10,5 +11,4 @@ export function actionFoodRationing(gameDoc: GameDocument) {
     } else {
         discardQuorumCard(gameDoc.gameState, player, QuorumCardId.FoodRationing);
     }
-    gameDoc.gameState.state = GameState.CrisisDrawn;
 }

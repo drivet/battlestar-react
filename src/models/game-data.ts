@@ -377,6 +377,11 @@ export enum ActionId {
     ResurrectionShip,
 }
 
+export interface SelectedAction {
+    actionId: ActionId;
+    skillCard?: SkillCard;
+}
+
 export enum CrisisCardId {
     // cylon attack
     JammedAssault,
@@ -518,7 +523,7 @@ export enum GameState {
     Movement,
     ActionSelection,
     Action,
-    CrisisDrawn
+    Crisis
 }
 
 export interface ViewableGameData {

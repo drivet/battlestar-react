@@ -1,5 +1,5 @@
 import { GameDocument } from "../game";
-import { ActionId } from "../../../src/models/game-data";
+import { ActionId, GameState } from "../../../src/models/game-data";
 import { actionNothing } from "../actions/nothing";
 import { actionDrawQuorumCard } from "../actions/draw-quorum-card";
 import { actionPressRoom } from "../actions/press-room";
@@ -18,6 +18,9 @@ export function handleAction(gameDoc: GameDocument, input: Input<any, any>) {
     const action = gameDoc.gameState.currentAction.action;
     const actionFn: TransitionFn = lookupActionHandler(action);
     actionFn(gameDoc, input);
+    if (!gameDoc.gameState.inputRequest) {
+        gameDoc.gameState.state = GameState.Crisis;
+    }
 }
 
 function lookupActionHandler(action: ActionId): TransitionFn {
