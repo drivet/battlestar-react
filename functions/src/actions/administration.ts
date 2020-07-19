@@ -1,9 +1,10 @@
 import { findVp, GameDocument, getCurrentPlayer, getPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
-import { SkillType } from "../../../src/models/game-data";
+import { QuorumCardId, SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
 import { createSkillCtx, handleCollectSkills } from "../skill-check";
 import { finishAction } from "../transitions/action";
+import { addCard } from "../deck";
 
 enum AdminState {
     ChoosePlayer,
@@ -37,12 +38,24 @@ function handleChoosePlayer(gameDoc: GameDocument, input: Input<string>) {
 
 function executeOutcome(gameDoc: GameDocument) {
     const score = gameDoc.gameState.skillCheckCtx.score;
-    if (score >= 5) {
+    if (score >= getDifficulty(gameDoc)) {
         const ctx = gameDoc.gameState.actionCtx;
         getPlayer(gameDoc, ctx.chosenPlayer).president = true;
         getCurrentPlayer(gameDoc).president = false;
     }
+    if (gameDoc.gameState.acceptProphecy !== null) {
+        addCard(gameDoc.gameState.discardedQuorumDeck, QuorumCardId.AcceptProphecy);
+        gameDoc.gameState.acceptProphecy = null;
+    }
     finishAction(gameDoc);
+}
+
+function getDifficulty(gameDoc: GameDocument) {
+    if (gameDoc.gameState.acceptProphecy !== null) {
+        return 7;
+    } else {
+        return 5;
+    }
 }
 
 export function actionAdministration(gameDoc: GameDocument, input: Input<any>) {

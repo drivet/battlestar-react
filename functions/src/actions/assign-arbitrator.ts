@@ -5,12 +5,11 @@ import { finishAction } from "../transitions/action";
 import { Input, InputId } from "../../../src/models/inputs";
 import { makeRequest } from "../input";
 
-
-interface AssignVpCtx {
-    state: AssignVpState;
+interface AssignArbitratorCtx {
+    state: AssignArbitratorState;
 }
 
-export enum AssignVpState {
+export enum AssignArbitratorState {
     Setup,
     ChoosePlayer,
 }
@@ -24,8 +23,8 @@ function handleChoosePlayer(gameDoc: GameDocument, input: Input<string>) {
     }
 
     const chosenPlayer = getPlayer(gameDoc, input.data);
-    chosenPlayer.vicePresident = true;
-    pullQuorumCardFromHand(gameDoc.gameState, currentPlayer, QuorumCardId.AcceptProphecy);
+    chosenPlayer.arbitrator = true;
+    pullQuorumCardFromHand(gameDoc.gameState, currentPlayer, QuorumCardId.AssignArbitrator);
     finishAction(gameDoc);
 }
 
@@ -34,15 +33,15 @@ function handleSetup(gameDoc: GameDocument) {
     addCards(player.skillCards, dealSkillCards(gameDoc.gameState, SkillType.Politics, 2));
 }
 
-export function actionAssignVp(gameDoc: GameDocument, input: Input<string>) {
+export function actionAssignArbitrator(gameDoc: GameDocument, input: Input<string>) {
     if (!gameDoc.gameState.actionCtx) {
         gameDoc.gameState.actionCtx = {
-            state: AssignVpState.Setup,
-        } as AssignVpCtx;
+            state: AssignArbitratorState.Setup,
+        } as AssignArbitratorCtx;
     }
-    if (gameDoc.gameState.actionCtx.state === AssignVpState.Setup) {
+    if (gameDoc.gameState.actionCtx.state === AssignArbitratorState.Setup) {
         handleSetup(gameDoc);
-    } else if (gameDoc.gameState.actionCtx.state === AssignVpState.ChoosePlayer) {
+    } else if (gameDoc.gameState.actionCtx.state === AssignArbitratorState.ChoosePlayer) {
         handleChoosePlayer(gameDoc, input)
     }
 }

@@ -42,8 +42,9 @@ export interface FullPlayer {
     skillCards?: SkillCardId[];
     quorumHand?: QuorumCardId[];
 
-    // from the quorum card
+    // from quorum cards
     vicePresident?: boolean;
+    arbitrator?: boolean;
 }
 
 export interface FullGameData {
@@ -102,6 +103,8 @@ export interface FullGameData {
     currentAction?: ActionId;
     actionCtx?: any;
     skillCheckCtx?: SkillCheckCtx;
+
+    acceptProphecy?: QuorumCardId;
 }
 
 export interface GameDocument {
@@ -289,10 +292,13 @@ export function dealQuorumCards(game: FullGameData, count: number): QuorumCardId
     return cards;
 }
 
-export function discardQuorumCard(game: FullGameData, player: FullPlayer, card: QuorumCardId) {
+export function pullQuorumCardFromHand(game: FullGameData, player: FullPlayer, card: QuorumCardId) {
     const index = player.quorumHand.findIndex(q => q === card);
-    const usedCard = player.quorumHand.splice(index, 1);
-    addCards(game.discardedQuorumDeck, usedCard);
+    return player.quorumHand.splice(index, 1);
+}
+
+export function discardQuorumCard(game: FullGameData, player: FullPlayer, card: QuorumCardId) {
+    addCards(game.discardedQuorumDeck, pullQuorumCardFromHand(game, player, card));
 }
 
 export function discardSkillCard(game: FullGameData, player: FullPlayer, cardId: SkillCardId) {
