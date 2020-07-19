@@ -31,6 +31,7 @@ function redactPlayer(player: FullPlayer): PlayerData {
         userId: player.userId,
         admiral: player.admiral,
         president: player.president,
+        vicePresident: player.vicePresident,
         skillCounts: {}
     }
     if (player.characterId !== undefined) {

@@ -1,4 +1,4 @@
-import { GameDocument, getCurrentPlayer, getPlayer } from "../game";
+import { findVp, GameDocument, getCurrentPlayer, getPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
@@ -16,15 +16,20 @@ interface AdminCtx {
 }
 
 function handleChoosePlayer(gameDoc: GameDocument, input: Input<string>) {
-    const currentPlayer =  getCurrentPlayer(gameDoc);
-    if (!input) {
-        gameDoc.gameState.inputRequest =
-            makeRequest(InputId.PlayerSelect, currentPlayer.userId);
-        return;
+    const ctx = gameDoc.gameState.actionCtx;
+    const vp = findVp(gameDoc);
+    if (vp && !vp.president) {
+        ctx.chosenPlayer = vp;
+    } else {
+        if (!input) {
+            const currentPlayer = getCurrentPlayer(gameDoc);
+            gameDoc.gameState.inputRequest =
+                makeRequest(InputId.PlayerSelect, currentPlayer.userId);
+            return;
+        }
+        ctx.chosenPlayer = getPlayer(gameDoc, input.data);
     }
 
-    const ctx = gameDoc.gameState.actionCtx;
-    ctx.chosenPlayer = getPlayer(gameDoc, input.data);
     gameDoc.gameState.skillCheckCtx =
         createSkillCtx(gameDoc, [SkillType.Leadership, SkillType.Politics]);
     ctx.state = AdminState.CollectSkills;
@@ -41,7 +46,7 @@ function executeOutcome(gameDoc: GameDocument) {
 }
 
 export function actionAdministration(gameDoc: GameDocument, input: Input<any>) {
-    const currentPlayer =  getCurrentPlayer(gameDoc);
+    const currentPlayer = getCurrentPlayer(gameDoc);
     if (!currentPlayer.president) {
         throw new Error('Administration can only be executed by the President');
     }

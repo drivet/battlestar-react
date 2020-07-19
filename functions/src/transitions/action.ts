@@ -13,6 +13,10 @@ import { actionEncourageMutiny } from "../actions/encourage-mutiny";
 import { TransitionFn } from "./defs";
 import { actionArmory } from "../actions/armory";
 import { actionPresidentialPardon } from "../actions/presidential-pardon";
+import { actionAdministration } from "../actions/administration";
+import { actionAdmiralsQuarters } from "../actions/admirals-quarters";
+import { actionAssignVp } from "../actions/assign-vice-president";
+import { actionBrig } from "../actions/brig";
 
 /**
  * Move the game to the crisis state, and clean up after yourself
@@ -53,5 +57,13 @@ function lookupActionHandler(action: ActionId): TransitionFn {
         return actionArmory;
     } else if (action === ActionId.PresidentialPardon) {
         return actionPresidentialPardon;
+    } else if (action === ActionId.Administration) {
+        return actionAdministration;
+    } else if (action === ActionId.AdmiralsQuarters) {
+        return actionAdmiralsQuarters;
+    } else if (action === ActionId.AssignVicePresident) {
+        return actionAssignVp;
+    } else if (action === ActionId.Brig) {
+        return actionBrig;
     }
 }

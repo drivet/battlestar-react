@@ -41,6 +41,9 @@ export interface FullPlayer {
     loyaltyCards?: LoyaltyCardId[];
     skillCards?: SkillCardId[];
     quorumHand?: QuorumCardId[];
+
+    // from the quorum card
+    vicePresident?: boolean;
 }
 
 export interface FullGameData {
@@ -425,4 +428,11 @@ export function getPlayer(gameDoc: GameDocument, userId: string): FullPlayer {
 
 export function getPlayerCount(gameDoc: GameDocument): number {
     return Object.keys(gameDoc.players).length;
+}
+
+export function findVp(gameDoc: GameDocument): FullPlayer {
+    const vps = gameDoc.gameState.userIds
+        .map(u => gameDoc.players[u])
+        .filter(p => p.vicePresident);
+    return vps[0];
 }
