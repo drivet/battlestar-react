@@ -1,10 +1,10 @@
-import { CharacterType, getCharacter, LocationId, SkillCard } from "../../src/models/game-data";
+import { CharacterType, getCharacter, LocationId, SkillCard, SkillCardId } from "../../src/models/game-data";
 import { isSpace } from "../../src/models/location";
 import { FullPlayer } from "./game";
 
 export interface Movement {
     location: LocationId;
-    discardedSkill?: SkillCard;
+    discardedSkill?: SkillCardId;
 }
 
 export function getAvailableLocations(player: FullPlayer): LocationId[] {

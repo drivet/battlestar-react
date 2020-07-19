@@ -2,11 +2,16 @@ import { FullGameData, FullPlayer } from "./game";
 import {
     LocationCounts,
     LocationIdKeys,
-    PlayerData, SkillCard, SkillDeckCounts, SkillType, SkillTypeKeys,
+    PlayerData,
+    SkillCardId,
+    SkillCards,
+    SkillDeckCounts,
+    SkillType,
+    SkillTypeKeys,
     ViewableGameData
 } from "../../src/models/game-data";
 import { LocatedCivilianShips } from "./civilians";
-import { SkillDecks } from "./skills";
+import { SkillCardDecks } from "./skill-cards";
 
 function redactActiveCivilians(locatedCivilians: LocatedCivilianShips): LocationCounts {
     if (locatedCivilians) {
@@ -40,7 +45,7 @@ function redactPlayer(player: FullPlayer): PlayerData {
     return playerData;
 }
 
-function redactSkillDecks(skillDecks: SkillDecks): SkillDeckCounts {
+function redactSkillDecks(skillDecks: SkillCardDecks): SkillDeckCounts {
     if (skillDecks) {
         const result: SkillDeckCounts = {};
         Object.keys(skillDecks).forEach(k => {
@@ -53,10 +58,11 @@ function redactSkillDecks(skillDecks: SkillDecks): SkillDeckCounts {
     }
 }
 
-function countSkills(skillCards: SkillCard[]): SkillDeckCounts {
+function countSkills(skillCards: SkillCardId[]): SkillDeckCounts {
     const result: SkillDeckCounts = {};
     skillCards.forEach(c => {
-        const key = SkillType[c.type];
+        const card = SkillCards[SkillCardId[c]];
+        const key = SkillType[card.type];
         if (!result[key]) {
             result[key] = 0;
         }

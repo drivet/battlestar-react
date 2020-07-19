@@ -14,13 +14,20 @@ import { TransitionFn } from "./defs";
 import { actionArmory } from "../actions/armory";
 import { actionPresidentialPardon } from "../actions/presidential-pardon";
 
+/**
+ * Move the game to the crisis state, and clean up after yourself
+ * @param gameDoc
+ */
+export function finishAction(gameDoc: GameDocument) {
+    gameDoc.gameState.actionCtx = null;
+    gameDoc.gameState.skillCheckCtx = null;
+    gameDoc.gameState.state = GameState.Crisis;
+}
+
 export function handleAction(gameDoc: GameDocument, input: Input<any, any>) {
-    const action = gameDoc.gameState.currentAction.action;
+    const action = gameDoc.gameState.currentAction;
     const actionFn: TransitionFn = lookupActionHandler(action);
     actionFn(gameDoc, input);
-    if (!gameDoc.gameState.inputRequest) {
-        gameDoc.gameState.state = GameState.Crisis;
-    }
 }
 
 function lookupActionHandler(action: ActionId): TransitionFn {
@@ -34,7 +41,7 @@ function lookupActionHandler(action: ActionId): TransitionFn {
         return actionInspirationalSpeech;
     } else if (action === ActionId.FoodRationing) {
         return actionFoodRationing;
-    } else if (action === ActionId.ConsolidatePower) {
+    } else if (action === ActionId.ConsolidatePower1 || action === ActionId.ConsolidatePower2) {
         return actionConsolidatePower;
     } else if (action === ActionId.ArrestOrder) {
         return actionArrestOrder;

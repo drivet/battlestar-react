@@ -3,6 +3,7 @@ import { Input, InputId } from "../../../src/models/inputs";
 import { SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
 import { addCard } from "../deck";
+import { finishAction } from "../transitions/action";
 
 export function actionResearchLab(gameDoc: GameDocument, input: Input<SkillType>) {
     if (!input) {
@@ -16,6 +17,7 @@ export function actionResearchLab(gameDoc: GameDocument, input: Input<SkillType>
     }
     const player = getPlayer(gameDoc, input.userId);
     addCard(player.skillCards, dealSkillCard(gameDoc.gameState, skill));
+    finishAction(gameDoc);
 }
 
 function validate(skill: SkillType): boolean {

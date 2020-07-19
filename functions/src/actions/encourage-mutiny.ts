@@ -1,8 +1,9 @@
-import { discardQuorumCard, GameDocument, getCurrentPlayer} from "../game";
+import { discardQuorumCard, GameDocument, getCurrentPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { QuorumCardId } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
 import { roll } from "../roll";
+import { finishAction } from "../transitions/action";
 
 export function actionEncourageMutiny(gameDoc: GameDocument, input: Input<string>) {
     const player = getCurrentPlayer(gameDoc);
@@ -25,4 +26,5 @@ export function actionEncourageMutiny(gameDoc: GameDocument, input: Input<string
         gameDoc.gameState.morale--;
     }
     discardQuorumCard(gameDoc.gameState, player, QuorumCardId.EncourageMutiny);
+    finishAction(gameDoc);
 }

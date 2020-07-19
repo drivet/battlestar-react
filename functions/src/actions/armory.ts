@@ -1,5 +1,6 @@
 import { GameDocument} from "../game";
 import { roll } from "../roll";
+import { finishAction } from "../transitions/action";
 
 export function actionArmory(gameDoc: GameDocument) {
     const die = roll();
@@ -14,6 +15,7 @@ export function actionArmory(gameDoc: GameDocument) {
         }
         trimZeros(centurions);
     }
+    finishAction(gameDoc);
 }
 
 function trimZeros(data: number[]) {

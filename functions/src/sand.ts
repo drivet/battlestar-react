@@ -1,6 +1,6 @@
-import { SkillDecks } from "./skills";
 import { SkillType } from "../../src/models/game-data";
 import { GameDocument } from "./game";
+import { SkillCardDecks } from "./skill-cards";
 
 /**
  * It appears that Firebase doesn't preserve empty arrays when doing a read.  But the objects are
@@ -30,7 +30,7 @@ export function sandGameDoc(gameDoc: GameDocument) {
     });
 }
 
-function sandSkillDecks(skillDecks: SkillDecks) {
+function sandSkillDecks(skillDecks: SkillCardDecks) {
     sandSkillDeck(skillDecks, SkillType.Tactics);
     sandSkillDeck(skillDecks, SkillType.Engineering);
     sandSkillDeck(skillDecks, SkillType.Leadership);
@@ -38,7 +38,7 @@ function sandSkillDecks(skillDecks: SkillDecks) {
     sandSkillDeck(skillDecks, SkillType.Piloting);
 }
 
-function sandSkillDeck(skillDecks: SkillDecks, skillType: SkillType) {
+function sandSkillDeck(skillDecks: SkillCardDecks, skillType: SkillType) {
     const key = SkillType[skillType];
     skillDecks[key] = skillDecks[key] ? skillDecks[key] : [];
 }

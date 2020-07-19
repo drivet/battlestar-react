@@ -2,6 +2,7 @@ import { discardQuorumCard, GameDocument, getCurrentPlayer, getPlayer } from "..
 import { Input, InputId } from "../../../src/models/inputs";
 import { LocationId, QuorumCardId } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
+import { finishAction } from "../transitions/action";
 
 export function actionArrestOrder(gameDoc: GameDocument, input: Input<string>) {
     const player = getCurrentPlayer(gameDoc);
@@ -13,4 +14,5 @@ export function actionArrestOrder(gameDoc: GameDocument, input: Input<string>) {
     const chosen = getPlayer(gameDoc, input.data);
     chosen.location = LocationId.Brig;
     discardQuorumCard(gameDoc.gameState, player, QuorumCardId.ArrestOrder);
+    finishAction(gameDoc);
 }

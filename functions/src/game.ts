@@ -14,13 +14,12 @@ import {
     LocationId,
     LocationIdKeys,
     LoyaltyCardId,
-    QuorumCardId, SelectedAction,
-    SkillCard, SkillCardType,
+    QuorumCardId, SkillCard,
+    SkillCardId, SkillCards,
     SkillType,
     SkillTypeKeys,
     ViewableGameData
 } from "../../src/models/game-data";
-import { createSkillDecks, SkillDecks } from "./skills";
 import { createCivilianPile, LocatedCivilianShips } from "./civilians";
 import { loyaltyDeck } from "./loyalty";
 import { createCrisisDeck, createSuperCrisisDeck } from "./crisis";
@@ -29,6 +28,7 @@ import { refreshView } from "./viewable";
 import { InputId, InputRequest, InputResponse } from "../../src/models/inputs";
 import { CharacterPool, initCharacterPool } from "../../src/models/character";
 import { SkillCheckCtx } from "./skill-check";
+import { createSkillCardDecks, SkillCardDecks } from "./skill-cards";
 
 export interface FullPlayer {
     userId: string;
@@ -39,7 +39,7 @@ export interface FullPlayer {
     revealedCylon?: boolean;
     location?: LocationId;
     loyaltyCards?: LoyaltyCardId[];
-    skillCards?: SkillCard[];
+    skillCards?: SkillCardId[];
     quorumHand?: QuorumCardId[];
 }
 
@@ -89,16 +89,16 @@ export interface FullGameData {
     quorumDeck?: QuorumCardId[];
     discardedQuorumDeck?: QuorumCardId[];
     destinationDeck?: DestinationCardId[];
-    skillDecks?: SkillDecks;
-    discardedSkillDecks? : SkillDecks;
-    destinyDeck?: SkillCard[];
+    skillDecks?: SkillCardDecks;
+    discardedSkillDecks? : SkillCardDecks;
+    destinyDeck?: SkillCardId[];
     crisisDeck?: CrisisCardId[];
     superCrisisDeck?: CrisisCardId[];
     loyaltyDeck?: LoyaltyCardId[];
 
-    currentAction?: SelectedAction;
+    currentAction?: ActionId;
     actionCtx?: any;
-    skillCheckCtx: SkillCheckCtx;
+    skillCheckCtx?: SkillCheckCtx;
 }
 
 export interface GameDocument {
@@ -217,11 +217,11 @@ export function setupDecks(game: FullGameData) {
     game.crisisDeck = createCrisisDeck();
     game.superCrisisDeck = createSuperCrisisDeck();
     game.destinationDeck = createDestinationDeck();
-    game.skillDecks = createSkillDecks();
+    game.skillDecks = createSkillCardDecks();
 }
 
 export function setupDestinyDeck(game: FullGameData) {
-    const destiny: SkillCard[] = [];
+    const destiny: SkillCardId[] = [];
     addCards(destiny, deal(skillDeck(game, SkillType.Tactics), 2));
     addCards(destiny, deal(skillDeck(game, SkillType.Engineering), 2));
     addCards(destiny, deal(skillDeck(game, SkillType.Piloting), 2));
@@ -253,7 +253,7 @@ export function setupInitialShips(game: FullGameData) {
     placeCivilians(game, LocationId.Back, 2);
 }
 
-export function dealSkillCard(game: FullGameData, skillType: SkillType): SkillCard {
+export function dealSkillCard(game: FullGameData, skillType: SkillType): SkillCardId {
     const skillKey = SkillType[skillType] as SkillTypeKeys;
     if (game.skillDecks[skillKey].length === 0) {
         game.skillDecks[skillKey] = shuffle(game.discardedSkillDecks[skillKey]);
@@ -262,7 +262,7 @@ export function dealSkillCard(game: FullGameData, skillType: SkillType): SkillCa
     return dealOne(game.skillDecks[skillKey]);
 }
 
-export function dealSkillCards(game: FullGameData, skillType: SkillType, count: number): SkillCard[] {
+export function dealSkillCards(game: FullGameData, skillType: SkillType, count: number): SkillCardId[] {
     const cards = [];
     for (let i = 0; i < count; i++) {
         cards.push(dealSkillCard(game, skillType))
@@ -292,11 +292,11 @@ export function discardQuorumCard(game: FullGameData, player: FullPlayer, card: 
     addCards(game.discardedQuorumDeck, usedCard);
 }
 
-export function discardSkillCard(game: FullGameData, player: FullPlayer, card: SkillCard) {
-    const index = player.skillCards.findIndex(s =>
-        s.strength === card.strength && s.cardType === card.cardType && s.type === card.type);
-    const usedCard: SkillCard = player.skillCards.splice(index, 1)[0];
-    addCard(game.discardedSkillDecks[SkillType[usedCard.type]], usedCard);
+export function discardSkillCard(game: FullGameData, player: FullPlayer, cardId: SkillCardId) {
+    const index = player.skillCards.findIndex(q => q === cardId);
+    const cards = player.skillCards.splice(index, 1);
+    const card: SkillCard = SkillCards[SkillCardId[cardId]];
+    addCards(game.discardedSkillDecks[SkillType[card.type]], cards);
 }
 
 export function removeQuorumCard(game: FullGameData, player: FullPlayer, card: QuorumCardId) {
@@ -369,7 +369,7 @@ function placeCivilians(game: FullGameData, location: LocationId, count: number)
     }
 }
 
-function skillDeck(game: FullGameData, skill: SkillType): SkillCard[] {
+function skillDeck(game: FullGameData, skill: SkillType): SkillCardId[] {
     const key = SkillType[skill] as SkillTypeKeys;
     return game.skillDecks![key]!;
 }
