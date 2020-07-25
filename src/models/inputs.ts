@@ -11,6 +11,13 @@ export enum InputId {
     ActionEncourageMutinyPlayerSelect,
     SelectCrisisAction,
     ActionPresidentialPardon,
+    PlayerSelect,
+    SkillCardSelect,
+    LocationSelect,
+    SkillTypeSelect,
+    BeforeSkillCheckSelect,
+    AfterSkillCheckAdded,
+    AfterSkillCheckTotaled
 }
 
 export interface InputRequest<T extends any = undefined> {

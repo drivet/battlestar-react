@@ -1,5 +1,5 @@
 import { InputRequest } from "./inputs";
-import { SkillDecks } from "../../functions/src/skills";
+import { SkillCardDecks } from "../../functions/src/skill-cards";
 
 export enum CharacterId {
     LeeAdama, GaiusBaltar, GalenTyrol, SaulTigh,
@@ -45,6 +45,80 @@ export interface SkillCard {
     type: SkillType;
     cardType: SkillCardType;
     strength: number;
+}
+
+export function skillCard(skillType: SkillType, card: SkillCardType, strength: number): SkillCard {
+    return {
+        cardType: card,
+        type: skillType,
+        strength: strength
+    }
+}
+
+export enum SkillCardId {
+    ConsolidatePower1,
+    ConsolidatePower2,
+    InvestigativeCommittee3,
+    InvestigativeCommittee4,
+    InvestigativeCommittee5,
+
+    LaunchScout1,
+    LaunchScout2,
+    StrategicPlanning3,
+    StrategicPlanning4,
+    StrategicPlanning5,
+
+    ExecutiveOrder1,
+    ExecutiveOrder2,
+    DeclareEmergency3,
+    DeclareEmergency4,
+    DeclareEmergency5,
+
+    Repair1,
+    Repair2,
+    ScientificResearch3,
+    ScientificResearch4,
+    ScientificResearch5,
+
+    EvasiveManeuvers1,
+    EvasiveManeuvers2,
+    MaximumFirepower3,
+    MaximumFirepower4,
+    MaximumFirepower5,
+}
+
+export type SkillCardIdKeys = keyof typeof SkillCardId;
+
+export const SkillCards: { [key in SkillCardIdKeys]?: SkillCard } = {
+    [SkillCardId[SkillCardId.LaunchScout1]]: skillCard(SkillType.Tactics, SkillCardType.LaunchScout,1),
+    [SkillCardId[SkillCardId.LaunchScout2]]: skillCard(SkillType.Tactics, SkillCardType.LaunchScout,2),
+    [SkillCardId[SkillCardId.StrategicPlanning3]]: skillCard(SkillType.Tactics, SkillCardType.StrategicPlanning,3),
+    [SkillCardId[SkillCardId.StrategicPlanning4]]: skillCard(SkillType.Tactics, SkillCardType.StrategicPlanning,4),
+    [SkillCardId[SkillCardId.StrategicPlanning5]]: skillCard(SkillType.Tactics, SkillCardType.StrategicPlanning,5),
+
+    [SkillCardId[SkillCardId.ExecutiveOrder1]]: skillCard(SkillType.Leadership, SkillCardType.ExecutiveOrder,1),
+    [SkillCardId[SkillCardId.ExecutiveOrder2]]: skillCard(SkillType.Leadership, SkillCardType.ExecutiveOrder,2),
+    [SkillCardId[SkillCardId.DeclareEmergency3]]: skillCard(SkillType.Leadership, SkillCardType.DeclareEmergency,3),
+    [SkillCardId[SkillCardId.DeclareEmergency4]]: skillCard(SkillType.Leadership, SkillCardType.DeclareEmergency,4),
+    [SkillCardId[SkillCardId.DeclareEmergency5]]: skillCard(SkillType.Leadership, SkillCardType.DeclareEmergency,5),
+
+    [SkillCardId[SkillCardId.ConsolidatePower1]]: skillCard(SkillType.Politics, SkillCardType.ConsolidatePower,1),
+    [SkillCardId[SkillCardId.ConsolidatePower2]]: skillCard(SkillType.Politics, SkillCardType.ConsolidatePower,2),
+    [SkillCardId[SkillCardId.InvestigativeCommittee3]]: skillCard(SkillType.Politics, SkillCardType.InvestigativeCommittee,3),
+    [SkillCardId[SkillCardId.InvestigativeCommittee4]]: skillCard(SkillType.Politics, SkillCardType.InvestigativeCommittee,4),
+    [SkillCardId[SkillCardId.InvestigativeCommittee5]]: skillCard(SkillType.Politics, SkillCardType.InvestigativeCommittee,5),
+
+    [SkillCardId[SkillCardId.Repair1]]: skillCard(SkillType.Engineering, SkillCardType.Repair,1),
+    [SkillCardId[SkillCardId.Repair2]]: skillCard(SkillType.Engineering, SkillCardType.Repair,2),
+    [SkillCardId[SkillCardId.ScientificResearch3]]: skillCard(SkillType.Engineering, SkillCardType.ScientificResearch,3),
+    [SkillCardId[SkillCardId.ScientificResearch4]]: skillCard(SkillType.Engineering, SkillCardType.ScientificResearch,4),
+    [SkillCardId[SkillCardId.ScientificResearch5]]: skillCard(SkillType.Engineering, SkillCardType.ScientificResearch,5),
+
+    [SkillCardId[SkillCardId.EvasiveManeuvers1]]: skillCard(SkillType.Piloting, SkillCardType.EvasiveManeuvers,1),
+    [SkillCardId[SkillCardId.EvasiveManeuvers2]]: skillCard(SkillType.Piloting, SkillCardType.EvasiveManeuvers,2),
+    [SkillCardId[SkillCardId.MaximumFirepower3]]: skillCard(SkillType.Piloting, SkillCardType.MaximumFirepower,3),
+    [SkillCardId[SkillCardId.MaximumFirepower4]]: skillCard(SkillType.Piloting, SkillCardType.MaximumFirepower,4),
+    [SkillCardId[SkillCardId.MaximumFirepower5]]: skillCard(SkillType.Piloting, SkillCardType.MaximumFirepower,5),
 }
 
 export interface SkillCardDue {
@@ -300,6 +374,35 @@ export enum QuorumCardId {
     InspirationalSpeech
 }
 
+// before cards are added to skill check, but after any skill check setup.
+export enum BeforeSkillCheckId {
+    None,
+    ScientificResearch,
+    InvestigativeCommittee,
+    FriendsInLowPlaces,
+    CylonHatred,
+    AssignArbitrator
+}
+
+// after cards have been added but before totalling
+export enum AfterSkillCheckAddedId {
+    None,
+    BlindDevotion
+}
+
+// after cards have been totalled
+export enum AfterSkillCheckTotalId {
+    None,
+    DeclareEmergency
+}
+
+export enum SkillCheckType {
+    Administration,
+    AdmiralsQuarters,
+    Brig,
+    Crisis
+}
+
 export enum DestinationCardId {
     DesolateMoon,
     RagnarAnchorage,
@@ -343,12 +446,18 @@ export enum ActionId {
     BrutalForce,
     AssignMissionSpecialist,
 
-    // Skills
-    MaximumFirepower,
-    Repair,
-    ConsolidatePower,
-    ExecutiveOrder,
-    LaunchScout,
+    // action from skills - distinguished by which skill cards are used
+    MaximumFirepower3,
+    MaximumFirepower4,
+    MaximumFirepower5,
+    Repair1,
+    Repair2,
+    ConsolidatePower1,
+    ConsolidatePower2,
+    ExecutiveOrder1,
+    ExecutiveOrder2,
+    LaunchScout1,
+    LaunchScout2,
 
     // Galactica Location
     PressRoom,
@@ -510,6 +619,7 @@ export interface PlayerData {
     skillCounts?: SkillDeckCounts;
     quorumCount?: number;
     loyaltyCount?: number;
+    vicePresident?: boolean;
 }
 
 export enum GameState {
@@ -573,7 +683,7 @@ export interface ViewableGameData {
     quorumDeck: number;
     destinationDeck: number;
     skillDecks: SkillDeckCounts;
-    discardedSkillDecks: SkillDecks;
+    discardedSkillDecks: SkillCardDecks;
     destinyDeck: number;
     crisisDeck: number;
     superCrisisDeck: number;

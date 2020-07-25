@@ -1,19 +1,19 @@
-import { SkillCard } from "../models/game-data";
+import { SkillCardId } from "../models/game-data";
 import { SelectionPanel } from "./SelectionPanel";
 import React from "react";
 import { getSkillCardImage } from "../skills";
 
 interface SkillCardSelectionPanelProps {
-    available: SkillCard[];
+    available: SkillCardId[];
     selectCount: number;
-    doneCb?: (cards: SkillCard[]) => void;
+    doneCb?: (cards: SkillCardId[]) => void;
 }
 
-export function skillCardImgElement(skillCard: SkillCard) {
+export function skillCardImgElement(skillCard: SkillCardId) {
     return (<img src={getSkillCardImage(skillCard)} alt={'Skill card'}/>);
 }
 
-function renderCard(skillCard: SkillCard, index: number) {
+function renderCard(skillCard: SkillCardId, index: number) {
     return (
         <div className={'p-1'}>
             {skillCardImgElement(skillCard)}

@@ -1,6 +1,6 @@
 import { GameDocument, getCurrentPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
-import { GameState, LocationId, SkillType } from "../../../src/models/game-data";
+import { LocationId, SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
 import { createSkillCtx, handleCollectSkills } from "../skill-check";
 import { finishAction } from "../transitions/action";

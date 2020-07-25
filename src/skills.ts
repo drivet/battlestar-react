@@ -1,4 +1,4 @@
-import { SkillCard, SkillCardType, SkillType } from "./models/game-data";
+import { SkillCardId, SkillCards, SkillCardType, SkillType } from "./models/game-data";
 import eng_repair_01 from './images/skills/BSG_Skill_Eng_Repair_1.png';
 import eng_repair_02 from './images/skills/BSG_Skill_Eng_Repair_2.png';
 import eng_research_03 from './images/skills/BSG_Skill_Eng_Sci_Research_3.png';
@@ -82,7 +82,8 @@ const cards = {
         }
     }
 }
-export function getSkillCardImage(skillCard: SkillCard) {
+export function getSkillCardImage(skillCardId: SkillCardId) {
+    const skillCard = SkillCards[SkillCardId[skillCardId]];
     const type = SkillType[skillCard.type];
     const cardType = SkillCardType[skillCard.cardType];
     return cards[type][cardType][skillCard.strength];
