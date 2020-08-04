@@ -1,4 +1,4 @@
-import { dealSkillCard, discardSkillCard, GameDocument, getCurrentPlayer, getPlayer } from "../game";
+import { dealSkillCard, discardSkillCardFromHand, GameDocument, getCurrentPlayer, getPlayer } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { ActionId, SkillCardId, SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
@@ -14,7 +14,7 @@ export function actionConsolidatePower(gameDoc: GameDocument, input: Input<Skill
     const player = getPlayer(gameDoc, input.userId);
     input.data.forEach(s => addCard(player.skillCards, dealSkillCard(gameDoc.gameState, s)));
     const skillCard = getSkillCard(gameDoc.gameState.currentAction);
-    discardSkillCard(gameDoc.gameState, player, skillCard);
+    discardSkillCardFromHand(gameDoc.gameState, player, skillCard);
     finishAction(gameDoc);
 }
 

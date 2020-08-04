@@ -376,24 +376,29 @@ export enum QuorumCardId {
 
 // before cards are added to skill check, but after any skill check setup.
 export enum BeforeSkillCheckId {
-    None,
-    ScientificResearch,
-    InvestigativeCommittee,
-    FriendsInLowPlaces,
+    ScientificResearch3,
+    ScientificResearch4,
+    ScientificResearch5,
+    InvestigativeCommittee3,
+    InvestigativeCommittee4,
+    InvestigativeCommittee5,
+    FILP_Increase,
+    FILP_Decrease,
+    AssignArbitrator_Increase,
+    AssignArbitrator_Decrease,
     CylonHatred,
-    AssignArbitrator
 }
 
 // after cards have been added but before totalling
 export enum AfterSkillCheckAddedId {
-    None,
     BlindDevotion
 }
 
 // after cards have been totalled
 export enum AfterSkillCheckTotalId {
-    None,
-    DeclareEmergency
+    DeclareEmergency3,
+    DeclareEmergency4,
+    DeclareEmergency5,
 }
 
 export enum SkillCheckType {

@@ -1,4 +1,4 @@
-import { addCard, addCards, deal, dealOne, shuffle } from "./deck";
+import { addCard, addCards, addCardsToTop, addCardToTop, deal, dealOne, shuffle } from "./deck";
 import { createQuorumDeck } from "./quorum";
 import {
     ActionId,
@@ -14,8 +14,10 @@ import {
     LocationId,
     LocationIdKeys,
     LoyaltyCardId,
-    QuorumCardId, SkillCard,
-    SkillCardId, SkillCards,
+    QuorumCardId,
+    SkillCard,
+    SkillCardId,
+    SkillCards,
     SkillType,
     SkillTypeKeys,
     ViewableGameData
@@ -29,6 +31,8 @@ import { InputId, InputRequest, InputResponse } from "../../src/models/inputs";
 import { CharacterPool, initCharacterPool } from "../../src/models/character";
 import { SkillCheckCtx } from "./skill-check";
 import { createSkillCardDecks, SkillCardDecks } from "./skill-cards";
+import { makeRequest } from "./input";
+import { RoundTableCtx } from "./round-table";
 
 export interface FullPlayer {
     userId: string;
@@ -103,6 +107,9 @@ export interface FullGameData {
     currentAction?: ActionId;
     actionCtx?: any;
     skillCheckCtx?: SkillCheckCtx;
+
+    // get input from everyone
+    roundTableCtx?: RoundTableCtx<any>;
 
     acceptProphecy?: QuorumCardId;
 }
@@ -298,14 +305,22 @@ export function pullQuorumCardFromHand(game: FullGameData, player: FullPlayer, c
 }
 
 export function discardQuorumCard(game: FullGameData, player: FullPlayer, card: QuorumCardId) {
-    addCards(game.discardedQuorumDeck, pullQuorumCardFromHand(game, player, card));
+    addCardsToTop(game.discardedQuorumDeck, pullQuorumCardFromHand(game, player, card));
 }
 
-export function discardSkillCard(game: FullGameData, player: FullPlayer, cardId: SkillCardId) {
+export function discardSkillCardsFromHand(game: FullGameData, player: FullPlayer, cardIds: SkillCardId[]) {
+    cardIds.forEach(c => discardSkillCardFromHand(game, player, c));
+}
+
+export function discardSkillCardFromHand(game: FullGameData, player: FullPlayer, cardId: SkillCardId) {
     const index = player.skillCards.findIndex(q => q === cardId);
-    const cards = player.skillCards.splice(index, 1);
+    player.skillCards.splice(index, 1);
+    discardSkillCard(game, cardId);
+}
+
+export function discardSkillCard(game: FullGameData, cardId: SkillCardId) {
     const card: SkillCard = SkillCards[SkillCardId[cardId]];
-    addCards(game.discardedSkillDecks[SkillType[card.type]], cards);
+    addCardToTop(game.discardedSkillDecks[SkillType[card.type]], card);
 }
 
 export function removeQuorumCard(game: FullGameData, player: FullPlayer, card: QuorumCardId) {
@@ -441,4 +456,15 @@ export function findVp(gameDoc: GameDocument): FullPlayer {
         .map(u => gameDoc.players[u])
         .filter(p => p.vicePresident);
     return vps[0];
+}
+
+export function findArbitrator(gameDoc: GameDocument): FullPlayer {
+    const arbitrators = gameDoc.gameState.userIds
+        .map(u => gameDoc.players[u])
+        .filter(p => p.arbitrator);
+    return arbitrators[0];
+}
+
+export function setInputReq<T>(gameDoc: GameDocument, inputId: InputId, userId: string, ctx: T = undefined) {
+    gameDoc.gameState.inputRequest = makeRequest(inputId, userId, ctx);
 }

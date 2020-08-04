@@ -2,13 +2,16 @@ export function addCards<T>(deck1: T[], deck2: T[]) {
     deck1.push(...deck2);
 }
 
+export function addCardsToTop<T>(deck1: T[], deck2: T[]) {
+    deck1.unshift(...deck2);
+}
+
 export function addCard<T>(cards: T[], card: T) {
     cards.push(card);
 }
 
-
-export function addCardToTop<T>(cards: T[], card: T) {
-    cards.unshift(card);
+export function addCardToTop<T>(cards: T[], cardToAdd: T) {
+    cards.unshift(cardToAdd);
 }
 
 export function dealOne<T>(cards: T[]): T {

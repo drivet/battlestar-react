@@ -1,7 +1,6 @@
-import { GameDocument, getCurrentPlayer } from "../game";
-import { GameState, LocationId, SkillCard, SkillCardId, SkillCards, SkillType } from "../../../src/models/game-data";
+import { discardSkillCardFromHand, GameDocument, getCurrentPlayer } from "../game";
+import { GameState, LocationId } from "../../../src/models/game-data";
 import { Input, InputId } from "../../../src/models/inputs";
-import { addCardToTop, removeCard } from "../deck";
 import { getAvailableLocations, Movement } from "../locations";
 import { makeRequest } from "../input";
 
@@ -15,10 +14,7 @@ export function handleMovement(gameDoc: GameDocument, input: Input<Movement, Loc
     const player = gameDoc.players[input.userId];
     player.location = input.data.location;
     if (input.data.discardedSkill) {
-        const skillCardId: SkillCardId = input.data.discardedSkill;
-        const cardFromHand: SkillCard = SkillCards[SkillCardId[skillCardId]];
-        addCardToTop(gameDoc.gameState.discardedSkillDecks[SkillType[cardFromHand.type]], skillCardId);
-        removeCard(player.skillCards, skillCardId);
+        discardSkillCardFromHand(gameDoc.gameState, player, input.data.discardedSkill);
     }
     gameDoc.gameState.state = GameState.ActionSelection;
 }
