@@ -26,8 +26,10 @@ export function handleRoundTable<T>(gameDoc: GameDocument, input: Input<T>): boo
         const user = ctx.users[ctx.count];
         setInputReq(gameDoc, ctx.inputId, user, (ctx.ctxFactory)(gameDoc, user));
         return false;
+    } else {
+        ctx.count++;
+        return ctx.count === getPlayerCount(gameDoc);
     }
-    return ctx.count === getPlayerCount(gameDoc);
 }
 
 // return the users starting from the one after the current player and ending with the current player

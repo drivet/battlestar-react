@@ -1,7 +1,6 @@
 import {
     discardSkillCardsFromHand,
     FullGameData,
-    FullPlayer,
     GameDocument,
     getPlayer,
     getPlayerByIndex,
@@ -12,25 +11,23 @@ import {
     BeforeSkillCheckId,
     CharacterId,
     QuorumCardId,
-    SkillCard,
     SkillCardId,
-    SkillCards,
     SkillCheckType,
     SkillType
 } from "../../src/models/game-data";
 import { Input, InputId } from "../../src/models/inputs";
 import * as _ from "lodash";
 import { handleRoundTable, initRoundTable, InputCtxFactory, usersFromCurrent } from "./round-table";
-import { addCard } from "./deck";
-
-export interface SkillCheck {
-    which: SkillCheckType;
-    types: SkillType[];
-    pass: number;
-    partial?: number;
-}
+import {
+    adjustDifficulty,
+    adjustDifficultyFromProphecy,
+    calcFinalResult,
+    calcSkillCheckStrength,
+    gatherBeforeSkills
+} from "./skill-check-utils";
 
 export enum SkillCheckState {
+    Setup,
     BeforeCollect,
     Collect,
     CheckForBlindDevotion,
@@ -42,14 +39,30 @@ export enum SkillCheckState {
 }
 
 export enum SkillCheckResult {
+    Unknown,
     Pass,
     Partial,
     Fail
 }
 
+export interface SkillCheckPlayer {
+    userId: string;
+    characterId: CharacterId;
+    president?: boolean;
+    skillCards?: SkillCardId[];
+    quorumHand?: QuorumCardId[];
+    arbitrator?: boolean;
+}
+
 export interface SkillCheckCtx {
+    players: SkillCheckPlayer[];
+    acceptingProphecy: boolean;
+    chosenPlayer?: number;
+    which: SkillCheckType;
+    types: SkillType[];
+    pass: number;
+    partial?: number;
     state: SkillCheckState;
-    skillCheck: SkillCheck;
     beforeCheck: BeforeSkillCheckId[][]
     skills: SkillCardId[][];
     galen?: string;
@@ -59,30 +72,45 @@ export interface SkillCheckCtx {
     result?: SkillCheckResult;
 }
 
-export function createSkillCheck(which: SkillCheckType, types: SkillType[], pass: number, partial?: number): SkillCheck {
+export function createSkillCheckCtx(players: SkillCheckPlayer[],
+                                    acceptingProphecy: boolean,
+                                    which: SkillCheckType,
+                                    types: SkillType[],
+                                    pass: number,
+                                    partial?: number,
+                                    chosenPlayer?: number): SkillCheckCtx {
     return {
+        players: players,
+        acceptingProphecy: acceptingProphecy,
+        chosenPlayer: chosenPlayer,
+        state: SkillCheckState.Setup,
         which: which,
         types: types,
         pass: pass,
-        partial: partial
-    }
-}
-
-export function setupSkillCtx(gameDoc: GameDocument, skillCheck: SkillCheck) {
-    _adjustDifficultyFromProphecy(gameDoc.gameState, skillCheck);
-    gameDoc.gameState.skillCheckCtx = {
-        state: SkillCheckState.BeforeCollect,
-        skillCheck: skillCheck,
+        partial: partial,
         beforeCheck: [],
         skills: [],
-        score: 0,
+        score: undefined,
         afterTotal: [],
-    }
+        result: SkillCheckResult.Unknown
+    };
+}
+
+/**
+ * Useful or not?
+ *
+ * @param game
+ * @param skillCheckCtx
+ */
+export function setupSkillCtx(game: FullGameData, skillCheckCtx: SkillCheckCtx) {
+    game.skillCheckCtx = skillCheckCtx;
 }
 
 export function handleSkillCheck(gameDoc: GameDocument, input: Input<any, any>): boolean {
     const ctx = gameDoc.gameState.skillCheckCtx;
-    if (ctx.state === SkillCheckState.BeforeCollect) {
+    if (ctx.state === SkillCheckState.Setup) {
+        return handleSetup(gameDoc.gameState);
+    } else if (ctx.state === SkillCheckState.BeforeCollect) {
         return handleBeforeCollect(gameDoc, input as Input<BeforeSkillCheckId[]>);
     } else if (ctx.state === SkillCheckState.Collect) {
         return handleCollectSkills(gameDoc, input);
@@ -91,110 +119,40 @@ export function handleSkillCheck(gameDoc: GameDocument, input: Input<any, any>):
     } else if (ctx.state === SkillCheckState.BlindDevotionSkillSelect) {
         return handleBlindDevotionSkillSelect(gameDoc, input);
     } else if (ctx.state === SkillCheckState.Scoring) {
-        return _handleScoring(gameDoc.gameState.skillCheckCtx);
+        return handleScoring(gameDoc.gameState.skillCheckCtx);
     } else if (ctx.state === SkillCheckState.AfterScore) {
         return handleCollectAfterScore(gameDoc, input);
     } else if (ctx.state === SkillCheckState.FinalScoring) {
-        return _handleFinalScoring(gameDoc.gameState.skillCheckCtx);
+        return handleFinalResult(gameDoc.gameState.skillCheckCtx);
     } else if (ctx.state === SkillCheckState.Discard) {
         return handleDiscard(gameDoc);
     }
 }
 
-function narrowBeforeSkillCheck(gameDoc: GameDocument, user: string): BeforeSkillCheckId[] {
-    return _narrowBeforeSkillCheck(getPlayer(gameDoc, user))
-}
-
-/**
- * Expose for testing
- */
-export function _narrowBeforeSkillCheck(player: FullPlayer): BeforeSkillCheckId[] {
-    const result: BeforeSkillCheckId[] = [];
-
-    if (player.arbitrator) {
-        result.push(BeforeSkillCheckId.AssignArbitrator_Increase, BeforeSkillCheckId.AssignArbitrator_Decrease);
-    }
-
-    if (hasSkillCard(player, SkillCardId.InvestigativeCommittee3)) {
-        result.push(BeforeSkillCheckId.InvestigativeCommittee3);
-    }
-    if (hasSkillCard(player, SkillCardId.InvestigativeCommittee4)) {
-        result.push(BeforeSkillCheckId.InvestigativeCommittee4);
-    }
-    if (hasSkillCard(player, SkillCardId.InvestigativeCommittee5)) {
-        result.push(BeforeSkillCheckId.InvestigativeCommittee5);
-    }
-
-    if (hasSkillCard(player, SkillCardId.ScientificResearch3)) {
-        result.push(BeforeSkillCheckId.ScientificResearch3);
-    }
-
-    if (hasSkillCard(player, SkillCardId.ScientificResearch4)) {
-        result.push(BeforeSkillCheckId.ScientificResearch4);
-    }
-
-    if (hasSkillCard(player, SkillCardId.ScientificResearch5)) {
-        result.push(BeforeSkillCheckId.ScientificResearch5);
-    }
-
-    if (player.characterId === CharacterId.SaulTigh) {
-        result.push(BeforeSkillCheckId.CylonHatred);
-    }
-
-    if (player.characterId === CharacterId.TomZarek) {
-        result.push(BeforeSkillCheckId.FILP_Decrease, BeforeSkillCheckId.FILP_Increase);
-    }
-    return result;
-}
-
-function hasSkillCard(player: FullPlayer, card: SkillCardId): boolean {
-    return player.skillCards.indexOf(card) !== -1;
+function handleSetup(game: FullGameData): boolean {
+    const s = game.skillCheckCtx;
+    const presidentChosen = s.players[s.chosenPlayer].president;
+    s.pass = adjustDifficultyFromProphecy(s.acceptingProphecy, s.which, presidentChosen, s.pass);
+    game.skillCheckCtx.state = SkillCheckState.BeforeCollect;
+    return false;
 }
 
 function handleBeforeCollect(gameDoc: GameDocument, input: Input<BeforeSkillCheckId[]>): boolean {
     const result = initAndHandleRoundTable(gameDoc, InputId.BeforeSkillCheckSelect, input, narrowBeforeSkillCheck);
     const skillCtx = gameDoc.gameState.skillCheckCtx;
     if (result) {
-        _adjustDifficulty(gameDoc.gameState, _.flatten(skillCtx.beforeCheck));
+        skillCtx.pass = adjustDifficulty(skillCtx.pass, _.flatten(skillCtx.beforeCheck));
+        skillCtx.state = SkillCheckState.Collect;
     } else if (input) {
         skillCtx.beforeCheck.push(input.data);
     }
     return result;
 }
 
-/**
- * expose for testing
- * @param game
- * @param skillCheck
- */
-export function _adjustDifficultyFromProphecy(game: FullGameData, skillCheck: SkillCheck) {
-    const adjust = game.acceptProphecy &&
-        (skillCheck.which === SkillCheckType.Administration ||
-            (skillCheck.which === SkillCheckType.AdmiralsQuarters &&
-                game.actionCtx.chosenPlayer.president));
-    if (adjust) {
-        skillCheck.pass += 2;
-        addCard(game.discardedQuorumDeck, QuorumCardId.AcceptProphecy);
-    }
-}
 
-export function _adjustDifficulty(game: FullGameData, adjustments: BeforeSkillCheckId[]) {
-    const skillCheck = game.skillCheckCtx.skillCheck;
-    adjustments.forEach(a => {
-       if (a === BeforeSkillCheckId.AssignArbitrator_Increase) {
-           skillCheck.pass += 3;
-           addCard(game.discardedQuorumDeck, QuorumCardId.AssignArbitrator);
-       } else if (a === BeforeSkillCheckId.AssignArbitrator_Decrease) {
-           skillCheck.pass -= 3;
-           addCard(game.discardedQuorumDeck, QuorumCardId.AssignArbitrator);
-       } else if (a === BeforeSkillCheckId.FILP_Increase) {
-           skillCheck.pass += 2;
-       } else if (a === BeforeSkillCheckId.FILP_Decrease) {
-           skillCheck.pass -= 2;
-       } else if (a === BeforeSkillCheckId.CylonHatred) {
-           skillCheck.pass -= 3;
-       }
-    });
+function narrowBeforeSkillCheck(gameDoc: GameDocument, user: string): BeforeSkillCheckId[] {
+    const player = getPlayer(gameDoc, user);
+    return gatherBeforeSkills(player.characterId, player.arbitrator, player.skillCards)
 }
 
 function handleCollectSkills(gameDoc: GameDocument, input: Input<SkillCardId[]>): boolean {
@@ -237,12 +195,10 @@ function handleBlindDevotionSkillSelect(gameDoc: GameDocument, input: Input<Skil
     return false;
 }
 
-/**
- * Exposed for testing
- * @param skillCtx
- */
-export function _handleScoring(skillCtx: SkillCheckCtx): boolean {
-    skillCtx.score = calcSkillCheckStrength(skillCtx);
+function handleScoring(skillCtx: SkillCheckCtx): boolean {
+    skillCtx.score = calcSkillCheckStrength(skillCtx.types,
+        _.flatten(skillCtx.skills), hasScientificResearch(skillCtx),
+        skillCtx.blindDevotionSkill);
     skillCtx.state = SkillCheckState.AfterScore;
     return false;
 }
@@ -258,22 +214,9 @@ function handleCollectAfterScore(gameDoc: GameDocument, input: Input<AfterSkillC
     return result;
 }
 
-/**
- * expose for testing
- * @param gameDoc
- */
-export function _handleFinalScoring(skillCtx: SkillCheckCtx): boolean {
-    const pass = hasDeclareEmergency(skillCtx) ?
-        skillCtx.skillCheck.pass - 2 : skillCtx.skillCheck.pass;
-
-    if (skillCtx.score >= pass) {
-        skillCtx.result = SkillCheckResult.Pass;
-    } else if (skillCtx.skillCheck.partial !== undefined &&
-               skillCtx.score >= skillCtx.skillCheck.partial) {
-        skillCtx.result = SkillCheckResult.Partial;
-    } else {
-        skillCtx.result = SkillCheckResult.Fail;
-    }
+function handleFinalResult(skillCtx: SkillCheckCtx): boolean {
+    skillCtx.result = calcFinalResult(
+        skillCtx.score, skillCtx.pass, skillCtx.partial, hasDeclareEmergency(skillCtx));
     return false;
 }
 
@@ -342,30 +285,6 @@ function initAndHandleRoundTable<T, S>(gameDoc: GameDocument, inputId: InputId, 
         initRoundTable(gameDoc, inputId, usersFromCurrent(gameDoc), inputCtxFactory)
     }
     return handleRoundTable(gameDoc, input);
-}
-
-function calcSkillCheckStrength(ctx: SkillCheckCtx): number {
-    let score = 0;
-    const skills = _.flatten(ctx.skills);
-    skills.map(s => SkillCards[SkillCardId[s]])
-        .forEach(s => score += calcSkillCardStrength(ctx, s));
-    return score;
-}
-
-function calcSkillCardStrength(ctx: SkillCheckCtx, skillCard: SkillCard): number {
-    if (hasScientificResearch(ctx) && skillCard.type === SkillType.Engineering) {
-        return skillCard.strength;
-    }
-
-    if (ctx.blindDevotionSkill === skillCard.type) {
-        return 0;
-    }
-
-    if (ctx.skillCheck.types.indexOf(skillCard.type) !== -1) {
-        return skillCard.strength;
-    } else {
-        return -1 * skillCard.strength;
-    }
 }
 
 function hasScientificResearch(ctx: SkillCheckCtx) {
