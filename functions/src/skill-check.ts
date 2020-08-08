@@ -30,7 +30,6 @@ export enum SkillCheckState {
     Setup,
     BeforeCollect,
     Collect,
-    CheckForBlindDevotion,
     BlindDevotionSkillSelect,
     Scoring,
     AfterScore,
@@ -106,7 +105,7 @@ export function setupSkillCtx(game: FullGameData, skillCheckCtx: SkillCheckCtx) 
     game.skillCheckCtx = skillCheckCtx;
 }
 
-export function handleSkillCheck(gameDoc: GameDocument, input: Input<any, any>): boolean {
+export function handleSkillCheck(gameDoc: GameDocument, input: Input<any, any>): SkillCheckResult {
     const ctx = gameDoc.gameState.skillCheckCtx;
     if (ctx.state === SkillCheckState.Setup) {
         return handleSetup(gameDoc.gameState);
@@ -114,8 +113,6 @@ export function handleSkillCheck(gameDoc: GameDocument, input: Input<any, any>):
         return handleBeforeCollect(gameDoc, input as Input<BeforeSkillCheckId[]>);
     } else if (ctx.state === SkillCheckState.Collect) {
         return handleCollectSkills(gameDoc, input);
-    } else if (ctx.state === SkillCheckState.CheckForBlindDevotion) {
-        return checkForBlindDevotion(gameDoc);
     } else if (ctx.state === SkillCheckState.BlindDevotionSkillSelect) {
         return handleBlindDevotionSkillSelect(gameDoc, input);
     } else if (ctx.state === SkillCheckState.Scoring) {
@@ -129,44 +126,47 @@ export function handleSkillCheck(gameDoc: GameDocument, input: Input<any, any>):
     }
 }
 
-function handleSetup(game: FullGameData): boolean {
+function handleSetup(game: FullGameData): SkillCheckResult {
     const s = game.skillCheckCtx;
     const presidentChosen = s.players[s.chosenPlayer].president;
     s.pass = adjustDifficultyFromProphecy(s.acceptingProphecy, s.which, presidentChosen, s.pass);
     game.skillCheckCtx.state = SkillCheckState.BeforeCollect;
-    return false;
+    return SkillCheckResult.Unknown;
 }
 
-function handleBeforeCollect(gameDoc: GameDocument, input: Input<BeforeSkillCheckId[]>): boolean {
+function handleBeforeCollect(gameDoc: GameDocument, input: Input<BeforeSkillCheckId[]>): SkillCheckResult {
     const result = initAndHandleRoundTable(gameDoc, InputId.BeforeSkillCheckSelect, input, narrowBeforeSkillCheck);
     const skillCtx = gameDoc.gameState.skillCheckCtx;
+    if (input) {
+        skillCtx.beforeCheck.push(input.data);
+    }
+
     if (result) {
         skillCtx.pass = adjustDifficulty(skillCtx.pass, _.flatten(skillCtx.beforeCheck));
         skillCtx.state = SkillCheckState.Collect;
-    } else if (input) {
-        skillCtx.beforeCheck.push(input.data);
     }
-    return result;
+    return SkillCheckResult.Unknown;
 }
-
 
 function narrowBeforeSkillCheck(gameDoc: GameDocument, user: string): BeforeSkillCheckId[] {
     const player = getPlayer(gameDoc, user);
     return gatherBeforeSkills(player.characterId, player.arbitrator, player.skillCards)
 }
 
-function handleCollectSkills(gameDoc: GameDocument, input: Input<SkillCardId[]>): boolean {
+function handleCollectSkills(gameDoc: GameDocument, input: Input<SkillCardId[]>): SkillCheckResult {
     const result = initAndHandleRoundTable(gameDoc, InputId.SkillCardSelect, input);
     const skillCtx = gameDoc.gameState.skillCheckCtx;
-    if (result) {
-        checkForBlindDevotion(gameDoc);
-    } else if (input) {
+    if (input) {
         skillCtx.skills.push(input.data);
     }
-    return result;
+
+    if (result) {
+        checkForBlindDevotion(gameDoc);
+    }
+    return SkillCheckResult.Unknown;
 }
 
-function checkForBlindDevotion(gameDoc: GameDocument): boolean {
+function checkForBlindDevotion(gameDoc: GameDocument): SkillCheckResult {
     const skillCtx = gameDoc.gameState.skillCheckCtx;
     const galenUser = findGalen(gameDoc);
     if (!galenUser) {
@@ -175,7 +175,7 @@ function checkForBlindDevotion(gameDoc: GameDocument): boolean {
         skillCtx.galen = galenUser;
         skillCtx.state = SkillCheckState.BlindDevotionSkillSelect;
     }
-    return false;
+    return SkillCheckResult.Unknown;
 }
 
 function findGalen(gameDoc: GameDocument): string {
@@ -184,43 +184,45 @@ function findGalen(gameDoc: GameDocument): string {
     return gameDoc.gameState.userIds[galenIndex];
 }
 
-function handleBlindDevotionSkillSelect(gameDoc: GameDocument, input: Input<SkillType>): boolean {
+function handleBlindDevotionSkillSelect(gameDoc: GameDocument, input: Input<SkillType>): SkillCheckResult {
     const skillCtx = gameDoc.gameState.skillCheckCtx;
     if (!input) {
         setInputReq(gameDoc, InputId.SkillTypeSelect, skillCtx.galen);
-        return false;
+        return SkillCheckResult.Unknown;
     }
     skillCtx.blindDevotionSkill = input.data;
     skillCtx.state = SkillCheckState.Scoring;
-    return false;
+    return SkillCheckResult.Unknown;
 }
 
-function handleScoring(skillCtx: SkillCheckCtx): boolean {
+function handleScoring(skillCtx: SkillCheckCtx): SkillCheckResult {
     skillCtx.score = calcSkillCheckStrength(skillCtx.types,
         _.flatten(skillCtx.skills), hasScientificResearch(skillCtx),
         skillCtx.blindDevotionSkill);
     skillCtx.state = SkillCheckState.AfterScore;
-    return false;
+    return SkillCheckResult.Unknown;
 }
 
-function handleCollectAfterScore(gameDoc: GameDocument, input: Input<AfterSkillCheckTotalId[]>): boolean {
+function handleCollectAfterScore(gameDoc: GameDocument, input: Input<AfterSkillCheckTotalId[]>): SkillCheckResult{
     const result = initAndHandleRoundTable(gameDoc, InputId.AfterSkillCheckTotaled, input);
     const skillCtx = gameDoc.gameState.skillCheckCtx;
-    if (result) {
-        skillCtx.state = SkillCheckState.FinalScoring;
-    } else if (input) {
+    if (input) {
         skillCtx.afterTotal.push(input.data);
     }
-    return result;
+    if (result) {
+        skillCtx.state = SkillCheckState.FinalScoring;
+    }
+    return SkillCheckResult.Unknown;
 }
 
-function handleFinalResult(skillCtx: SkillCheckCtx): boolean {
+function handleFinalResult(skillCtx: SkillCheckCtx): SkillCheckResult {
     skillCtx.result = calcFinalResult(
         skillCtx.score, skillCtx.pass, skillCtx.partial, hasDeclareEmergency(skillCtx));
-    return false;
+    skillCtx.state = SkillCheckState.Discard;
+    return SkillCheckResult.Unknown;
 }
 
-function handleDiscard(gameDoc: GameDocument): boolean {
+function handleDiscard(gameDoc: GameDocument): SkillCheckResult {
     const skillCtx = gameDoc.gameState.skillCheckCtx;
 
     for (let i = 0; i < skillCtx.beforeCheck.length; i++) {
@@ -234,7 +236,7 @@ function handleDiscard(gameDoc: GameDocument): boolean {
     for (let i = 0; i < skillCtx.afterTotal.length; i++) {
         discardSkills(gameDoc, i, getAfterSkillCards(skillCtx.afterTotal[i]));
     }
-    return true;
+    return skillCtx.result;
 }
 
 function discardSkills(gameDoc: GameDocument, playerIndex: number, skills: SkillCardId[]) {

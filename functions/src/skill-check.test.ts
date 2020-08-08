@@ -1,7 +1,90 @@
 import { GameDocument, newGame } from "./game";
-import { createSkillCheckCtx, handleSkillCheck, setupSkillCtx, SkillCheckState } from "./skill-check";
+import {
+    createSkillCheckCtx,
+    handleSkillCheck,
+    setupSkillCtx,
+    SkillCheckPlayer,
+    SkillCheckResult,
+    SkillCheckState
+} from "./skill-check";
 import { Input, InputId } from "../../src/models/inputs";
-import { CharacterId, SkillCheckType, SkillType } from "../../src/models/game-data";
+import {
+    AfterSkillCheckTotalId,
+    BeforeSkillCheckId,
+    CharacterId,
+    SkillCardId,
+    SkillCheckType,
+    SkillType
+} from "../../src/models/game-data";
+
+
+function executeAndVerifySimpleSkillCheck(characters: CharacterId[],
+                                          which: SkillCheckType,
+                                          types: SkillType[],
+                                          pass: number,
+                                          skills: SkillCardId[][],
+                                          result: SkillCheckResult) {
+    const empty = Array(characters.length).fill([]);
+    executeAndVerifySkillCheck(false, undefined,
+        characters, undefined, undefined, which, types, pass,
+        undefined, empty, skills, empty, result)
+}
+
+function executeAndVerifySkillCheck(acceptingProphecy: boolean,
+                                    chosenPlayer: number,
+                                    characters: CharacterId[],
+                                    president: CharacterId,
+                                    arbitrator: CharacterId,
+                                    which: SkillCheckType,
+                                    types: SkillType[],
+                                    pass: number,
+                                    partial: number,
+                                    beforeSkillCheck: BeforeSkillCheckId[][],
+                                    skills: SkillCardId[][],
+                                    afterTotal: AfterSkillCheckTotalId[][],
+                                    result: SkillCheckResult) {
+    const players: SkillCheckPlayer[] = characters.map((c, i) => ({
+        userId: 'user' + i,
+        characterId: c,
+        president: president === c,
+        arbitrator: arbitrator === c,
+    }));
+
+    const users = players.map(p => p.userId);
+    const gameDoc = newGame('gameId', users);
+    gameDoc.gameState.inputRequest = null;
+    gameDoc.gameState.currentPlayer = 2;
+
+    const skillCheckCtx =
+        createSkillCheckCtx(players, acceptingProphecy, which, types, pass, partial, chosenPlayer);
+    setupSkillCtx(gameDoc.gameState, skillCheckCtx);
+
+    verifySkillCheckState(gameDoc, SkillCheckState.Setup);
+    expect(gameDoc.gameState.inputRequest).toBeFalsy();
+
+    expect(handleSkillCheck(gameDoc, null)).toBe(SkillCheckResult.Unknown);
+    verifySkillCheckState(gameDoc, SkillCheckState.BeforeCollect);
+
+    executeAndVerifySkillCheckStage(gameDoc, users,
+        SkillCheckState.BeforeCollect, SkillCheckState.Collect,
+        InputId.BeforeSkillCheckSelect, beforeSkillCheck);
+
+    executeAndVerifySkillCheckStage(gameDoc, users,
+        SkillCheckState.Collect, SkillCheckState.Scoring,
+        InputId.SkillCardSelect, skills);
+
+    expect(handleSkillCheck(gameDoc, null)).toBe(SkillCheckResult.Unknown);
+    verifySkillCheckState(gameDoc, SkillCheckState.AfterScore);
+
+    executeAndVerifySkillCheckStage(gameDoc, users,
+        SkillCheckState.AfterScore, SkillCheckState.FinalScoring,
+        InputId.AfterSkillCheckTotaled, afterTotal);
+
+    expect(handleSkillCheck(gameDoc, null)).toBe(SkillCheckResult.Unknown);
+    verifySkillCheckState(gameDoc, SkillCheckState.Discard);
+
+    expect(skillCheckCtx.result).toBe(result);
+}
 
 /**
  * Call this when your expecting the handleSkillCheck call to produce an input request.
@@ -28,13 +111,12 @@ function handleAndVerifySkillCheckStep(gameDoc: GameDocument,
                                        input: Input<any, any>,
                                        state1: SkillCheckState,
                                        state2: SkillCheckState,
-                                       ctx: any = null,
-                                       end: boolean = false) {
+                                       ctx: any = null) {
     // we ensure that we start off with no input request...
     expect(gameDoc.gameState.inputRequest).toBeFalsy();
 
     // This next call should make one, though
-    expect(handleSkillCheck(gameDoc, null)).toBe(false);
+    handleSkillCheck(gameDoc, null);
     expect(gameDoc.gameState.inputRequest).toBeTruthy();
     expect(gameDoc.gameState.inputRequest.userId).toEqual(input.userId);
     expect(gameDoc.gameState.inputRequest.inputId).toBe(input.inputId);
@@ -44,7 +126,7 @@ function handleAndVerifySkillCheckStep(gameDoc: GameDocument,
     // the game engine would normally do this...
     gameDoc.gameState.inputRequest = null;
 
-    expect(handleSkillCheck(gameDoc, input)).toBe(end);
+    handleSkillCheck(gameDoc, input);
     expect(gameDoc.gameState.inputRequest).toBeFalsy();
     expect(gameDoc.gameState.skillCheckCtx.state).toBe(state2);
 }
@@ -62,53 +144,41 @@ function makeInput (user: string, inputId: InputId, data: any, ctx?: any) {
     }
 }
 
+function executeAndVerifySkillCheckStage(gameDoc: GameDocument, users: string[],
+                                         state1: SkillCheckState, state2: SkillCheckState,
+                                         inputId: InputId, data: any[]) {
+    for (let i = 0; i < users.length; i++) {
+        const last = i === users.length - 1;
+        handleAndVerifySkillCheckStep(gameDoc,
+            makeInput(users[i], inputId, data[i]), state1,
+            last ? state2 : state1);
+    }
+}
+
 describe('Skill check scenarios', () => {
-    let gameDoc: GameDocument;
-    beforeEach(() => {
-        gameDoc = newGame('gameId', ['c1', 'c2', 'c3']);
-        gameDoc.gameState.inputRequest = null;
-        gameDoc.gameState.currentPlayer = 2;
+    it('should pass Administration', () => {
+        executeAndVerifySkillCheck(false, 0,
+            [CharacterId.LeeAdama, CharacterId.TomZarek, CharacterId.SaulTigh],
+            CharacterId.TomZarek, undefined, SkillCheckType.Administration,
+            [SkillType.Politics, SkillType.Leadership], 5, undefined,
+            [[], [BeforeSkillCheckId.FILP_Increase], []],
+            [[SkillCardId.DeclareEmergency5],
+                [SkillCardId.InvestigativeCommittee5],
+                [SkillCardId.MaximumFirepower3]],
+            [[], [], []],
+            SkillCheckResult.Pass);
     });
 
-    it('should handle Administration', () => {
-        const players = [
-            {
-                userId: 'u1',
-                characterId: CharacterId.LeeAdama
-            },
-            {
-                userId: 'u2',
-                characterId: CharacterId.TomZarek,
-                president: true
-            }, {
-                userId: 'u3',
-                characterId: CharacterId.SaulTigh
-            }
-        ];
-        const skillCheckCtx = createSkillCheckCtx(players,false,
-            SkillCheckType.Administration,
-            [SkillType.Politics, SkillType.Leadership], 5);
-        skillCheckCtx.chosenPlayer = 0;
-        setupSkillCtx(gameDoc.gameState, skillCheckCtx);
-
-        verifySkillCheckState(gameDoc, SkillCheckState.Setup);
-        expect(gameDoc.gameState.inputRequest).toBeFalsy();
-
-        expect(handleSkillCheck(gameDoc, null)).toBe(false);
-        verifySkillCheckState(gameDoc, SkillCheckState.BeforeCollect);
-
-        handleAndVerifySkillCheckStep(gameDoc,
-            makeInput('c1', InputId.BeforeSkillCheckSelect, []),
-            SkillCheckState.BeforeCollect, SkillCheckState.BeforeCollect);
-
-        handleAndVerifySkillCheckStep(gameDoc,
-            makeInput('c2', InputId.BeforeSkillCheckSelect, []),
-            SkillCheckState.BeforeCollect, SkillCheckState.BeforeCollect);
-
-        handleAndVerifySkillCheckStep(gameDoc,
-            makeInput('c3', InputId.BeforeSkillCheckSelect, []),
-            SkillCheckState.BeforeCollect, SkillCheckState.Collect, null, true);
+    it('should fail Administration', () => {
+        executeAndVerifySkillCheck(false, 0,
+            [CharacterId.LeeAdama, CharacterId.TomZarek, CharacterId.SaulTigh],
+            CharacterId.TomZarek, undefined, SkillCheckType.Administration,
+            [SkillType.Politics, SkillType.Leadership], 5, undefined,
+            [[], [BeforeSkillCheckId.FILP_Increase], []],
+            [[SkillCardId.DeclareEmergency3],
+                [SkillCardId.InvestigativeCommittee5],
+                [SkillCardId.MaximumFirepower5]],
+            [[], [], []],
+            SkillCheckResult.Fail);
     });
-
-
 });

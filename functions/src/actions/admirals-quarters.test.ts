@@ -1,7 +1,7 @@
 import { GameDocument, getPlayer, newGame } from "../game";
-// import { actionAdmiralsQuarters, AdmiralsQuartersState } from "./admirals-quarters";
+import { actionAdmiralsQuarters, AdmiralsQuartersState } from "./admirals-quarters";
 import { InputId } from "../../../src/models/inputs";
-import { LocationId, SkillCardId, SkillCards, SkillType } from "../../../src/models/game-data";
+import { LocationId, SkillCardId, SkillType } from "../../../src/models/game-data";
 //
 // describe('Admirals Quarters Action', () => {
 //     let game: GameDocument;
@@ -25,52 +25,6 @@ import { LocationId, SkillCardId, SkillCards, SkillType } from "../../../src/mod
 //         expect(game.gameState.skillCheckCtx).toBeTruthy();
 //         expect(game.gameState.skillCheckCtx.types)
 //             .toEqual([SkillType.Leadership, SkillType.Tactics]);
-//     });
-//
-//     it('should ask for skill cards', () => {
-//         game.gameState.actionCtx = {
-//             state: AdmiralsQuartersState.CollectSkills,
-//             chosenPlayer: getPlayer(game, 'c2')
-//         }
-//
-//         game.gameState.skillCheckCtx = {
-//             skills: [],
-//             skillPlayer: 0,
-//             types: [SkillType.Leadership, SkillType.Tactics],
-//             score: 0
-//         }
-//
-//         actionAdmiralsQuarters(game,null);
-//         const request = game.gameState.inputRequest;
-//         expect(request).toBeTruthy();
-//         expect(request.inputId).toBe(InputId.SkillCardSelect);
-//         expect(request.userId).toBe('c1');
-//     });
-//
-//     it('should continue to ask for skill cards', () => {
-//         game.gameState.actionCtx = {
-//             state: AdmiralsQuartersState.CollectSkills,
-//             chosenPlayer: getPlayer(game, 'c2')
-//         }
-//
-//         const skillCards = [
-//             [
-//                 SkillCards[SkillCardId[SkillCardId.ConsolidatePower1]],
-//                 SkillCards[SkillCardId[SkillCardId.Repair2]]
-//             ]
-//         ];
-//         game.gameState.skillCheckCtx = {
-//             skills: skillCards,
-//             skillPlayer: 1,
-//             types: [SkillType.Leadership, SkillType.Tactics],
-//             score: 0
-//         }
-//
-//         actionAdmiralsQuarters(game,null);
-//         const request = game.gameState.inputRequest;
-//         expect(request).toBeTruthy();
-//         expect(request.inputId).toBe(InputId.SkillCardSelect);
-//         expect(request.userId).toBe('c2');
 //     });
 //
 //     it('should send to brig', () => {

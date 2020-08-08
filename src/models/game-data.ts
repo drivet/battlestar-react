@@ -389,11 +389,6 @@ export enum BeforeSkillCheckId {
     CylonHatred,
 }
 
-// after cards have been added but before totalling
-export enum AfterSkillCheckAddedId {
-    BlindDevotion
-}
-
 // after cards have been totalled
 export enum AfterSkillCheckTotalId {
     DeclareEmergency3,

@@ -11,7 +11,7 @@ export interface RoundTableCtx<T> {
 }
 
 export function initRoundTable<T>(game: GameDocument, inputId: InputId, users: string[],
-                                     ctxFactory: InputCtxFactory<T> = undefined) {
+                                  ctxFactory: InputCtxFactory<T> = undefined) {
     game.gameState.roundTableCtx = {
         inputId: inputId,
         users: users,
@@ -24,11 +24,17 @@ export function handleRoundTable<T>(gameDoc: GameDocument, input: Input<T>): boo
     const ctx = gameDoc.gameState.roundTableCtx;
     if (!input) {
         const user = ctx.users[ctx.count];
-        setInputReq(gameDoc, ctx.inputId, user, (ctx.ctxFactory)(gameDoc, user));
+        const data = ctx.ctxFactory ? (ctx.ctxFactory)(gameDoc, user) : null;
+        setInputReq(gameDoc, ctx.inputId, user, data);
         return false;
     } else {
         ctx.count++;
-        return ctx.count === getPlayerCount(gameDoc);
+        if (ctx.count === getPlayerCount(gameDoc)) {
+            gameDoc.gameState.roundTableCtx = null;
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 

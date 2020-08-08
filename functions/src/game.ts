@@ -451,6 +451,11 @@ export function getPlayerCount(gameDoc: GameDocument): number {
     return Object.keys(gameDoc.players).length;
 }
 
+
+export function getPlayers(gameDoc: GameDocument): FullPlayer[] {
+    return Object.values(gameDoc.players);
+}
+
 export function findVp(gameDoc: GameDocument): FullPlayer {
     const vps = gameDoc.gameState.userIds
         .map(u => gameDoc.players[u])
