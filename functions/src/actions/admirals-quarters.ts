@@ -15,6 +15,23 @@ interface AdmiralsQuartersCtx {
     chosenPlayer: FullPlayer;
 }
 
+export function actionAdmiralsQuarters(gameDoc: GameDocument, input: Input<any>) {
+    if (!gameDoc.gameState.actionCtx) {
+        gameDoc.gameState.actionCtx = {
+            state: AdmiralsQuartersState.ChoosePlayer,
+        } as AdmiralsQuartersCtx;
+    }
+    const ctx = gameDoc.gameState.actionCtx;
+    if (ctx.state === AdmiralsQuartersState.ChoosePlayer) {
+        handleChoosePlayer(gameDoc, input);
+    } else if (ctx.state === AdmiralsQuartersState.SkillCheck) {
+        const result = handleSkillCheck(gameDoc, input)
+        if (result) {
+            executeOutcome(gameDoc, result);
+        }
+    }
+}
+
 function handleChoosePlayer(gameDoc: GameDocument, input: Input<string>) {
     const currentPlayer =  getCurrentPlayer(gameDoc);
     if (!input) {
@@ -34,27 +51,10 @@ function handleChoosePlayer(gameDoc: GameDocument, input: Input<string>) {
             7, undefined, ctx.chosenPlayer);
 }
 
-function executeOutcome(gameDoc: GameDocument) {
-    const result = gameDoc.gameState.skillCheckCtx.result;
+function executeOutcome(gameDoc: GameDocument, result: SkillCheckResult) {
     if (result === SkillCheckResult.Pass) {
         const ctx = gameDoc.gameState.actionCtx;
         ctx.chosenPlayer.location = LocationId.Brig;
     }
     finishAction(gameDoc);
-}
-
-export function actionAdmiralsQuarters(gameDoc: GameDocument, input: Input<any>) {
-    if (!gameDoc.gameState.actionCtx) {
-        gameDoc.gameState.actionCtx = {
-            state: AdmiralsQuartersState.ChoosePlayer,
-        } as AdmiralsQuartersCtx;
-    }
-    const ctx = gameDoc.gameState.actionCtx;
-    if (ctx.state === AdmiralsQuartersState.ChoosePlayer) {
-        handleChoosePlayer(gameDoc, input);
-    } else if (ctx.state === AdmiralsQuartersState.SkillCheck) {
-        if (handleSkillCheck(gameDoc, input)) {
-            executeOutcome(gameDoc);
-        }
-    }
 }

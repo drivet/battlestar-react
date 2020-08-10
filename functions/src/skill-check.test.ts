@@ -17,19 +17,6 @@ import {
     SkillType
 } from "../../src/models/game-data";
 
-
-function executeAndVerifySimpleSkillCheck(characters: CharacterId[],
-                                          which: SkillCheckType,
-                                          types: SkillType[],
-                                          pass: number,
-                                          skills: SkillCardId[][],
-                                          result: SkillCheckResult) {
-    const empty = Array(characters.length).fill([]);
-    executeAndVerifySkillCheck(false, undefined,
-        characters, undefined, undefined, which, types, pass,
-        undefined, empty, skills, empty, result)
-}
-
 function executeAndVerifySkillCheck(acceptingProphecy: boolean,
                                     chosenPlayer: number,
                                     characters: CharacterId[],
@@ -135,7 +122,7 @@ function verifySkillCheckState(game: GameDocument, state: SkillCheckState) {
     expect(game.gameState.skillCheckCtx.state).toBe(state);
 }
 
-function makeInput (user: string, inputId: InputId, data: any, ctx?: any) {
+function makeInput (user: string, inputId: InputId, data: any, ctx?: any): Input<any> {
     return {
         userId: user,
         inputId: inputId,

@@ -19,7 +19,6 @@ describe('Armory Action', () => {
     it('should do nothing if die < 7', () => {
         game.gameState.boardedCenturions = [1, 2];
         jest.spyOn(rollMod, 'roll').mockReturnValue(6);
-
         actionArmory(game);
         expect(game.gameState.boardedCenturions).toEqual([1, 2]);
     });
@@ -27,7 +26,6 @@ describe('Armory Action', () => {
     it('should remove trailing zeros', () => {
         game.gameState.boardedCenturions = [1, 1];
         jest.spyOn(rollMod, 'roll').mockReturnValue(7);
-
         actionArmory(game);
         expect(game.gameState.boardedCenturions).toEqual([1]);
     });
