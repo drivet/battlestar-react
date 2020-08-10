@@ -1,18 +1,10 @@
 import { GameDocument, getPlayer, newGame } from "../game";
 import { actionAdmiralsQuarters, AdmiralsQuartersState } from "./admirals-quarters";
-import { Input, InputId } from "../../../src/models/inputs";
+import { InputId } from "../../../src/models/inputs";
 import { LocationId } from "../../../src/models/game-data";
 import * as skillMod from "../skill-check";
 import { SkillCheckResult } from "../skill-check";
-
-function makeInput (user: string, inputId: InputId, data: any, ctx?: any): Input<any> {
-    return {
-        userId: user,
-        inputId: inputId,
-        data: data,
-        ctx: ctx
-    }
-}
+import { makeInput } from "../test-utils";
 
 describe('Admirals Quarters Action', () => {
     let game: GameDocument;
