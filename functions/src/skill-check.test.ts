@@ -1,6 +1,7 @@
 import { GameDocument, newGame } from "./game";
 import {
     createSkillCheckCtx,
+    handleDiscard,
     handleSkillCheck,
     setupSkillCtx,
     SkillCheckPlayer,
@@ -12,10 +13,21 @@ import {
     AfterSkillCheckTotalId,
     BeforeSkillCheckId,
     CharacterId,
+    QuorumCardId,
     SkillCardId,
     SkillCheckType,
     SkillType
 } from "../../src/models/game-data";
+import { sandGameDoc } from "./sand";
+
+function makePlayers(characters: CharacterId[], president: CharacterId, arbitrator: CharacterId): SkillCheckPlayer[] {
+    return characters.map((c, i) => ({
+        userId: 'user' + i,
+        characterId: c,
+        president: president === c,
+        arbitrator: arbitrator === c,
+    }));
+}
 
 function executeAndVerifySkillCheck(acceptingProphecy: boolean,
                                     chosenPlayer: number,
@@ -30,12 +42,7 @@ function executeAndVerifySkillCheck(acceptingProphecy: boolean,
                                     skills: SkillCardId[][],
                                     afterTotal: AfterSkillCheckTotalId[][],
                                     result: SkillCheckResult) {
-    const players: SkillCheckPlayer[] = characters.map((c, i) => ({
-        userId: 'user' + i,
-        characterId: c,
-        president: president === c,
-        arbitrator: arbitrator === c,
-    }));
+    const players: SkillCheckPlayer[] = makePlayers(characters, president, arbitrator);
 
     const users = players.map(p => p.userId);
     const gameDoc = newGame('gameId', users);
@@ -167,5 +174,71 @@ describe('Skill check scenarios', () => {
                 [SkillCardId.MaximumFirepower5]],
             [[], [], []],
             SkillCheckResult.Fail);
+    });
+
+    it('should discard the quorum cards', () => {
+        const game: GameDocument = newGame('gameId', ['c1', 'c2', 'c3']);
+        sandGameDoc(game);
+
+        const players = makePlayers(
+            [CharacterId.SaulTigh, CharacterId.TomZarek, CharacterId.KaraThrace],
+            CharacterId.TomZarek, CharacterId.KaraThrace);
+
+        const skillCtx = createSkillCheckCtx(players, true,  SkillCheckType.Crisis,
+            [SkillType.Tactics, SkillType.Engineering], 5);
+
+        setupSkillCtx(game.gameState, skillCtx);
+        skillCtx.beforeCheck = [[], [], [BeforeSkillCheckId.AssignArbitrator_Decrease]];
+
+        handleDiscard(game);
+
+        expect(game.gameState.discardedQuorumDeck.length).toBe(2);
+        expect(game.gameState.discardedQuorumDeck).toContain(QuorumCardId.AssignArbitrator);
+        expect(game.gameState.discardedQuorumDeck).toContain(QuorumCardId.AcceptProphecy);
+    });
+
+    it('should not discard the quorum cards', () => {
+        const game: GameDocument = newGame('gameId', ['c1', 'c2', 'c3']);
+        sandGameDoc(game);
+
+        const players = makePlayers(
+            [CharacterId.SaulTigh, CharacterId.TomZarek, CharacterId.KaraThrace],
+            CharacterId.TomZarek, CharacterId.KaraThrace);
+
+        const skillCtx = createSkillCheckCtx(players, false,  SkillCheckType.Crisis,
+            [SkillType.Tactics, SkillType.Engineering], 5);
+
+        setupSkillCtx(game.gameState, skillCtx);
+        skillCtx.beforeCheck = [[], [], [BeforeSkillCheckId.AssignArbitrator_Decrease]];
+
+        handleDiscard(game);
+
+        expect(game.gameState.discardedQuorumDeck.length).toBe(1);
+        expect(game.gameState.discardedQuorumDeck).toContain(QuorumCardId.AssignArbitrator);
+    });
+
+    it('should discard the skill cards', () => {
+        const game: GameDocument = newGame('gameId', ['c1', 'c2', 'c3']);
+        sandGameDoc(game);
+
+        const players = makePlayers(
+            [CharacterId.SaulTigh, CharacterId.TomZarek, CharacterId.KaraThrace],
+            CharacterId.TomZarek, CharacterId.KaraThrace);
+
+        const skillCtx = createSkillCheckCtx(players, false,  SkillCheckType.Crisis,
+            [SkillType.Tactics, SkillType.Engineering], 5);
+        setupSkillCtx(game.gameState, skillCtx);
+        skillCtx.beforeCheck = [[BeforeSkillCheckId.ScientificResearch5], [BeforeSkillCheckId.InvestigativeCommittee4], []];
+        skillCtx.afterTotal = [[AfterSkillCheckTotalId.DeclareEmergency5], [], []];
+        skillCtx.skills = [[SkillCardId.DeclareEmergency3],
+            [SkillCardId.ConsolidatePower1, SkillCardId.EvasiveManeuvers1],
+            [SkillCardId.ExecutiveOrder1]];
+        handleDiscard(game);
+
+        expect(game.gameState.discardedSkillDecks['Engineering'].length).toBe(1);
+        expect(game.gameState.discardedSkillDecks['Leadership'].length).toBe(3);
+        expect(game.gameState.discardedSkillDecks['Politics'].length).toBe(2);
+        expect(game.gameState.discardedSkillDecks['Piloting'].length).toBe(1);
+        expect(game.gameState.discardedSkillDecks['Tactics'].length).toBe(0);
     });
 });

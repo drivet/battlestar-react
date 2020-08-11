@@ -49,6 +49,10 @@ export interface FullPlayer {
     // from quorum cards
     vicePresident?: boolean;
     arbitrator?: boolean;
+
+    // action flags, so we don't use more than once
+    blindDevotionUsed?: boolean;
+    commandAuthorityUsed?: boolean;
 }
 
 export interface FullGameData {
@@ -443,6 +447,12 @@ export function getPlayerByIndex(gameDoc: GameDocument, index: number) {
     return gameDoc.players[gameDoc.gameState.userIds[index]];
 }
 
+export function getUserByCharacter(gameDoc: GameDocument, character: CharacterId) {
+    const index = Object.values(gameDoc.players)
+        .findIndex(p => p.characterId === character);
+    return gameDoc.gameState.userIds[index];
+}
+
 export function getPlayer(gameDoc: GameDocument, userId: string): FullPlayer {
     return gameDoc.players[userId];
 }
@@ -461,13 +471,6 @@ export function findVp(gameDoc: GameDocument): FullPlayer {
         .map(u => gameDoc.players[u])
         .filter(p => p.vicePresident);
     return vps[0];
-}
-
-export function findArbitrator(gameDoc: GameDocument): FullPlayer {
-    const arbitrators = gameDoc.gameState.userIds
-        .map(u => gameDoc.players[u])
-        .filter(p => p.arbitrator);
-    return arbitrators[0];
 }
 
 export function setInputReq<T>(gameDoc: GameDocument, inputId: InputId, userId: string, ctx: T = undefined) {

@@ -2,12 +2,13 @@ import { GameDocument, getPlayer, newGame } from "../game";
 import { LocationId, QuorumCardId } from "../../../src/models/game-data";
 import { actionArrestOrder } from "./arrest-order";
 import { InputId } from "../../../src/models/inputs";
+import { sandGameDoc } from "../sand";
 
 describe('Arrest order Action', () => {
     let game: GameDocument;
     beforeEach(() => {
         game = newGame('gameId', ['c1', 'c2', 'c3']);
-        game.gameState.discardedQuorumDeck = [];
+        sandGameDoc(game);
         const player = getPlayer(game, 'c1');
         player.quorumHand = [QuorumCardId.ArrestOrder];
     });

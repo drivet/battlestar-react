@@ -1,9 +1,10 @@
 import {
     discardSkillCardsFromHand,
-    FullGameData,
+    FullGameData, FullPlayer,
     GameDocument,
     getPlayer,
     getPlayerByIndex,
+    getUserByCharacter,
     setInputReq
 } from "./game";
 import {
@@ -25,6 +26,7 @@ import {
     calcSkillCheckStrength,
     gatherBeforeSkills
 } from "./skill-check-utils";
+import { addCard, addCardToTop } from "./deck";
 
 export enum SkillCheckState {
     Setup,
@@ -34,7 +36,8 @@ export enum SkillCheckState {
     Scoring,
     AfterScore,
     FinalScoring,
-    Discard
+    Discard,
+    CommandAuthority,
 }
 
 export enum SkillCheckResult {
@@ -69,6 +72,8 @@ export interface SkillCheckCtx {
     score: number;
     afterTotal: AfterSkillCheckTotalId[][];
     result?: SkillCheckResult;
+    adama?: string;
+    commandAuthority?: boolean;
 }
 
 export function createSkillCheckCtx(players: SkillCheckPlayer[],
@@ -120,7 +125,9 @@ export function handleSkillCheck(gameDoc: GameDocument, input: Input<any, any>):
     } else if (ctx.state === SkillCheckState.AfterScore) {
         return handleCollectAfterScore(gameDoc, input);
     } else if (ctx.state === SkillCheckState.FinalScoring) {
-        return handleFinalResult(gameDoc.gameState.skillCheckCtx);
+        return handleFinalResult(gameDoc);
+    } else if (ctx.state === SkillCheckState.CommandAuthority) {
+        return handleCommandAuthority(gameDoc, input);
     } else if (ctx.state === SkillCheckState.Discard) {
         return handleDiscard(gameDoc);
     }
@@ -166,22 +173,15 @@ function handleCollectSkills(gameDoc: GameDocument, input: Input<SkillCardId[]>)
     return SkillCheckResult.Unknown;
 }
 
-function checkForBlindDevotion(gameDoc: GameDocument): SkillCheckResult {
+function checkForBlindDevotion(gameDoc: GameDocument) {
     const skillCtx = gameDoc.gameState.skillCheckCtx;
-    const galenUser = findGalen(gameDoc);
-    if (!galenUser) {
+    const galenUser = getUserByCharacter(gameDoc, CharacterId.GalenTyrol);
+    if (!galenUser || getPlayer(gameDoc, galenUser).blindDevotionUsed) {
         skillCtx.state = SkillCheckState.Scoring;
     } else {
         skillCtx.galen = galenUser;
         skillCtx.state = SkillCheckState.BlindDevotionSkillSelect;
     }
-    return SkillCheckResult.Unknown;
-}
-
-function findGalen(gameDoc: GameDocument): string {
-    const galenIndex = Object.values(gameDoc.players)
-        .findIndex(p => p.characterId === CharacterId.GalenTyrol);
-    return gameDoc.gameState.userIds[galenIndex];
 }
 
 function handleBlindDevotionSkillSelect(gameDoc: GameDocument, input: Input<SkillType>): SkillCheckResult {
@@ -191,6 +191,9 @@ function handleBlindDevotionSkillSelect(gameDoc: GameDocument, input: Input<Skil
         return SkillCheckResult.Unknown;
     }
     skillCtx.blindDevotionSkill = input.data;
+    if (skillCtx.blindDevotionSkill !== undefined) {
+        getPlayer(gameDoc, skillCtx.galen).blindDevotionUsed = true;
+    }
     skillCtx.state = SkillCheckState.Scoring;
     return SkillCheckResult.Unknown;
 }
@@ -215,14 +218,35 @@ function handleCollectAfterScore(gameDoc: GameDocument, input: Input<AfterSkillC
     return SkillCheckResult.Unknown;
 }
 
-function handleFinalResult(skillCtx: SkillCheckCtx): SkillCheckResult {
+function handleFinalResult(gameDoc: GameDocument): SkillCheckResult {
+    const skillCtx = gameDoc.gameState.skillCheckCtx;
     skillCtx.result = calcFinalResult(
         skillCtx.score, skillCtx.pass, skillCtx.partial, hasDeclareEmergency(skillCtx));
-    skillCtx.state = SkillCheckState.Discard;
+    const adama = getUserByCharacter(gameDoc, CharacterId.WilliamAdama);
+    if (adama && !getPlayer(gameDoc, adama).commandAuthorityUsed) {
+        skillCtx.state = SkillCheckState.CommandAuthority;
+    } else {
+        skillCtx.state = SkillCheckState.Discard;
+    }
     return SkillCheckResult.Unknown;
 }
 
-function handleDiscard(gameDoc: GameDocument): SkillCheckResult {
+function handleCommandAuthority(gameDoc: GameDocument, input: Input<boolean>): SkillCheckResult {
+    const skillCtx = gameDoc.gameState.skillCheckCtx;
+    if (!input) {
+        setInputReq(gameDoc, InputId.CommandAuthority, skillCtx.adama);
+        return SkillCheckResult.Unknown;
+    }
+    skillCtx.commandAuthority = input.data;
+    if (skillCtx.commandAuthority) {
+        getPlayer(gameDoc, skillCtx.adama).commandAuthorityUsed = true;
+    }
+    skillCtx.state = SkillCheckState.Discard;
+    return SkillCheckResult.Unknown;
+
+}
+
+export function handleDiscard(gameDoc: GameDocument): SkillCheckResult {
     const skillCtx = gameDoc.gameState.skillCheckCtx;
 
     for (let i = 0; i < skillCtx.beforeCheck.length; i++) {
@@ -230,17 +254,52 @@ function handleDiscard(gameDoc: GameDocument): SkillCheckResult {
     }
 
     for (let i = 0; i < skillCtx.skills.length; i++) {
-        discardSkills(gameDoc, i, skillCtx.skills[i]);
+        if (skillCtx.commandAuthority) {
+            giveSkillsToAdama(gameDoc, i, skillCtx.skills[i]);
+        } else {
+            discardSkills(gameDoc, i, skillCtx.skills[i]);
+        }
     }
 
     for (let i = 0; i < skillCtx.afterTotal.length; i++) {
         discardSkills(gameDoc, i, getAfterSkillCards(skillCtx.afterTotal[i]));
     }
+
+    if (skillCtx.acceptingProphecy) {
+        addCardToTop(gameDoc.gameState.discardedQuorumDeck, QuorumCardId.AcceptProphecy);
+    }
+
+    if (hasArbitrator(skillCtx)) {
+        findArbitrator(skillCtx).arbitrator = false;
+        addCardToTop(gameDoc.gameState.discardedQuorumDeck, QuorumCardId.AssignArbitrator);
+    }
+
     return skillCtx.result;
+}
+
+function hasArbitrator(ctx: SkillCheckCtx) {
+    return _.flatten(ctx.beforeCheck).findIndex(b =>
+        b === BeforeSkillCheckId.AssignArbitrator_Increase ||
+        b === BeforeSkillCheckId.AssignArbitrator_Decrease) !== -1;
+}
+
+function findArbitrator(skillCtx: SkillCheckCtx): SkillCheckPlayer {
+    const arbitrators = skillCtx.players.filter(p => p.arbitrator);
+    return arbitrators[0];
 }
 
 function discardSkills(gameDoc: GameDocument, playerIndex: number, skills: SkillCardId[]) {
     discardSkillCardsFromHand(gameDoc.gameState, getPlayerByIndex(gameDoc, playerIndex), skills);
+}
+
+function giveSkillsToAdama(gameDoc: GameDocument, playerIndex: number, skills: SkillCardId[]) {
+    const player = getPlayerByIndex(gameDoc, playerIndex);
+    const adama = getPlayer(gameDoc, gameDoc.gameState.skillCheckCtx.adama)
+    skills.forEach(c => {
+        const index = player.skillCards.findIndex(q => q === c);
+        player.skillCards.splice(index, 1);
+        addCard(adama.skillCards, c);
+    });
 }
 
 function getBeforeSkillCards(beforeCheck: BeforeSkillCheckId[]): SkillCardId[] {
