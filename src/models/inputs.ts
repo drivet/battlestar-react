@@ -17,7 +17,9 @@ export enum InputId {
     SkillTypeSelect,
     BeforeSkillCheckSelect,
     AfterSkillCheckTotaled,
-    CommandAuthority
+    CommandAuthority,
+    BeforeRollSelect,
+    ReRollSelect
 }
 
 export interface InputRequest<T extends any = undefined> {

@@ -56,3 +56,11 @@ function getNextPlayer(gameDoc: GameDocument, playerIndex: number): number {
     }
     return next;
 }
+
+export function initAndHandleRoundTable<T, S>(gameDoc: GameDocument, inputId: InputId, input: Input<T>,
+                                              inputCtxFactory: InputCtxFactory<S> = undefined): boolean {
+    if (!gameDoc.gameState.roundTableCtx) {
+        initRoundTable(gameDoc, inputId, usersFromCurrent(gameDoc), inputCtxFactory)
+    }
+    return handleRoundTable(gameDoc, input);
+}

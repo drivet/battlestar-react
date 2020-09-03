@@ -1,4 +1,4 @@
-import { FullPlayer, GameDocument, getCurrentPlayer, getPlayer, getPlayers } from "../game";
+import { GameDocument, getCurrentPlayer, getPlayer, getPlayers } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { LocationId, SkillCheckType, SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
@@ -12,7 +12,7 @@ export enum AdmiralsQuartersState {
 
 interface AdmiralsQuartersCtx {
     state: AdmiralsQuartersState;
-    chosenPlayer: FullPlayer;
+    chosenPlayer: string;
 }
 
 export function actionAdmiralsQuarters(gameDoc: GameDocument, input: Input<any>) {
@@ -41,20 +41,21 @@ function handleChoosePlayer(gameDoc: GameDocument, input: Input<string>) {
     }
 
     const ctx = gameDoc.gameState.actionCtx;
-    ctx.chosenPlayer = getPlayer(gameDoc, input.data);
+    ctx.chosenPlayer = input.data;
     ctx.state = AdmiralsQuartersState.SkillCheck;
+    const players = getPlayers(gameDoc) as SkillCheckPlayer[];
     gameDoc.gameState.skillCheckCtx =
-        createSkillCheckCtx(getPlayers(gameDoc) as SkillCheckPlayer[],
+        createSkillCheckCtx(players,
             gameDoc.gameState.acceptProphecy !== null,
             SkillCheckType.AdmiralsQuarters,
             [SkillType.Leadership, SkillType.Tactics],
-            7, undefined, ctx.chosenPlayer);
+            7, undefined, players.map(p => p.userId).indexOf(ctx.chosenPlayer));
 }
 
 function executeOutcome(gameDoc: GameDocument, result: SkillCheckResult) {
     if (result === SkillCheckResult.Pass) {
         const ctx = gameDoc.gameState.actionCtx;
-        ctx.chosenPlayer.location = LocationId.Brig;
+        getPlayer(gameDoc, ctx.chosenPlayer).location = LocationId.Brig;
     }
     finishAction(gameDoc);
 }

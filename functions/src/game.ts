@@ -33,6 +33,7 @@ import { SkillCheckCtx } from "./skill-check";
 import { createSkillCardDecks, SkillCardDecks } from "./skill-cards";
 import { makeRequest } from "./input";
 import { RoundTableCtx } from "./round-table";
+import { RollCtx } from "./roll-manager";
 
 export interface FullPlayer {
     userId: string;
@@ -111,6 +112,7 @@ export interface FullGameData {
     currentAction?: ActionId;
     actionCtx?: any;
     skillCheckCtx?: SkillCheckCtx;
+    rollCtx?: RollCtx;
 
     // get input from everyone
     roundTableCtx?: RoundTableCtx<any>;
@@ -471,6 +473,13 @@ export function findVp(gameDoc: GameDocument): FullPlayer {
         .map(u => gameDoc.players[u])
         .filter(p => p.vicePresident);
     return vps[0];
+}
+
+export function findAdmiral(gameDoc: GameDocument): FullPlayer {
+    const a = gameDoc.gameState.userIds
+        .map(u => gameDoc.players[u])
+        .filter(p => p.admiral);
+    return a[0];
 }
 
 export function setInputReq<T>(gameDoc: GameDocument, inputId: InputId, userId: string, ctx: T = undefined) {

@@ -1,6 +1,6 @@
 import {
     discardSkillCardsFromHand,
-    FullGameData, FullPlayer,
+    FullGameData,
     GameDocument,
     getPlayer,
     getPlayerByIndex,
@@ -18,7 +18,7 @@ import {
 } from "../../src/models/game-data";
 import { Input, InputId } from "../../src/models/inputs";
 import * as _ from "lodash";
-import { handleRoundTable, initRoundTable, InputCtxFactory, usersFromCurrent } from "./round-table";
+import { initAndHandleRoundTable } from "./round-table";
 import {
     adjustDifficulty,
     adjustDifficultyFromProphecy,
@@ -338,14 +338,6 @@ function getAfterSkillCard(afterCheck: AfterSkillCheckTotalId): SkillCardId {
     } else {
         return undefined;
     }
-}
-
-function initAndHandleRoundTable<T, S>(gameDoc: GameDocument, inputId: InputId, input: Input<T>,
-                                       inputCtxFactory: InputCtxFactory<S> = undefined): boolean {
-    if (!gameDoc.gameState.roundTableCtx) {
-        initRoundTable(gameDoc, inputId, usersFromCurrent(gameDoc), inputCtxFactory)
-    }
-    return handleRoundTable(gameDoc, input);
 }
 
 function hasScientificResearch(ctx: SkillCheckCtx) {

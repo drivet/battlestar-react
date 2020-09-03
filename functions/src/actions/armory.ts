@@ -1,9 +1,17 @@
-import { GameDocument} from "../game";
-import { roll } from "../roll";
+import { GameDocument, getPlayers } from "../game";
+import { createRollCtx, DicePlayer, handleRoll, setupRollCtx } from "../roll-manager";
 import { finishAction } from "../transitions/action";
+import { Input } from "../../../src/models/inputs";
 
-export function actionArmory(gameDoc: GameDocument) {
-    const die = roll();
+export function actionArmory(gameDoc: GameDocument, input: Input<any, any>) {
+    setupRollCtx(gameDoc.gameState, getPlayers(gameDoc) as DicePlayer[], gameDoc.gameState.currentPlayer);
+    const result = handleRoll(gameDoc, input);
+    if (result) {
+        executeOutcome(gameDoc, result);
+    }
+}
+
+function executeOutcome(gameDoc: GameDocument, die: number) {
     if (die >= 7) {
         const centurions = gameDoc.gameState.boardedCenturions;
         // destroy a centurion closest to the end

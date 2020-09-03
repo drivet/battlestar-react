@@ -25,6 +25,7 @@ import { actionBrig } from "../actions/brig";
 export function finishAction(gameDoc: GameDocument) {
     gameDoc.gameState.actionCtx = null;
     gameDoc.gameState.skillCheckCtx = null;
+    gameDoc.gameState.rollCtx = null;
     gameDoc.gameState.state = GameState.Crisis;
 }
 

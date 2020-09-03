@@ -396,6 +396,12 @@ export enum AfterSkillCheckTotalId {
     DeclareEmergency5,
 }
 
+export enum BeforeRollId {
+    StrategicPlanning3,
+    StrategicPlanning4,
+    StrategicPlanning5,
+}
+
 export enum SkillCheckType {
     Administration,
     AdmiralsQuarters,

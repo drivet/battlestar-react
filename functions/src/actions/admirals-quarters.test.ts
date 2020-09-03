@@ -20,14 +20,14 @@ describe('Admirals Quarters Action', () => {
         expect(request.userId).toBe('c1');
 
         actionAdmiralsQuarters(game, makeInput('c1', InputId.PlayerSelect, 'c2'));
-        expect(game.gameState.actionCtx.chosenPlayer.userId).toBe('c2');
+        expect(game.gameState.actionCtx.chosenPlayer).toBe('c2');
         expect(game.gameState.actionCtx.state).toBe(AdmiralsQuartersState.SkillCheck);
     });
 
     it('should send to brig', () => {
         game.gameState.actionCtx = {
             state: AdmiralsQuartersState.SkillCheck,
-            chosenPlayer: getPlayer(game, 'c2')
+            chosenPlayer: 'c2'
         }
 
         jest.spyOn(skillMod, 'handleSkillCheck').mockReturnValue(SkillCheckResult.Pass);

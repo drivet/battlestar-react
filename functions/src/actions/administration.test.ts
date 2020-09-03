@@ -20,21 +20,21 @@ describe('Administration Action', () => {
         expect(request.userId).toBe('c1');
 
         actionAdministration(game, makeInput('c1', InputId.PlayerSelect, 'c2'));
-        expect(game.gameState.actionCtx.chosenPlayer.userId).toBe('c2');
+        expect(game.gameState.actionCtx.chosenPlayer).toBe('c2');
         expect(game.gameState.actionCtx.state).toBe(AdminState.SkillCheck);
     });
 
     it('should choose the vice president', () => {
         getPlayer(game, 'c3').vicePresident = true;
         actionAdministration(game, null);
-        expect(game.gameState.actionCtx.chosenPlayer.userId).toBe('c3');
+        expect(game.gameState.actionCtx.chosenPlayer).toBe('c3');
         expect(game.gameState.actionCtx.state).toBe(AdminState.SkillCheck);
     });
 
     it('should pass presidency', () => {
         game.gameState.actionCtx = {
             state: AdminState.SkillCheck,
-            chosenPlayer: getPlayer(game, 'c2')
+            chosenPlayer: 'c2'
         }
 
         jest.spyOn(skillMod, 'handleSkillCheck').mockReturnValue(SkillCheckResult.Pass);

@@ -1,4 +1,4 @@
-import { findVp, FullPlayer, GameDocument, getCurrentPlayer, getPlayer, getPlayers } from "../game";
+import { findVp, GameDocument, getCurrentPlayer, getPlayer, getPlayers } from "../game";
 import { Input, InputId } from "../../../src/models/inputs";
 import { SkillCheckType, SkillType } from "../../../src/models/game-data";
 import { makeRequest } from "../input";
@@ -12,9 +12,8 @@ export enum AdminState {
 
 interface AdminCtx {
     state: AdminState;
-    chosenPlayer: FullPlayer;
+    chosenPlayer: string;
 }
-
 
 export function actionAdministration(gameDoc: GameDocument, input: Input<any>) {
     const currentPlayer = getCurrentPlayer(gameDoc);
@@ -42,7 +41,7 @@ function handleChoosePlayer(gameDoc: GameDocument, input: Input<string>) {
     const ctx = gameDoc.gameState.actionCtx;
     const vp = findVp(gameDoc);
     if (vp && !vp.president) {
-        ctx.chosenPlayer = vp;
+        ctx.chosenPlayer = vp.userId;
     } else {
         if (!input) {
             const currentPlayer = getCurrentPlayer(gameDoc);
@@ -50,15 +49,16 @@ function handleChoosePlayer(gameDoc: GameDocument, input: Input<string>) {
                 makeRequest(InputId.PlayerSelect, currentPlayer.userId);
             return;
         }
-        ctx.chosenPlayer = getPlayer(gameDoc, input.data);
+        ctx.chosenPlayer = input.data;
     }
 
+    const players = getPlayers(gameDoc) as SkillCheckPlayer[];
     gameDoc.gameState.skillCheckCtx =
-        createSkillCheckCtx(getPlayers(gameDoc) as SkillCheckPlayer[],
+        createSkillCheckCtx(players,
             gameDoc.gameState.acceptProphecy !== null,
             SkillCheckType.Administration,
             [SkillType.Leadership, SkillType.Politics],
-            5, undefined, ctx.chosenPlayer);
+            5, undefined, players.map(p => p.userId).indexOf(ctx.chosenPlayer));
 
     ctx.state = AdminState.SkillCheck;
 }
@@ -66,7 +66,7 @@ function handleChoosePlayer(gameDoc: GameDocument, input: Input<string>) {
 function executeOutcome(gameDoc: GameDocument, result: SkillCheckResult) {
     if (result === SkillCheckResult.Pass) {
         const ctx = gameDoc.gameState.actionCtx;
-        ctx.chosenPlayer.president = true;
+        getPlayer(gameDoc, ctx.chosenPlayer).president = true;
         getCurrentPlayer(gameDoc).president = false;
     }
     gameDoc.gameState.acceptProphecy = null;

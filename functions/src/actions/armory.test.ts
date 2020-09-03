@@ -1,5 +1,5 @@
 import { GameDocument, newGame } from "../game";
-import * as rollMod from "../roll";
+import * as rollMod from "../roll-manager";
 import { actionArmory } from "./armory";
 
 describe('Armory Action', () => {
@@ -10,23 +10,23 @@ describe('Armory Action', () => {
 
     it('should destroy centurions if die >= 7', () => {
         game.gameState.boardedCenturions = [1, 2];
-        jest.spyOn(rollMod, 'roll').mockReturnValue(7);
+        jest.spyOn(rollMod, 'handleRoll').mockReturnValue(7);
 
-        actionArmory(game);
+        actionArmory(game, null);
         expect(game.gameState.boardedCenturions).toEqual([1, 1]);
     });
 
     it('should do nothing if die < 7', () => {
         game.gameState.boardedCenturions = [1, 2];
-        jest.spyOn(rollMod, 'roll').mockReturnValue(6);
-        actionArmory(game);
+        jest.spyOn(rollMod, 'handleRoll').mockReturnValue(6);
+        actionArmory(game, null);
         expect(game.gameState.boardedCenturions).toEqual([1, 2]);
     });
 
     it('should remove trailing zeros', () => {
         game.gameState.boardedCenturions = [1, 1];
-        jest.spyOn(rollMod, 'roll').mockReturnValue(7);
-        actionArmory(game);
+        jest.spyOn(rollMod, 'handleRoll').mockReturnValue(7);
+        actionArmory(game, null);
         expect(game.gameState.boardedCenturions).toEqual([1]);
     });
 });
