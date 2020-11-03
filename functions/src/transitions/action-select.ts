@@ -1,6 +1,6 @@
 import { GameDocument, getCurrentPlayer } from "../game";
-import { Input, InputId } from "../../../src/models/inputs";
-import { makeRequest } from "../input";
+import { InputId } from "../../../src/models/inputs";
+import { Input, makeRequest } from "../inputs/input";
 import { AvailableActions, getAvailableActions } from "../../../src/actions";
 import { ActionId, GameState, SelectedAction } from "../../../src/models/game-data";
 
@@ -15,7 +15,7 @@ export function handleActionSelection(gameDoc: GameDocument, input: Input<Select
         throw new Error('invalid action selected ' + input.data);
     }
 
-    gameDoc.gameState.currentAction = input.data;
+    gameDoc.gameState.currentAction = input.data.actionId;
     gameDoc.gameState.state = GameState.Action;
 }
 

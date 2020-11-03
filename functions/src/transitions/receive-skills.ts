@@ -1,8 +1,8 @@
 import { dealSkillCard, dealSkillCards, GameDocument, getCurrentPlayer } from "../game";
-import { Input, InputId } from "../../../src/models/inputs";
+import { InputId } from "../../../src/models/inputs";
 import { addCard, addCards } from "../deck";
 import { CharacterId, GameState, getCharacter, SkillType } from "../../../src/models/game-data";
-import { makeRequest } from "../input";
+import { Input, makeRequest } from "../inputs/input";
 
 export function handleReceiveSkills(gameDoc: GameDocument, input: Input<SkillType[]>) {
     const currentPlayer = getCurrentPlayer(gameDoc);

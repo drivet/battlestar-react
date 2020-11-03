@@ -1,7 +1,7 @@
 import { GameDocument, getCurrentPlayer, getPlayer, getPlayers } from "../game";
-import { Input, InputId } from "../../../src/models/inputs";
+import { InputId } from "../../../src/models/inputs";
 import { LocationId, SkillCheckType, SkillType } from "../../../src/models/game-data";
-import { makeRequest } from "../input";
+import { Input, makeRequest } from "../inputs/input";
 import { createSkillCheckCtx, handleSkillCheck, SkillCheckPlayer, SkillCheckResult } from "../skill-check";
 import { finishAction } from "../transitions/action";
 

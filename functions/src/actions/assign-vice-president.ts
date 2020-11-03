@@ -2,8 +2,8 @@ import { dealSkillCards, GameDocument, getCurrentPlayer, getPlayer, pullQuorumCa
 import { addCards } from "../deck";
 import { QuorumCardId, SkillType } from "../../../src/models/game-data";
 import { finishAction } from "../transitions/action";
-import { Input, InputId } from "../../../src/models/inputs";
-import { makeRequest } from "../input";
+import { InputId } from "../../../src/models/inputs";
+import { Input, makeRequest } from "../inputs/input";
 
 
 interface AssignVpCtx {

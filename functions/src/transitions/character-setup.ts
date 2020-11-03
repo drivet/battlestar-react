@@ -1,7 +1,7 @@
 import { FullPlayer, GameDocument, getCurrentPlayer } from "../game";
 import { CharacterId, GameState, getCharacter, LocationId } from "../../../src/models/game-data";
-import { Input, InputId } from "../../../src/models/inputs";
-import { makeRequest } from "../input";
+import { InputId } from "../../../src/models/inputs";
+import { Input, makeRequest } from "../inputs/input";
 import { nextPlayerAndChangeState } from "./defs";
 
 export function handleCharacterSetup(gameDoc: GameDocument, input: Input<boolean>) {

@@ -1,8 +1,8 @@
 import { CharacterId, CharacterType, GameState, getCharacter } from "../../../src/models/game-data";
 import { GameDocument, getCurrentPlayer } from "../game";
 import { CharacterPool } from "../../../src/models/character";
-import { Input, InputId } from "../../../src/models/inputs";
-import { makeRequest } from "../input";
+import { InputId } from "../../../src/models/inputs";
+import { Input, makeRequest } from "../inputs/input";
 import { nextPlayerAndChangeState } from "./defs";
 
 export function handleSelectCharacter(gameDoc: GameDocument, input: Input<CharacterId, CharacterPool>) {

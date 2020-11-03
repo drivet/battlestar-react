@@ -1,7 +1,7 @@
 import { GameDocument, getPlayers } from "../game";
 import { createRollCtx, DicePlayer, handleRoll, setupRollCtx } from "../roll-manager";
 import { finishAction } from "../transitions/action";
-import { Input } from "../../../src/models/inputs";
+import { Input } from "../inputs/input";
 
 export function actionArmory(gameDoc: GameDocument, input: Input<any, any>) {
     setupRollCtx(gameDoc.gameState, getPlayers(gameDoc) as DicePlayer[], gameDoc.gameState.currentPlayer);

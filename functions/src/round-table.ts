@@ -1,5 +1,6 @@
 import { GameDocument, getPlayerCount, setInputReq } from "./game";
-import { Input, InputId } from "../../src/models/inputs";
+import { InputId } from "../../src/models/inputs";
+import { Input } from "./inputs/input";
 
 export type InputCtxFactory<T> = (game: GameDocument, user: string) => T;
 

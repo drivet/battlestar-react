@@ -1,8 +1,8 @@
 import { discardSkillCardFromHand, GameDocument, getCurrentPlayer } from "../game";
 import { GameState, LocationId } from "../../../src/models/game-data";
-import { Input, InputId } from "../../../src/models/inputs";
+import { InputId } from "../../../src/models/inputs";
 import { getAvailableLocations, Movement } from "../locations";
-import { makeRequest } from "../input";
+import { Input, makeRequest } from "../inputs/input";
 
 export function handleMovement(gameDoc: GameDocument, input: Input<Movement, LocationId[]>) {
     if (!input) {

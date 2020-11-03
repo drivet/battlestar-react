@@ -1,6 +1,6 @@
 import { GameDocument, getCurrentPlayer } from "../game";
-import { Input, InputId } from "../../../src/models/inputs";
-import { makeRequest } from "../input";
+import { InputId } from "../../../src/models/inputs";
+import { Input, makeRequest } from "../inputs/input";
 import { LocationId } from "../../../src/models/game-data";
 import { finishAction } from "../transitions/action";
 

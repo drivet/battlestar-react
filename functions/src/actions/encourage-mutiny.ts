@@ -1,7 +1,7 @@
 import { discardQuorumCard, findAdmiral, GameDocument, getCurrentPlayer, getPlayer, getPlayers } from "../game";
-import { Input, InputId } from "../../../src/models/inputs";
+import { InputId } from "../../../src/models/inputs";
 import { QuorumCardId } from "../../../src/models/game-data";
-import { makeRequest } from "../input";
+import { Input, makeRequest } from "../inputs/input";
 import { DicePlayer, handleRoll, setupRollCtx } from "../roll-manager";
 import { finishAction } from "../transitions/action";
 

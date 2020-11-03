@@ -8,7 +8,7 @@ import {
     SkillCheckResult,
     SkillCheckState
 } from "./skill-check";
-import { Input, InputId } from "../../src/models/inputs";
+import { InputId } from "../../src/models/inputs";
 import {
     AfterSkillCheckTotalId,
     BeforeSkillCheckId,
@@ -19,6 +19,7 @@ import {
     SkillType
 } from "../../src/models/game-data";
 import { sandGameDoc } from "./sand";
+import { Input } from "./inputs/input";
 
 function makePlayers(characters: CharacterId[], president: CharacterId, arbitrator: CharacterId): SkillCheckPlayer[] {
     return characters.map((c, i) => ({

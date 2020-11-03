@@ -2,7 +2,7 @@ import { discardQuorumCard, GameDocument, getCurrentPlayer, getPlayers, removeQu
 import { QuorumCardId } from "../../../src/models/game-data";
 import { DicePlayer, handleRoll, setupRollCtx } from "../roll-manager";
 import { finishAction } from "../transitions/action";
-import { Input } from "../../../src/models/inputs";
+import { Input } from "../inputs/input";
 
 export function actionInspirationalSpeech(gameDoc: GameDocument, input: Input<any, any>) {
     setupRollCtx(gameDoc.gameState, getPlayers(gameDoc) as DicePlayer[], gameDoc.gameState.currentPlayer);

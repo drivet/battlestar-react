@@ -1,7 +1,7 @@
 import { dealSkillCard, GameDocument, getCurrentPlayer, pullQuorumCardFromHand } from "../game";
-import { Input, InputId } from "../../../src/models/inputs";
+import { InputId } from "../../../src/models/inputs";
 import { QuorumCardId, SkillType } from "../../../src/models/game-data";
-import { makeRequest } from "../input";
+import { Input, makeRequest } from "../inputs/input";
 import { addCard } from "../deck";
 import { finishAction } from "../transitions/action";
 

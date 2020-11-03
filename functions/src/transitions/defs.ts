@@ -1,6 +1,7 @@
 import { FullPlayer, GameDocument } from "../game";
-import { Input, InputResponse } from "../../../src/models/inputs";
+import { InputResponse } from "../../../src/models/inputs";
 import { GameState, ViewableGameData } from "../../../src/models/game-data";
+import { Input } from "../inputs/input";
 
 export type TransitionFn = (g: GameDocument, input?: Input<any, any>) => void;
 export type BotFn<T> = (g: ViewableGameData, p: FullPlayer) => InputResponse<T>;

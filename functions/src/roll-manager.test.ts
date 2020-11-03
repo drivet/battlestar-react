@@ -1,7 +1,8 @@
 import { GameDocument, newGame } from "./game";
 import { DicePlayer, handleRoll, RollState, setupRollCtx } from "./roll-manager";
 import { BeforeRollId, CharacterId } from "../../src/models/game-data";
-import { Input, InputId } from "../../src/models/inputs";
+import { InputId } from "../../src/models/inputs";
+import { Input } from "./inputs/input";
 
 describe('Dice roll scenarios', () => {
     it('should perform a simple roll', () => {

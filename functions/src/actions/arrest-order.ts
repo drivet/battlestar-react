@@ -1,7 +1,7 @@
 import { discardQuorumCard, GameDocument, getCurrentPlayer, getPlayer } from "../game";
-import { Input, InputId } from "../../../src/models/inputs";
+import { InputId } from "../../../src/models/inputs";
 import { LocationId, QuorumCardId } from "../../../src/models/game-data";
-import { makeRequest } from "../input";
+import { Input, makeRequest } from "../inputs/input";
 import { finishAction } from "../transitions/action";
 
 export function actionArrestOrder(gameDoc: GameDocument, input: Input<string>) {

@@ -31,7 +31,7 @@ import { InputId, InputRequest, InputResponse } from "../../src/models/inputs";
 import { CharacterPool, initCharacterPool } from "../../src/models/character";
 import { SkillCheckCtx } from "./skill-check";
 import { createSkillCardDecks, SkillCardDecks } from "./skill-cards";
-import { makeRequest } from "./input";
+import { InputParameters, makeRequest } from "./inputs/input";
 import { RoundTableCtx } from "./round-table";
 import { RollCtx } from "./roll-manager";
 
@@ -120,7 +120,7 @@ export interface FullGameData {
     acceptProphecy?: QuorumCardId;
 }
 
-export interface GameDocument {
+export interface GameDocument extends InputParameters<any, any> {
     gameId: string;
     players: { [key: string]: FullPlayer }
     gameState: FullGameData;

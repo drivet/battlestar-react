@@ -16,7 +16,7 @@ import {
     SkillCheckType,
     SkillType
 } from "../../src/models/game-data";
-import { Input, InputId } from "../../src/models/inputs";
+import { InputId } from "../../src/models/inputs";
 import * as _ from "lodash";
 import { initAndHandleRoundTable } from "./round-table";
 import {
@@ -27,6 +27,7 @@ import {
     gatherBeforeSkills
 } from "./skill-check-utils";
 import { addCard, addCardToTop } from "./deck";
+import { Input } from "./inputs/input";
 
 export enum SkillCheckState {
     Setup,

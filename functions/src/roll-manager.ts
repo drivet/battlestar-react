@@ -1,9 +1,10 @@
 import { discardSkillCardsFromHand, FullGameData, GameDocument, getPlayerByIndex, setInputReq } from "./game";
-import { Input, InputId } from "../../src/models/inputs";
+import { InputId } from "../../src/models/inputs";
 import { BeforeRollId, CharacterId, SkillCardId } from "../../src/models/game-data";
 import { initAndHandleRoundTable } from "./round-table";
 import * as _ from "lodash";
 import { roll } from "./roll";
+import { Input } from "./inputs/input";
 
 export enum RollState {
     BeforeRoll,

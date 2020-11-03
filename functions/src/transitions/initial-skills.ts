@@ -2,8 +2,8 @@ import { addCard } from "../deck";
 import { CharacterId, GameState, getCharacter, SkillType } from "../../../src/models/game-data";
 import { nextPlayerAndChangeState } from "./defs";
 import { dealSkillCard, GameDocument, getCurrentPlayer } from "../game";
-import { Input, InputId } from "../../../src/models/inputs";
-import { makeRequest } from "../input";
+import { InputId } from "../../../src/models/inputs";
+import { Input, makeRequest } from "../inputs/input";
 
 export function handleReceiveInitialSkills(gameDoc: GameDocument, input: Input<SkillType[]>) {
     if (!input) {

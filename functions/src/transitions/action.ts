@@ -7,7 +7,6 @@ import { actionInspirationalSpeech } from "../actions/inspirational-speech";
 import { actionFoodRationing } from "../actions/food-rationing";
 import { actionConsolidatePower } from "../actions/consolidate-power";
 import { actionArrestOrder } from "../actions/arrest-order";
-import { Input } from "../../../src/models/inputs";
 import { actionResearchLab } from "../actions/research-lab";
 import { actionEncourageMutiny } from "../actions/encourage-mutiny";
 import { TransitionFn } from "./defs";
@@ -17,6 +16,7 @@ import { actionAdministration } from "../actions/administration";
 import { actionAdmiralsQuarters } from "../actions/admirals-quarters";
 import { actionAssignVp } from "../actions/assign-vice-president";
 import { actionBrig } from "../actions/brig";
+import { Input } from "../inputs/input";
 
 /**
  * Move the game to the crisis state, and clean up after yourself

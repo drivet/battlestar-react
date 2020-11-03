@@ -34,4 +34,3 @@ export interface InputResponse<T> {
     data: T;
 }
 
-export interface Input<S, T extends any = undefined> extends InputRequest<T>, InputResponse<S>{}

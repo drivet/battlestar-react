@@ -11,11 +11,12 @@ import { handleReceiveSkills } from "./transitions/receive-skills";
 import { handleActionSelection } from "./transitions/action-select";
 import { sandGameDoc } from "./sand";
 import { refreshView } from "./viewable";
-import { Input, InputResponse } from "../../src/models/inputs";
+import { InputResponse } from "../../src/models/inputs";
 import { TransitionFn } from "./transitions/defs";
 import { getBotResponse } from "./bots/bots";
 import { handleAction } from "./transitions/action";
 import { handleCrisis } from "./transitions/crisis";
+import { Input } from "./inputs/input";
 
 /**
  * This is always called because someone has given an input which in theory should allow us to continue the game
